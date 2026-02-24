@@ -126,8 +126,7 @@ export default function CalendarDropdown({ label, selectedDate, onSelectDate }: 
               onSelect={(date) => date && handleDayClick(date)}
               showOutsideDays
               components={{
-                IconLeft: () => <ChevronLeft size={16} />,
-                IconRight: () => <ChevronRight size={16} />,
+                Chevron: ({ orientation }) => orientation === 'left' ? <ChevronLeft size={16} /> : <ChevronRight size={16} />
               }}
             />
 
