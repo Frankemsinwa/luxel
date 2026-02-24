@@ -42,6 +42,52 @@ export default function Home() {
     },
   };
 
+  const serviceCards = [
+      { 
+        icon: <svg width="24" height="24" fill="black" viewBox="0 0 24 24"><path d="M21 16.5C21 16.88 20.79 17.21 20.47 17.38L12.57 21.82C12.41 21.94 12.21 22 12 22C11.79 22 11.59 21.94 11.43 21.82L3.53 17.38C3.21 17.21 3 16.88 3 16.5V7.5C3 7.12 3.21 6.79 3.53 6.62L11.43 2.18C11.59 2.06 11.79 2 12 2C12.21 2 12.41 2.06 12.57 2.18L20.47 6.62C20.79 6.79 21 7.12 21 7.5V16.5Z"/></svg>,
+        title: "Flights",
+        desc: "Best price guarantee on domestic and international flights to over 5,000 destinations."
+      },
+      { 
+        icon: <svg width="24" height="24" fill="black" viewBox="0 0 24 24"><path d="M7 14c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM19 8h-1V3H6v5H5c-1.1 0-2 .9-2 2v11h18V10c0-1.1-.9-2-2-2zM8 5h8v3H8V5zm11 14H5v-2h14v2zm0-4H5v-5h14v5z"/></svg>,
+        title: "Hotels",
+        desc: "Handpicked luxury hotels and cozy apartments sorted by the best reviews."
+      },
+      { 
+        icon: <svg width="24" height="24" fill="black" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>,
+        title: "Car Rentals",
+        desc: "Explore your destination at your own pace with our premium fleet of vehicles."
+      },
+      { 
+        icon: <svg width="24" height="24" fill="black" viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>,
+        title: "Tour",
+        desc: "Guided experiences and adventures tailored to create unforgettable memories."
+      }
+    ];
+
+    const destinationCards = [
+      { 
+        name: "Abu dhabi", 
+        img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=800",
+        desc: "Abu Dhabi is renowned for its stunning Sheikh Zayed Grand Mosque and luxury attractions like Ferrari World"
+      },
+      { 
+        name: "Lagos", 
+        img: "https://images.unsplash.com/photo-1616212173163-1a2f6b8c8f0c?q=80&w=800", // New image for Lagos
+        desc: "Lagos is Africa's most populous city, famous as Nigeria's financial hub and Nollywood epicenter."
+      },
+      { 
+        name: "Singapore", 
+        img: "https://images.unsplash.com/photo-1542171121-65985055b719?q=80&w=800", // New image for Singapore
+        desc: "Singapore is known worldwide as a global financial powerhouse and spotless 'Garden City.'"
+      },
+      { 
+        name: "Canada", 
+        img: "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&q=80&w=800",
+        desc: "Canada is celebrated for its vast natural beauty, including the Rocky Mountains and northern lights."
+      }
+    ];
+
   return (
     <>
       <Navbar />
@@ -147,15 +193,24 @@ export default function Home() {
 
         <SearchBar />
 
-        {/* The rest of the sections */}
-        <section className="bg-amber pt-32 pb-24 px-6 -mt-10">
+        {/* Yellow Services Section */}
+        <section className="bg-amber pt-32 pb-24 px-6 relative z-0 -mt-12">
           <div className="max-w-7xl mx-auto text-center">
             <h2 className="text-white text-3xl md:text-5xl font-bold mb-16 italic font-serif leading-tight">
               Everything You Need for a Perfect Trip
             </h2>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Service Cards */}
+              {serviceCards.map((card, i) => (
+                <div key={i} className="bg-black text-white p-8 rounded-3xl text-left hover:transform hover:-translate-y-2 transition-all duration-300 group shadow-xl">
+                  <div className="w-12 h-12 bg-amber rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform shadow-lg shadow-amber/20">
+                    {card.icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-4">{card.title}</h3>
+                  <p className="text-zinc-400 text-sm leading-relaxed font-light">
+                    {card.desc}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -163,18 +218,17 @@ export default function Home() {
         <section className="py-24 px-6 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
             {/* Suitcase Illustration Area */}
-            <div className="flex-1 relative">
-              <div className="relative w-full max-w-md aspect-square">
-                <div className="absolute inset-0 bg-amber/5 rounded-full blur-3xl" />
-                <svg viewBox="0 0 500 500" className="relative z-10 w-full h-full drop-shadow-xl">
-                  <path d="M120 180 Q120 150 150 150 L350 150 Q380 150 380 180 L380 400 Q380 430 350 430 L150 430 Q120 430 120 400 Z" fill="#F1BC32" fillOpacity="0.1" stroke="#F1BC32" strokeWidth="2" strokeDasharray="8 8" />
-                  <path d="M140 200 Q140 180 160 180 L340 180 Q360 180 360 200 L360 380 Q360 400 340 400 L160 400 Q140 400 140 380 Z" fill="#F1BC32" fillOpacity="0.2" />
-                  <path d="M220 180 L220 140 Q220 120 250 120 Q280 120 280 140 L280 180" stroke="#F1BC32" strokeWidth="4" fill="none" strokeLinecap="round" />
-                  <circle cx="250" cy="290" r="70" stroke="#F1BC32" strokeWidth="1" strokeDasharray="4 4" />
-                </svg>
-              </div>
-            </div>
-
+                        <div className="flex-1 relative">
+                          <div className="relative w-full max-w-lg aspect-square">
+                            <Image 
+                              src="/why.png" 
+                              alt="Luxel Benefits Illustration" 
+                              fill 
+                              className="object-contain"
+                              priority
+                            />
+                          </div>
+                        </div>
             {/* Content */}
             <div className="flex-1">
               <p className="text-amber font-bold tracking-[0.2em] text-[10px] mb-4 uppercase">Benefits</p>
@@ -219,7 +273,27 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {/* Destination Cards */}
+              {destinationCards.map((card, i) => (
+                <div key={i} className="group cursor-pointer">
+                  <div className="relative h-64 rounded-[2.5rem] overflow-hidden mb-[-2.5rem] z-10 shadow-lg border-4 border-white">
+                    <Image 
+                      src={card.img} 
+                      alt={card.name} 
+                      fill 
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </div>
+                  <div className="bg-[#FBC335] p-8 pt-14 rounded-[2.5rem] shadow-xl group-hover:shadow-amber/30 transition-all min-h-[220px] flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-3">{card.name}</h3>
+                      <p className="text-white/90 text-[11px] font-light leading-relaxed mb-6 line-clamp-3">
+                        {card.desc}
+                      </p>
+                    </div>
+                    <p className="text-white font-bold text-[10px] tracking-widest uppercase opacity-80">302 Properties</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
