@@ -17,6 +17,7 @@
   --color-amber-dark: var(--amber-dark);
   --color-black: var(--black);
   --font-sans: var(--font-plus-jakarta), system-ui, sans-serif;
+  --font-newton: var(--font-newton-scient), serif;
 }
 
 * {

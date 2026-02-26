@@ -72,16 +72,16 @@ export default function Home() {
       img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=800",
       desc: "Abu Dhabi is renowned for its stunning Sheikh Zayed Grand Mosque and luxury attractions like Ferrari World"
     },
-          { 
-            name: "Lagos", 
-            img: "/lagos.png", // Using local image
-            desc: "Lagos is Africa's most populous city, famous as Nigeria's financial hub and Nollywood epicenter."
-          },
-          { 
-            name: "Singapore", 
-            img: "/singapore.png", // Using local image
-            desc: "Singapore is known worldwide as a global financial powerhouse and spotless 'Garden City.'"
-          },    {
+    {
+      name: "Lagos",
+      img: "/lagos.png", // Using local image
+      desc: "Lagos is Africa's most populous city, famous as Nigeria's financial hub and Nollywood epicenter."
+    },
+    {
+      name: "Singapore",
+      img: "/singapore.png", // Using local image
+      desc: "Singapore is known worldwide as a global financial powerhouse and spotless 'Garden City.'"
+    }, {
       name: "Canada",
       img: "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&q=80&w=800",
       desc: "Canada is celebrated for its vast natural beauty, including the Rocky Mountains and northern lights."
@@ -117,7 +117,7 @@ export default function Home() {
                 className="text-6xl lg:text-[100px] font-bold leading-[0.9] mb-8 tracking-tighter text-white"
               >
                 Travel Like <br />
-                a <span className="text-amber italic">Billionaire</span> <br />
+                a <span className="text-amber italic font-newton">Billionaire</span> <br />
                 on Budget.
               </motion.h1>
 
@@ -201,7 +201,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="text-white text-3xl md:text-5xl font-bold mb-16 italic font-serif leading-tight"
+              className="text-white text-3xl md:text-5xl font-bold mb-16 italic font-newton leading-tight"
             >
               Everything You Need for a Perfect Trip
             </motion.h2>
@@ -286,7 +286,7 @@ export default function Home() {
                 Core Values
               </p>
               <h2 className="text-5xl md:text-7xl font-bold mb-8 text-zinc-900 leading-tight tracking-tighter">
-                Why <span className="italic font-serif text-amber">Luxel?</span>
+                Why <span className="italic font-newton text-amber">Luxel?</span>
               </h2>
 
               <p className="text-zinc-500 mb-12 leading-relaxed max-w-md font-light text-lg">
@@ -337,7 +337,7 @@ export default function Home() {
               >
                 <h2 className="text-5xl md:text-7xl font-bold text-zinc-900 mb-6 tracking-tighter">
                   Destinations <br />
-                  <span className="text-amber italic font-serif">for discovery</span>
+                  <span className="text-amber italic font-newton">for discovery</span>
                 </h2>
                 <p className="text-zinc-500 font-light text-lg">Curated recommendations for the global elite.</p>
               </motion.div>
