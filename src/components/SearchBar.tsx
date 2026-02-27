@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import CalendarDropdown from './CalendarDropdown';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import {
     MapPin,
     Users,
@@ -79,7 +80,7 @@ const Dropdown = ({ options, selected, setSelected, label, icon }: DropdownProps
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-                        className="absolute top-full left-0 mt-3 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/20 z-50 overflow-hidden"
+                        className="absolute top-full left-0 mt-3 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/20 z-[100] overflow-hidden"
                     >
                         <div className="p-2">
                             {options.map(option => (
@@ -105,15 +106,37 @@ const Dropdown = ({ options, selected, setSelected, label, icon }: DropdownProps
     )
 }
 
-export default function SearchBar() {
-    const [from, setFrom] = useState(locations[0]);
-    const [to, setTo] = useState(locations[1]);
-    const [departureDate, setDepartureDate] = useState<Date | undefined>(new Date());
+export default function SearchBar({ className, initialValues }: {
+    className?: string;
+    initialValues?: {
+        from?: string;
+        to?: string;
+        departure?: string;
+        passengers?: string;
+    }
+}) {
+    const router = useRouter();
+    const [from, setFrom] = useState(initialValues?.from || locations[0]);
+    const [to, setTo] = useState(initialValues?.to || locations[1]);
+    const [departureDate, setDepartureDate] = useState<Date | undefined>(
+        initialValues?.departure ? new Date(initialValues.departure) : new Date()
+    );
     const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
-    const [passengers, setPassengers] = useState(passengerOptions[0]);
+    const [passengers, setPassengers] = useState(initialValues?.passengers || passengerOptions[0]);
+
+    const handleSearch = () => {
+        const params = new URLSearchParams({
+            from: from || '',
+            to: to || '',
+            departure: departureDate?.toISOString() || '',
+            return: returnDate?.toISOString() || '',
+            passengers: passengers || ''
+        });
+        router.push(`/flights?${params.toString()}`);
+    };
 
     return (
-        <section className="relative -mt-24 z-30 px-6 max-w-7xl mx-auto w-full">
+        <section className={className || "relative -mt-24 z-30 px-6 max-w-7xl mx-auto w-full"}>
             <div className="bg-white/70 backdrop-blur-2xl rounded-[32px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-3 border border-white">
                 <div className="flex flex-wrap lg:flex-nowrap items-center gap-1">
                     <Dropdown
@@ -164,7 +187,10 @@ export default function SearchBar() {
                         icon={<Users size={18} strokeWidth={2.5} />}
                     />
 
-                    <button className="bg-amber text-white h-16 w-full lg:w-16 rounded-[22px] font-bold flex items-center justify-center transition-all shadow-lg shadow-amber/20 ml-2 cursor-pointer hover:bg-amber-dark hover:scale-105 active:scale-95">
+                    <button
+                        onClick={handleSearch}
+                        className="bg-amber text-white h-16 w-full lg:w-16 rounded-[22px] font-bold flex items-center justify-center transition-all shadow-lg shadow-amber/20 ml-2 cursor-pointer hover:bg-amber-dark hover:scale-105 active:scale-95"
+                    >
                         <Search size={24} strokeWidth={3} />
                     </button>
                 </div>

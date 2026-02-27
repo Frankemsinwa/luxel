@@ -152,7 +152,7 @@ export default function Home() {
                   className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] rounded-full border-[6px] border-amber/20 overflow-hidden transform translate-y-8 shadow-2xl transition-all duration-500 group-hover:border-amber/40"
                 >
                   <Image
-                    src="/image (1).png"
+                    src="/hero-left.png"
                     alt="Skyline at night"
                     fill
                     className="object-cover scale-110 group-hover:scale-125 transition-transform duration-700"
@@ -170,7 +170,7 @@ export default function Home() {
                   className="relative w-56 h-[440px] lg:w-64 lg:h-[500px] rounded-full border-[6px] border-amber/20 overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-amber/40"
                 >
                   <Image
-                    src="/image.png"
+                    src="/hero-right.png"
                     alt="Golden hour skyline"
                     fill
                     className="object-cover scale-110 group-hover:scale-125 transition-transform duration-700"

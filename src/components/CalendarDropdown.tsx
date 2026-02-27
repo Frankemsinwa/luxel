@@ -67,7 +67,7 @@ export default function CalendarDropdown({ label, selectedDate, onSelectDate }: 
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-            className="absolute top-full left-0 mt-3 bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/20 z-50 p-6 min-w-[340px]"
+            className="absolute top-full left-0 mt-3 bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/20 z-[100] p-6 min-w-[340px]"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-zinc-900 font-bold text-lg">Select Date</h3>
