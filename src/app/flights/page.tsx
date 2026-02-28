@@ -150,7 +150,7 @@ function FlightsContent() {
             <Navbar />
 
             {/* Search Summary Bar */}
-            <div className="bg-white border-b border-zinc-100 py-6 px-6 relative z-[40]">
+            <div className="bg-white border-b border-zinc-100 pt-32 pb-6 px-6 relative z-[40]">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex flex-wrap items-center justify-between gap-10">
                         <div className="flex flex-wrap items-center gap-12">
