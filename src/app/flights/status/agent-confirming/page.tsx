@@ -37,11 +37,11 @@ function AgentConfirmingContent() {
     const arrCode = searchParams.get('arrCode') || "JFK";
 
     return (
-        <div className="min-h-screen bg-[#fafafa] flex flex-col">
+        <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
             {/* Step Indicator Section */}
-            <div className="bg-white border-b border-zinc-100">
+            <div className="bg-amber border-b border-amber/20">
                 <BookingStatusHeader currentStep={2} />
             </div>
 
@@ -55,26 +55,26 @@ function AgentConfirmingContent() {
                         <div className="space-y-8">
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                 <div>
-                                    <h1 className="text-4xl font-black text-zinc-900 tracking-tight mb-2">Verifying Availability</h1>
-                                    <p className="text-zinc-500 font-medium">Your request LX-492781 is being handled by our VIP desk.</p>
+                                    <h1 className="text-4xl font-black text-black tracking-tight mb-2">Verifying Availability</h1>
+                                    <p className="text-black/60 font-medium">Your request LX-492781 is being handled by our VIP desk.</p>
                                 </div>
-                                <div className="bg-amber/5 border border-amber/10 rounded-2xl px-6 py-4 flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-amber flex items-center justify-center text-white shadow-lg shadow-amber/20">
+                                <div className="bg-black/5 border border-black/10 rounded-2xl px-6 py-4 flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-amber shadow-lg shadow-black/20">
                                         <Clock size={20} />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-black text-amber uppercase tracking-widest">Expected in</div>
-                                        <div className="text-xl font-black text-zinc-900">{formatTime(timeLeft)}</div>
+                                        <div className="text-[10px] font-black text-black uppercase tracking-widest">Expected in</div>
+                                        <div className="text-xl font-black text-black">{formatTime(timeLeft)}</div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Animated Loading Bar */}
-                            <div className="relative h-1 w-full bg-zinc-100 rounded-full overflow-hidden">
+                            <div className="relative h-1 w-full bg-black/10 rounded-full overflow-hidden">
                                 <motion.div
                                     initial={{ width: '0%' }}
                                     animate={{ width: `${((60 - timeLeft) / 60) * 100}%` }}
-                                    className="absolute inset-y-0 left-0 bg-amber shadow-[0_0_15px_rgba(245,158,11,0.5)]"
+                                    className="absolute inset-y-0 left-0 bg-black shadow-[0_0_15px_rgba(0,0,0,0.3)]"
                                 />
                             </div>
                         </div>

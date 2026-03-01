@@ -14,7 +14,7 @@ function FinalizedContent() {
     const searchParams = useSearchParams();
 
     return (
-        <div className="min-h-screen bg-zinc-50 flex flex-col">
+        <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
             <BookingStatusHeader currentStep={5} />
@@ -28,7 +28,7 @@ function FinalizedContent() {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white rounded-[3rem] p-16 shadow-2xl shadow-zinc-200/50 border border-zinc-100 relative overflow-hidden text-center"
+                            className="bg-amber rounded-[3rem] p-16 shadow-2xl shadow-amber/20 border border-amber/20 relative overflow-hidden text-center"
                         >
                             <div className="flex flex-col items-center max-w-2xl mx-auto relative z-10">
                                 <motion.div

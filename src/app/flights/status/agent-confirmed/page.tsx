@@ -19,11 +19,11 @@ function AgentConfirmedContent() {
     const totalPrice = pricePerPerson * passengerCount;
 
     return (
-        <div className="min-h-screen bg-[#fafafa] flex flex-col">
+        <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
             {/* Step Indicator Section */}
-            <div className="bg-white border-b border-zinc-100">
+            <div className="bg-amber border-b border-amber/20">
                 <BookingStatusHeader currentStep={3} />
             </div>
 
@@ -46,7 +46,7 @@ function AgentConfirmedContent() {
                                 </div>
                                 <div className="text-right">
                                     <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Total Confirmed Price</div>
-                                    <div className="text-5xl font-black text-zinc-900">${totalPrice.toFixed(2)}</div>
+                                    <div className="text-5xl font-black text-zinc-900">₦{totalPrice.toFixed(2)}</div>
                                 </div>
                             </div>
 
@@ -89,7 +89,7 @@ function AgentConfirmedContent() {
                                         <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-50">
                                             <CheckCircle2 size={16} />
                                         </div>
-                                        <p className="text-sm font-bold text-zinc-900">Price confirmed at ${totalPrice.toFixed(2)}</p>
+                                        <p className="text-sm font-bold text-zinc-900">Price confirmed at ₦{totalPrice.toFixed(2)}</p>
                                     </div>
                                     <span className="text-[10px] font-black text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-md">NOW</span>
                                 </motion.div>

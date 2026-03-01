@@ -205,9 +205,9 @@ function TourSearchContent() {
                                 onChange={(e) => setPriceRange(parseInt(e.target.value))}
                                 className="w-full h-1.5 bg-zinc-100 rounded-lg appearance-none cursor-pointer accent-amber mb-4"
                             />
-                            <div className="flex justify-between text-xs font-bold text-zinc-400">
-                                <span>$1,000</span>
-                                <span className="text-amber">${priceRange.toLocaleString()}</span>
+<div className="flex justify-between text-xs font-bold text-zinc-400">
+                                <span>₦1,000</span>
+                                <span className="text-amber">₦{priceRange.toLocaleString()}</span>
                             </div>
                         </div>
 
@@ -302,7 +302,7 @@ function TourSearchContent() {
                                             <div className="flex items-center justify-between pt-6 border-t border-zinc-50">
                                                 <div>
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 block mb-1">Price From</span>
-                                                    <span className="text-xl font-black text-zinc-900">${tour.price.toLocaleString()}</span>
+                                                    <span className="text-xl font-black text-zinc-900">₦{tour.price.toLocaleString()}</span>
                                                 </div>
                                                 <div className="w-10 h-10 rounded-full bg-amber/10 flex items-center justify-center group-hover:bg-amber transition-colors">
                                                     <ChevronDown size={16} className="text-amber group-hover:text-black -rotate-90 transition-colors" />

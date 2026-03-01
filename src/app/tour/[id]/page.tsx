@@ -136,7 +136,7 @@ export default function TourDetailsPage() {
                             className="text-right"
                         >
                             <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Starting From</p>
-                            <p className="text-4xl font-black text-amber">${tour.price.toLocaleString()} <span className="text-sm text-white/40 font-medium">/ guest</span></p>
+                            <p className="text-4xl font-black text-amber">₦{tour.price.toLocaleString()} <span className="text-sm text-white/40 font-medium">/ guest</span></p>
                         </motion.div>
                     </div>
                 </div>
@@ -261,7 +261,7 @@ export default function TourDetailsPage() {
                                         <p className="text-lg font-black text-zinc-900">Subtotal</p>
                                         <p className="text-xs text-zinc-400 font-medium whitespace-nowrap">Tax & fees included</p>
                                     </div>
-                                    <p className="text-2xl font-black text-zinc-900">${(tour.price * guests).toLocaleString()}</p>
+                                    <p className="text-2xl font-black text-zinc-900">₦{(tour.price * guests).toLocaleString()}</p>
                                 </div>
 
                                 <button

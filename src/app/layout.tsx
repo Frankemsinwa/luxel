@@ -14,6 +14,17 @@ const newtonScient = localFont({
   variable: "--font-newton-scient",
 });
 
+const satoshi = localFont({
+  src: [
+    { path: "../../public/fonts/Satoshi-Regular.otf", weight: "400", style: "normal" },
+    { path: "../../public/fonts/Satoshi-Medium.otf", weight: "500", style: "normal" },
+    { path: "../../public/fonts/Satoshi-Bold.otf", weight: "700", style: "normal" },
+    { path: "../../public/fonts/Satoshi-Light.otf", weight: "300", style: "normal" },
+    { path: "../../public/fonts/Satoshi-MediumItalic.otf", weight: "500", style: "italic" },
+  ],
+  variable: "--font-satoshi",
+});
+
 export const metadata: Metadata = {
   title: "Luxel",
   description: "Premium airline booking experience",
@@ -27,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${plusJakartaSans.variable} ${newtonScient.variable} antialiased`}
+        className={`${plusJakartaSans.variable} ${newtonScient.variable} ${satoshi.variable} antialiased`}
       >
         {children}
       </body>

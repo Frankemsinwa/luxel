@@ -146,7 +146,7 @@ function FlightsContent() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-50 flex flex-col">
+        <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
             {/* Search Summary Bar */}
@@ -205,15 +205,15 @@ function FlightsContent() {
 
                 {/* Filters Sidebar */}
                 <aside className="w-full lg:w-80 flex flex-col gap-8">
-                    <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-zinc-100">
+                    <div className="bg-amber p-8 rounded-[2.5rem] shadow-sm border border-amber/20">
                         <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-xl font-bold text-zinc-900">Filters</h2>
+                            <h2 className="text-xl font-bold text-black">Filters</h2>
                             <button
                                 onClick={() => {
                                     setPriceRange(1500);
                                     setSelectedAirlines(["British Airways", "Virgin Atlantic", "American Airlines"]);
                                 }}
-                                className="text-xs font-bold text-amber hover:underline uppercase tracking-widest"
+                                className="text-xs font-bold text-black/60 hover:underline uppercase tracking-widest"
                             >
                                 Reset
                             </button>
@@ -222,10 +222,10 @@ function FlightsContent() {
                         {/* Price Range */}
                         <div className="mb-10">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-amber/10 flex items-center justify-center text-amber">
+                                <div className="w-10 h-10 rounded-xl bg-black/10 flex items-center justify-center text-black">
                                     <Filter size={18} />
                                 </div>
-                                <h3 className="font-bold text-zinc-900">Price Range</h3>
+                                <h3 className="font-bold text-black">Price Range</h3>
                             </div>
                             <input
                                 type="range"
@@ -233,22 +233,22 @@ function FlightsContent() {
                                 max="1500"
                                 value={priceRange}
                                 onChange={(e) => setPriceRange(parseInt(e.target.value))}
-                                className="w-full h-1.5 bg-zinc-100 rounded-lg appearance-none cursor-pointer accent-amber mb-4"
+                                className="w-full h-1.5 bg-black/10 rounded-lg appearance-none cursor-pointer accent-black mb-4"
                             />
-                            <div className="flex justify-between text-xs font-bold text-zinc-400 tracking-tighter">
-                                <span>$200</span>
-                                <span className="text-amber">${priceRange}</span>
-                                <span>$1,500</span>
+                            <div className="flex justify-between text-xs font-bold text-black/50 tracking-tighter">
+                                <span>₦200</span>
+                                <span className="text-black">₦{priceRange}</span>
+                                <span>₦1,500</span>
                             </div>
                         </div>
 
                         {/* Airlines */}
                         <div>
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400">
+                                <div className="w-10 h-10 rounded-xl bg-black/10 flex items-center justify-center text-black">
                                     <Plane size={18} />
                                 </div>
-                                <h3 className="font-bold text-zinc-900">Airlines</h3>
+                                <h3 className="font-bold text-black">Airlines</h3>
                             </div>
                             <div className="space-y-4">
                                 {[
@@ -260,11 +260,11 @@ function FlightsContent() {
                                         <div className="flex items-center gap-3">
                                             <div
                                                 onClick={() => handleAirlineToggle(airline)}
-                                                className={`w-5 h-5 rounded border transition-colors flex items-center justify-center ${selectedAirlines.includes(airline) ? 'bg-amber border-amber' : 'border-zinc-200 group-hover:border-amber'}`}
+                                                className={`w-5 h-5 rounded border transition-colors flex items-center justify-center ${selectedAirlines.includes(airline) ? 'bg-black border-black' : 'border-black/30 group-hover:border-black'}`}
                                             >
-                                                {selectedAirlines.includes(airline) && <div className="w-2 h-2 rounded-full bg-white" />}
+                                                {selectedAirlines.includes(airline) && <div className="w-2 h-2 rounded-full bg-amber" />}
                                             </div>
-                                            <span className="text-sm font-medium text-zinc-600 group-hover:text-zinc-900">{airline}</span>
+                                            <span className="text-sm font-medium text-black/70 group-hover:text-black">{airline}</span>
                                         </div>
                                     </label>
                                 ))}
@@ -276,10 +276,10 @@ function FlightsContent() {
                 {/* Results Area */}
                 <div className="flex-1">
                     <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-lg font-bold text-zinc-900">{results.length} results found for your search</h2>
+                        <h2 className="text-lg font-bold text-black">{results.length} results found for your search</h2>
                         <div className="flex items-center gap-4">
-                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Sort by:</span>
-                            <select className="bg-transparent text-sm font-bold text-zinc-900 focus:outline-none cursor-pointer">
+                            <span className="text-xs font-bold text-black/50 uppercase tracking-widest">Sort by:</span>
+                            <select className="bg-transparent text-sm font-bold text-black focus:outline-none cursor-pointer">
                                 <option>Recommended</option>
                                 <option>Cheapest</option>
                                 <option>Fastest</option>
@@ -296,43 +296,43 @@ function FlightsContent() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     layout
-                                    className="bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm border border-zinc-100 flex flex-col lg:flex-row items-center gap-10 hover:shadow-xl hover:scale-[1.01] transition-all group"
+                                    className="bg-amber rounded-[2.5rem] p-8 lg:p-10 shadow-sm border border-amber/20 flex flex-col lg:flex-row items-center gap-10 hover:shadow-xl hover:scale-[1.01] transition-all group"
                                 >
                                     {/* Flight Info */}
                                     <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 items-center gap-8 md:gap-4">
                                         <div className="flex items-center gap-6">
-                                            <div className="w-16 h-16 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 font-black group-hover:bg-amber/10 group-hover:text-amber transition-colors">
+                                            <div className="w-16 h-16 rounded-2xl bg-black/10 border border-black/10 flex items-center justify-center text-black font-black group-hover:bg-black group-hover:text-amber transition-colors">
                                                 <div className="text-xs font-black">{flight.logo}</div>
                                             </div>
                                             <div>
-                                                <div className="text-2xl font-bold text-zinc-900">{flight.departureTime}</div>
-                                                <div className="text-xs font-medium text-zinc-400 tracking-widest">{flight.departureCode} • {flight.departureCity}</div>
+                                                <div className="text-2xl font-bold text-black">{flight.departureTime}</div>
+                                                <div className="text-xs font-medium text-black/60 tracking-widest">{flight.departureCode} • {flight.departureCity}</div>
                                             </div>
                                         </div>
 
                                         <div className="flex flex-col items-center justify-center px-4">
-                                            <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">{flight.duration}</div>
-                                            <div className="relative w-full h-[2px] bg-zinc-100 mb-2">
-                                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 border-2 border-amber bg-white rounded-full group-hover:scale-125 transition-transform" />
-                                                <div className="absolute top-1/2 left-0 -translate-y-1/2 w-1.5 h-1.5 bg-zinc-300 rounded-full" />
-                                                <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1.5 h-1.5 bg-zinc-300 rounded-full" />
+                                            <div className="text-[10px] font-bold text-black/50 uppercase tracking-widest mb-3">{flight.duration}</div>
+                                            <div className="relative w-full h-[2px] bg-black/10 mb-2">
+                                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 border-2 border-black bg-amber rounded-full group-hover:scale-125 transition-transform" />
+                                                <div className="absolute top-1/2 left-0 -translate-y-1/2 w-1.5 h-1.5 bg-black/30 rounded-full" />
+                                                <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1.5 h-1.5 bg-black/30 rounded-full" />
                                             </div>
-                                            <div className="text-[10px] font-bold text-amber uppercase tracking-widest">{flight.stops}</div>
+                                            <div className="text-[10px] font-bold text-black uppercase tracking-widest">{flight.stops}</div>
                                         </div>
 
                                         <div className="text-right">
-                                            <div className="text-2xl font-bold text-zinc-900">{flight.arrivalTime}</div>
-                                            <div className="text-xs font-medium text-zinc-400 tracking-widest">{flight.arrivalCode}-{flight.arrivalCity}</div>
+                                            <div className="text-2xl font-bold text-black">{flight.arrivalTime}</div>
+                                            <div className="text-xs font-medium text-black/60 tracking-widest">{flight.arrivalCode}-{flight.arrivalCity}</div>
                                         </div>
                                     </div>
 
                                     {/* Divider */}
-                                    <div className="w-px h-24 bg-zinc-100 hidden lg:block" />
+                                    <div className="w-px h-24 bg-black/10 hidden lg:block" />
 
                                     {/* Pricing & Action */}
                                     <div className="w-full lg:w-48 text-center lg:text-right">
-                                        <div className="text-4xl font-bold text-zinc-900 mb-1">${flight.price}</div>
-                                        <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-6">Round-trip per person</div>
+                                        <div className="text-4xl font-bold text-black mb-1">₦{flight.price}</div>
+                                        <div className="text-[10px] font-bold text-black/50 uppercase tracking-widest mb-6">Round-trip per person</div>
                                         <button
                                             onClick={() => {
                                                 const params = new URLSearchParams({
@@ -351,7 +351,7 @@ function FlightsContent() {
                                                 });
                                                 router.push(`/flights/details?${params.toString()}`);
                                             }}
-                                            className="w-full bg-amber text-white py-4 rounded-2xl font-bold text-sm shadow-lg shadow-amber/20 hover:bg-amber-dark hover:scale-105 active:scale-95 transition-all"
+                                            className="w-full bg-black text-amber py-4 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 hover:scale-105 active:scale-95 transition-all"
                                         >
                                             Select
                                         </button>
@@ -361,13 +361,13 @@ function FlightsContent() {
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    className="bg-white rounded-[2.5rem] p-20 text-center border-2 border-dashed border-zinc-100"
+                                    className="bg-amber rounded-[2.5rem] p-20 text-center border-2 border-dashed border-black/20"
                                 >
-                                    <div className="w-20 h-20 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-300 mx-auto mb-6">
+                                    <div className="w-20 h-20 rounded-full bg-black/10 flex items-center justify-center text-black/30 mx-auto mb-6">
                                         <Search size={32} />
                                     </div>
-                                    <h3 className="text-xl font-bold text-zinc-900 mb-2">No flights found</h3>
-                                    <p className="text-zinc-400 font-light">Try adjusting your filters to find more options.</p>
+                                    <h3 className="text-xl font-bold text-black mb-2">No flights found</h3>
+                                    <p className="text-black/50 font-light">Try adjusting your filters to find more options.</p>
                                 </motion.div>
                             )}
                         </AnimatePresence>

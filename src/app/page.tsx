@@ -69,21 +69,21 @@ export default function Home() {
   const destinationCards = [
     {
       name: "Abu dhabi",
-      img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=800",
+      img: "/pic/abu-dhabi-1.jpeg",
       desc: "Abu Dhabi is renowned for its stunning Sheikh Zayed Grand Mosque and luxury attractions like Ferrari World"
     },
     {
       name: "Lagos",
-      img: "/lagos.png", // Using local image
+      img: "/pic/lagos.jpeg", // Using local image
       desc: "Lagos is Africa's most populous city, famous as Nigeria's financial hub and Nollywood epicenter."
     },
     {
       name: "Singapore",
-      img: "/singapore.png", // Using local image
+      img: "/pic/singapore.jpeg",
       desc: "Singapore is known worldwide as a global financial powerhouse and spotless 'Garden City.'"
     }, {
       name: "Canada",
-      img: "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&q=80&w=800",
+      img: "/pic/canada.jpeg",
       desc: "Canada is celebrated for its vast natural beauty, including the Rocky Mountains and northern lights."
     }
   ];
@@ -109,16 +109,16 @@ export default function Home() {
             >
               <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-800 bg-white/5 backdrop-blur-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse" />
-                <span className="text-[10px] font-bold tracking-[0.2em] text-zinc-400 uppercase">Premium Travel Experience</span>
+                <span className="text-[10px] font-normal tracking-[0.2em] text-zinc-400 uppercase">Premium Travel Experience</span>
               </motion.div>
 
               <motion.h1
                 variants={titleVariants}
-                className="text-6xl lg:text-[100px] font-bold leading-[0.9] mb-8 tracking-tighter text-white"
+                className="text-6xl lg:text-[100px] font-normal leading-[0.9] mb-8 tracking-tighter text-white"
               >
-                Travel Like <br />
+                <span className="font-bold">Travel Like</span> <br />
                 a <span className="text-amber italic font-newton">Billionaire</span> <br />
-                on Budget.
+                <span className="font-bold">on Budget.</span>
               </motion.h1>
 
               <motion.p
@@ -129,10 +129,10 @@ export default function Home() {
               </motion.p>
 
               <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                <button className="bg-amber text-black px-10 py-5 rounded-2xl text-[12px] font-bold tracking-widest shadow-[0_20px_40px_rgba(241,188,50,0.25)] hover:bg-amber-light transition-all transform hover:-translate-y-1 active:scale-95 cursor-pointer">
+                <button className="bg-amber text-black px-10 py-5 rounded-2xl text-[12px] font-normal tracking-widest shadow-[0_20px_40px_rgba(241,188,50,0.25)] hover:bg-amber-light transition-all transform hover:-translate-y-1 active:scale-95 cursor-pointer">
                   START YOUR SEARCH
                 </button>
-                <button className="px-10 py-5 rounded-2xl text-[12px] font-bold tracking-widest border border-zinc-800 hover:bg-white/5 transition-all cursor-pointer">
+                <button className="px-10 py-5 rounded-2xl text-[12px] font-normal tracking-widest border border-zinc-800 hover:bg-white/5 transition-all cursor-pointer">
                   LEARN MORE
                 </button>
               </motion.div>
@@ -201,10 +201,10 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="text-white text-3xl md:text-5xl font-bold mb-16 italic font-newton leading-tight"
-            >
-              Everything You Need for a Perfect Trip
-            </motion.h2>
+              className="text-white text-3xl md:text-5xl font-medium mb-16 italic leading-tight font-satoshi"
+              >
+                Everything You Need For A Perfect Trip
+              </motion.h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {serviceCards.map((card, i) => (
                 <motion.div
@@ -227,12 +227,12 @@ export default function Home() {
                     </div>
                   </motion.div>
 
-                  <h3 className="text-xl font-bold mb-4 relative z-10">{card.title}</h3>
+                  <h3 className="text-xl font-normal mb-4 relative z-10">{card.title}</h3>
                   <p className="text-zinc-400 text-sm leading-relaxed font-light relative z-10">
                     {card.desc}
                   </p>
 
-                  <div className="mt-8 flex items-center gap-2 text-amber text-[10px] font-bold tracking-widest uppercase opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                  <div className="mt-8 flex items-center gap-2 text-amber text-[10px] font-normal tracking-widest uppercase opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                     Explore More <ChevronRight size={10} />
                   </div>
                 </motion.div>
@@ -281,12 +281,12 @@ export default function Home() {
               transition={{ duration: 1, ease: [0.21, 1, 0.36, 1] }}
               className="flex-1"
             >
-              <p className="text-amber font-bold tracking-[0.3em] text-[10px] mb-6 uppercase flex items-center gap-3">
+              <p className="text-amber font-normal tracking-[0.3em] text-[10px] mb-6 uppercase flex items-center gap-3">
                 <span className="w-8 h-[1px] bg-amber" />
                 Core Values
               </p>
-              <h2 className="text-5xl md:text-7xl font-bold mb-8 text-zinc-900 leading-tight tracking-tighter">
-                Why <span className="italic font-newton text-amber">Luxel?</span>
+              <h2 className="text-5xl md:text-7xl font-normal mb-8 text-zinc-900 leading-tight tracking-tighter">
+                <span className="font-medium">Why</span> <span className="italic font-newton text-amber">Luxel?</span>
               </h2>
 
               <p className="text-zinc-500 mb-12 leading-relaxed max-w-md font-light text-lg">
@@ -314,7 +314,7 @@ export default function Home() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full bg-amber" />
-                      <h4 className="text-lg font-bold text-zinc-900 group-hover:text-amber transition-colors">{benefit.title}</h4>
+                      <h4 className="text-lg font-normal text-zinc-900 group-hover:text-amber transition-colors">{benefit.title}</h4>
                     </div>
                     <p className="text-zinc-500 text-sm font-light max-w-sm leading-relaxed pl-5 border-l-2 border-zinc-100 group-hover:border-amber transition-colors">
                       {benefit.desc}
@@ -335,9 +335,9 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
               >
-                <h2 className="text-5xl md:text-7xl font-bold text-zinc-900 mb-6 tracking-tighter">
-                  Destinations <br />
-                  <span className="text-amber italic font-newton">for discovery</span>
+                <h2 className="text-5xl md:text-7xl font-normal text-zinc-900 tracking-tighter">
+                  <span className="font-medium">Destinations</span> <br />
+                  <span className="text-amber italic font-newton tracking-[-0.05em]">fordiscovery</span>
                 </h2>
                 <p className="text-zinc-500 font-light text-lg">Curated recommendations for the global elite.</p>
               </motion.div>
@@ -345,7 +345,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="group flex items-center gap-3 text-sm font-bold tracking-widest uppercase hover:text-amber transition-colors"
+                className="group flex items-center gap-3 text-sm font-normal tracking-widest uppercase hover:text-amber transition-colors"
               >
                 View all places
                 <div className="w-10 h-10 rounded-full border border-zinc-200 flex items-center justify-center group-hover:border-amber transition-colors">
@@ -380,7 +380,7 @@ export default function Home() {
                   >
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-2xl font-bold">{card.name}</h3>
+                        <h3 className="text-3xl font-bold">{card.name}</h3>
                         <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <PlaneLanding size={14} className="text-white" />
                         </div>
@@ -388,10 +388,6 @@ export default function Home() {
                       <p className="text-[12px] font-light leading-relaxed mb-6 line-clamp-3 opacity-90">
                         {card.desc}
                       </p>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                      <p className="font-bold text-[10px] tracking-widest uppercase opacity-80">302 Properties</p>
-                      <p className="text-[10px] font-bold">FROM $2,499</p>
                     </div>
                   </motion.div>
                 </motion.div>

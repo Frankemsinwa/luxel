@@ -17,13 +17,13 @@ import { useState } from "react";
 export default function MembersPage() {
     const [searchQuery, setSearchQuery] = useState("");
 
-    const members = [
-        { id: "M-1029", name: "Jonathan Wick", tier: "VIP", since: "2023", spent: "$492,000", lastFlight: "Oct 20, 2026", status: "Active" },
-        { id: "M-1035", name: "Sofia Al-Aziz", tier: "Elite", since: "2024", spent: "$128,500", lastFlight: "Oct 22, 2026", status: "Active" },
-        { id: "M-1082", name: "Michael Chen", tier: "Business", since: "2022", spent: "$89,200", lastFlight: "Oct 15, 2026", status: "Active" },
-        { id: "M-1102", name: "Elena Rossi", tier: "VIP", since: "2021", spent: "$612,400", lastFlight: "Oct 10, 2026", status: "Away" },
-        { id: "M-1145", name: "David Beckham", tier: "VIP", since: "2020", spent: "$890,200", lastFlight: "Now", status: "Active" },
-        { id: "M-1156", name: "Amara Okoro", tier: "Elite", since: "2024", spent: "$45,000", lastFlight: "Yesterday", status: "Active" },
+const members = [
+        { id: "M-1029", name: "Jonathan Wick", tier: "VIP", since: "2023", spent: "₦492,000", lastFlight: "Oct 20, 2026", status: "Active" },
+        { id: "M-1035", name: "Sofia Al-Aziz", tier: "Elite", since: "2024", spent: "₦128,500", lastFlight: "Oct 22, 2026", status: "Active" },
+        { id: "M-1082", name: "Michael Chen", tier: "Business", since: "2022", spent: "₦89,200", lastFlight: "Oct 15, 2026", status: "Active" },
+        { id: "M-1102", name: "Elena Rossi", tier: "VIP", since: "2021", spent: "₦612,400", lastFlight: "Oct 10, 2026", status: "Away" },
+        { id: "M-1145", name: "David Beckham", tier: "VIP", since: "2020", spent: "₦890,200", lastFlight: "Now", status: "Active" },
+        { id: "M-1156", name: "Amara Okoro", tier: "Elite", since: "2024", spent: "₦45,000", lastFlight: "Yesterday", status: "Active" },
     ];
 
     return (
@@ -53,7 +53,7 @@ export default function MembersPage() {
                 <div className="bg-zinc-900 rounded-[2rem] p-8 text-white flex items-center justify-between relative overflow-hidden">
                     <div className="relative z-10">
                         <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Total Member Equity</p>
-                        <h3 className="text-2xl font-black">$12,482,000</h3>
+                        <h3 className="text-2xl font-black">₦12,482,000</h3>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-amber relative z-10">
                         <TrendingUp size={24} />

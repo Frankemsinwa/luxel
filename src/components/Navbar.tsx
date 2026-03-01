@@ -33,7 +33,7 @@ export default function Navbar() {
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 px-6 ${isScrolled ? 'py-4' : 'py-6'}`}>
-        <div className={`max-w-7xl mx-auto rounded-[2rem] transition-all duration-500 border border-white/5 relative overflow-hidden ${isScrolled ? 'bg-black/60 backdrop-blur-2xl shadow-2xl py-3 px-8 translate-y-2' : 'bg-transparent py-4 px-6'}`}>
+        <div className={`max-w-7xl mx-auto rounded-[2rem] transition-all duration-500 border border-white/5 relative overflow-hidden ${isScrolled ? 'bg-black/60 backdrop-blur-2xl shadow-2xl py-3 px-8 translate-y-2' : 'bg-black py-4 px-6'}`}>
 
           {/* Animated Background Shimmer for Scrolled State */}
           {isScrolled && (

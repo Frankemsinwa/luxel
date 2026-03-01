@@ -40,7 +40,7 @@ function PaymentContent() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-50 flex flex-col">
+        <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
             <BookingStatusHeader currentStep={3} />
@@ -50,13 +50,13 @@ function PaymentContent() {
 
                     {/* Left Side: Summary & Reward */}
                     <div className="lg:col-span-1 space-y-8">
-                        <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-zinc-100">
+                        <div className="bg-amber rounded-[3rem] p-10 shadow-sm border border-amber/20">
                             <div className="flex items-center gap-3 mb-10">
-                                <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                <div className="px-3 py-1 rounded-full bg-emerald-900/20 text-emerald-700 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
                                     Availability Confirmed
                                 </div>
-                                <span className="text-[10px] font-bold text-zinc-400">Ref: #LX-99281</span>
+                                <span className="text-[10px] font-bold text-black/50">Ref: #LX-99281</span>
                             </div>
 
                             <div className="flex items-baseline justify-between mb-8">
@@ -93,7 +93,7 @@ function PaymentContent() {
                             <div className="pt-10 border-t border-zinc-100 flex items-center justify-between">
                                 <span className="text-sm font-medium text-zinc-500">Total Due</span>
                                 <div className="text-right">
-                                    <span className="text-3xl font-black text-zinc-900">${totalPrice.toFixed(2)}</span>
+                                    <span className="text-3xl font-black text-zinc-900">₦{totalPrice.toFixed(2)}</span>
                                 </div>
                             </div>
                             <p className="text-[9px] text-zinc-400 font-medium mt-4 flex items-center gap-2">

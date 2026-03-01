@@ -31,7 +31,7 @@ function VerifyingContent() {
     }, [router, searchParams]);
 
     return (
-        <div className="min-h-screen bg-zinc-50 flex flex-col">
+        <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
             <BookingStatusHeader currentStep={4} />
@@ -45,7 +45,7 @@ function VerifyingContent() {
                         <motion.div
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-zinc-900 rounded-[3rem] p-12 shadow-2xl shadow-zinc-200/50 border border-white/5 relative overflow-hidden"
+                            className="bg-black rounded-[3rem] p-12 shadow-2xl shadow-black/20 border border-black/20 relative overflow-hidden"
                         >
                             <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
                                 <Loader2 size={200} className="animate-spin text-white" />

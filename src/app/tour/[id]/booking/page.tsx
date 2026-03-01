@@ -214,26 +214,26 @@ export default function TourBookingPage() {
                                         </div>
                                     </div>
 
-                                    <div className="pt-6 border-t border-zinc-50 space-y-4">
+<div className="pt-6 border-t border-zinc-50 space-y-4">
                                         <div className="flex justify-between text-xs font-bold text-zinc-400">
                                             <span>Base Tour Price</span>
-                                            <span className="text-zinc-900">${tourSummary.basePrice.toLocaleString()}</span>
+                                            <span className="text-zinc-900">₦{tourSummary.basePrice.toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between text-xs font-bold text-zinc-400">
                                             <span>Taxes & Local Fees</span>
-                                            <span className="text-zinc-900">${tourSummary.taxes.toLocaleString()}</span>
+                                            <span className="text-zinc-900">₦{tourSummary.taxes.toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between text-xs font-bold text-zinc-400">
                                             <div className="flex items-center gap-1.5">
                                                 Luxel Service Fee <Info size={12} className="text-zinc-300" />
                                             </div>
-                                            <span className="text-zinc-900">${tourSummary.fee.toLocaleString()}</span>
+                                            <span className="text-zinc-900">₦{tourSummary.fee.toLocaleString()}</span>
                                         </div>
                                     </div>
 
                                     <div className="pt-6 border-t border-zinc-50 flex items-center justify-between">
                                         <span className="text-lg font-black text-zinc-900">Total Amount</span>
-                                        <span className="text-3xl font-black text-amber">${tourSummary.total.toLocaleString()}</span>
+                                        <span className="text-3xl font-black text-amber">₦{tourSummary.total.toLocaleString()}</span>
                                     </div>
 
                                     <button

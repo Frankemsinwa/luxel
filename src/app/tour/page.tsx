@@ -39,7 +39,7 @@ export default function TourLandingPage() {
             title: 'The Tuscan Silk Road',
             description: 'Culinary excellence through the rolling hills of Italy.',
             image: '/tour-img/img-1.jpg',
-            price: '$4,200',
+            price: '₦4,200',
             duration: '7 Days',
             rating: 5,
             actualImage: '/lagos.png' // Using existing images for variety if needed, but the prompt says use public/tour
@@ -49,7 +49,7 @@ export default function TourLandingPage() {
             title: 'Kyoto Zen Retreat',
             description: 'Mindful immersion in the ancient temples of Japan.',
             image: '/tour-img/img-2.jpg',
-            price: '$3,800',
+            price: '₦3,800',
             duration: '5 Days',
             rating: 5
         },
@@ -58,7 +58,7 @@ export default function TourLandingPage() {
             title: 'Wilderness Refined',
             description: 'Ultimate luxury safari experience in the Serengeti.',
             image: '/tour-img/img-3.jpg',
-            price: '$9,500',
+            price: '₦9,500',
             duration: '10 Days',
             rating: 5
         }
