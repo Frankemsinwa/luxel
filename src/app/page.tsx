@@ -201,7 +201,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="text-white text-3xl md:text-5xl font-medium mb-16 italic leading-tight font-satoshi"
+              className="text-white text-3xl md:text-5xl font-semibold mb-16 italic leading-tight font-satoshi"
               >
                 Everything You Need For A Perfect Trip
               </motion.h2>
@@ -227,7 +227,7 @@ export default function Home() {
                     </div>
                   </motion.div>
 
-                  <h3 className="text-xl font-normal mb-4 relative z-10">{card.title}</h3>
+                  <h3 className="text-xl font-bold mb-4 relative z-10">{card.title}</h3>
                   <p className="text-zinc-400 text-sm leading-relaxed font-light relative z-10">
                     {card.desc}
                   </p>

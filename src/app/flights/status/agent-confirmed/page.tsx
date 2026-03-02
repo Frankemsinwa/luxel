@@ -41,7 +41,7 @@ function AgentConfirmedContent() {
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                                         Availability Confirmed
                                     </div>
-                                    <h1 className="text-4xl font-black text-zinc-900 tracking-tight mb-2">Price & Routing Verified</h1>
+                                    <h1 className="text-4xl font-semibold text-zinc-900 tracking-tight mb-2">Price & Routing Verified</h1>
                                     <p className="text-zinc-500 font-medium">Your private rate has been locked. Please complete payment to issue your tickets.</p>
                                 </div>
                                 <div className="text-right">

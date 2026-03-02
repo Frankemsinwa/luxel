@@ -205,15 +205,15 @@ function FlightsContent() {
 
                 {/* Filters Sidebar */}
                 <aside className="w-full lg:w-80 flex flex-col gap-8">
-                    <div className="bg-amber p-8 rounded-[2.5rem] shadow-sm border border-amber/20">
+<div className="bg-black p-8 rounded-[2.5rem] shadow-sm border border-white/10">
                         <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-xl font-bold text-black">Filters</h2>
+                            <h2 className="text-xl font-bold text-white">Filters</h2>
                             <button
                                 onClick={() => {
                                     setPriceRange(1500);
                                     setSelectedAirlines(["British Airways", "Virgin Atlantic", "American Airlines"]);
                                 }}
-                                className="text-xs font-bold text-black/60 hover:underline uppercase tracking-widest"
+                                className="text-xs font-bold text-white/60 hover:underline uppercase tracking-widest"
                             >
                                 Reset
                             </button>
@@ -222,10 +222,10 @@ function FlightsContent() {
                         {/* Price Range */}
                         <div className="mb-10">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-black/10 flex items-center justify-center text-black">
+                                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
                                     <Filter size={18} />
                                 </div>
-                                <h3 className="font-bold text-black">Price Range</h3>
+                                <h3 className="font-bold text-white">Price Range</h3>
                             </div>
                             <input
                                 type="range"
@@ -233,11 +233,11 @@ function FlightsContent() {
                                 max="1500"
                                 value={priceRange}
                                 onChange={(e) => setPriceRange(parseInt(e.target.value))}
-                                className="w-full h-1.5 bg-black/10 rounded-lg appearance-none cursor-pointer accent-black mb-4"
+                                className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber mb-4"
                             />
-                            <div className="flex justify-between text-xs font-bold text-black/50 tracking-tighter">
+                            <div className="flex justify-between text-xs font-bold text-white/50 tracking-tighter">
                                 <span>₦200</span>
-                                <span className="text-black">₦{priceRange}</span>
+                                <span className="text-white">₦{priceRange}</span>
                                 <span>₦1,500</span>
                             </div>
                         </div>
@@ -245,10 +245,10 @@ function FlightsContent() {
                         {/* Airlines */}
                         <div>
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-black/10 flex items-center justify-center text-black">
+                                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
                                     <Plane size={18} />
                                 </div>
-                                <h3 className="font-bold text-black">Airlines</h3>
+                                <h3 className="font-bold text-white">Airlines</h3>
                             </div>
                             <div className="space-y-4">
                                 {[
@@ -260,11 +260,11 @@ function FlightsContent() {
                                         <div className="flex items-center gap-3">
                                             <div
                                                 onClick={() => handleAirlineToggle(airline)}
-                                                className={`w-5 h-5 rounded border transition-colors flex items-center justify-center ${selectedAirlines.includes(airline) ? 'bg-black border-black' : 'border-black/30 group-hover:border-black'}`}
+                                                className={`w-5 h-5 rounded border transition-colors flex items-center justify-center ${selectedAirlines.includes(airline) ? 'bg-amber border-amber' : 'border-white/30 group-hover:border-white'}`}
                                             >
-                                                {selectedAirlines.includes(airline) && <div className="w-2 h-2 rounded-full bg-amber" />}
+                                                {selectedAirlines.includes(airline) && <div className="w-2 h-2 rounded-full bg-black" />}
                                             </div>
-                                            <span className="text-sm font-medium text-black/70 group-hover:text-black">{airline}</span>
+                                            <span className="text-sm font-medium text-white/70 group-hover:text-white">{airline}</span>
                                         </div>
                                     </label>
                                 ))}
@@ -306,7 +306,7 @@ function FlightsContent() {
                                             </div>
                                             <div>
                                                 <div className="text-2xl font-bold text-black">{flight.departureTime}</div>
-                                                <div className="text-xs font-medium text-black/60 tracking-widest">{flight.departureCode} • {flight.departureCity}</div>
+                                                <div className="text-sm font-medium text-black/60 tracking-widest">{flight.departureCode} • {flight.departureCity}</div>
                                             </div>
                                         </div>
 
@@ -322,7 +322,7 @@ function FlightsContent() {
 
                                         <div className="text-right">
                                             <div className="text-2xl font-bold text-black">{flight.arrivalTime}</div>
-                                            <div className="text-xs font-medium text-black/60 tracking-widest">{flight.arrivalCode}-{flight.arrivalCity}</div>
+                                            <div className="text-sm font-medium text-black/60 tracking-widest">{flight.arrivalCode}-{flight.arrivalCity}</div>
                                         </div>
                                     </div>
 

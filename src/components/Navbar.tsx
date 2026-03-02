@@ -91,7 +91,7 @@ export default function Navbar() {
                 </button>
                 <button
                   onClick={() => setAuthModal({ isOpen: true, mode: 'login' })}
-                  className="bg-white hover:bg-amber text-black hover:text-white px-8 py-3 rounded-2xl text-[10px] font-black tracking-[0.2em] transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-black/20 uppercase flex items-center gap-2"
+                  className="bg-amber hover:bg-white text-white hover:text-black px-8 py-3 rounded-2xl text-[10px] font-black tracking-[0.2em] transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-black/20 uppercase flex items-center gap-2"
                 >
                   <User size={14} strokeWidth={3} />
                   Login

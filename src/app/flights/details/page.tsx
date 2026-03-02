@@ -61,28 +61,28 @@ function FlightDetailsContent() {
                     {/* Left Column - Flight Info */}
                     <div className="flex-1 space-y-8">
 
-                        {/* Route Highlights */}
-                        <div className="bg-amber rounded-[3rem] p-10 shadow-sm border border-amber/20 flex flex-col gap-12 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-black/5 rounded-full blur-3xl -mr-32 -mt-32" />
+                    {/* Route Highlights */}
+                        <div className="bg-black rounded-[3rem] p-10 shadow-sm border border-white/10 flex flex-col gap-12 relative overflow-hidden text-amber">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-amber/10 rounded-full blur-3xl -mr-32 -mt-32" />
 
                             {/* Departure */}
                             <div className="relative z-10 flex gap-8">
                                 <div className="flex flex-col items-center">
-                                    <div className="w-14 h-14 rounded-2xl bg-black/10 flex items-center justify-center text-black font-bold text-sm">{flight.logo}</div>
-                                    <div className="w-[2px] flex-1 bg-black/10 my-4" />
+                                    <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-amber font-bold text-sm">{flight.logo}</div>
+                                    <div className="w-[2px] flex-1 bg-white/10 my-4" />
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-[10px] font-bold text-black uppercase tracking-widest">Departure</span>
-                                        <span className="text-xs font-semibold text-black/50 font-mono">Terminal 5 • Sat, Oct 12</span>
+                                        <span className="text-[10px] font-bold text-amber uppercase tracking-widest">Departure</span>
+                                        <span className="text-xs font-semibold text-amber/50 font-mono">Terminal 5 • Sat, Oct 12</span>
                                     </div>
-                                    <h2 className="text-4xl font-bold text-black mb-2">{flight.depTime}</h2>
-                                    <p className="text-lg font-bold text-black mb-6">{flight.depCity} ({flight.depCode})</p>
-                                    <div className="flex items-center gap-4 text-xs font-medium text-black/50">
+                                    <h2 className="text-4xl font-bold text-amber mb-2">{flight.depTime}</h2>
+                                    <p className="text-lg font-bold text-amber mb-6">{flight.depCity} ({flight.depCode})</p>
+                                    <div className="flex items-center gap-4 text-xs font-medium text-amber/50">
                                         <span>{flight.airline}</span>
-                                        <div className="w-1 h-1 rounded-full bg-black/20" />
+                                        <div className="w-1 h-1 rounded-full bg-white/20" />
                                         <span>BA005</span>
-                                        <div className="w-1 h-1 rounded-full bg-black/20" />
+                                        <div className="w-1 h-1 rounded-full bg-white/20" />
                                         <span>Boeing 787-9</span>
                                     </div>
                                 </div>
@@ -92,19 +92,19 @@ function FlightDetailsContent() {
                             {flight.stops !== "NON-STOP" && (
                                 <div className="relative z-10 flex gap-8">
                                     <div className="flex flex-col items-center">
-                                        <div className="w-14 h-14 rounded-full border-2 border-black/10 flex items-center justify-center text-black/50">
+                                        <div className="w-14 h-14 rounded-full border-2 border-white/10 flex items-center justify-center text-amber/50">
                                             <Clock size={20} />
                                         </div>
-                                        <div className="w-[2px] flex-1 bg-black/10 my-4" />
+                                        <div className="w-[2px] flex-1 bg-white/10 my-4" />
                                     </div>
                                     <div className="flex-1">
-                                        <div className="bg-black/5 border border-black/10 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                             <div className="flex items-center gap-3">
-                                                <span className="font-bold text-black">Layover Connection</span>
-                                                <div className="w-1 h-1 rounded-full bg-black" />
-                                                <span className="text-sm text-black/60">2h 15m wait</span>
+                                                <span className="font-bold text-amber">Layover Connection</span>
+                                                <div className="w-1 h-1 rounded-full bg-white" />
+                                                <span className="text-sm text-amber/60">2h 15m wait</span>
                                             </div>
-                                            <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest">Connection</span>
+                                            <span className="text-[10px] font-bold text-amber/50 uppercase tracking-widest">Connection</span>
                                         </div>
                                     </div>
                                 </div>
@@ -113,23 +113,23 @@ function FlightDetailsContent() {
                             {/* Arrival */}
                             <div className="relative z-10 flex gap-8">
                                 <div className="flex flex-col items-center">
-                                    <div className="w-14 h-14 rounded-2xl bg-black flex items-center justify-center text-amber font-bold text-sm">{flight.logo}</div>
+                                    <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-black font-bold text-sm">{flight.logo}</div>
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-[10px] font-bold text-black uppercase tracking-widest">Arrival</span>
-                                        <span className="text-xs font-semibold text-black/50 font-mono">Terminal 3 • Sun, Oct 13</span>
+                                        <span className="text-[10px] font-bold text-amber uppercase tracking-widest">Arrival</span>
+                                        <span className="text-xs font-semibold text-amber/50 font-mono">Terminal 3 • Sun, Oct 13</span>
                                     </div>
                                     <div className="flex items-center gap-3 mb-2">
-                                        <h2 className="text-4xl font-bold text-black">{flight.arrTime}</h2>
-                                        <span className="px-3 py-1 bg-black text-amber text-[10px] font-bold rounded-full uppercase">+1 Day</span>
+                                        <h2 className="text-4xl font-bold text-amber">{flight.arrTime}</h2>
+                                        <span className="px-3 py-1 bg-amber text-black text-[10px] font-bold rounded-full uppercase">+1 Day</span>
                                     </div>
-                                    <p className="text-lg font-bold text-black mb-6">{flight.arrCity} ({flight.arrCode})</p>
-                                    <div className="flex items-center gap-4 text-xs font-medium text-black/50">
+                                    <p className="text-lg font-bold text-amber mb-6">{flight.arrCity} ({flight.arrCode})</p>
+                                    <div className="flex items-center gap-4 text-xs font-medium text-amber/50">
                                         <span>{flight.airline}</span>
-                                        <div className="w-1 h-1 rounded-full bg-black/20" />
+                                        <div className="w-1 h-1 rounded-full bg-white/20" />
                                         <span>QR812</span>
-                                        <div className="w-1 h-1 rounded-full bg-black/20" />
+                                        <div className="w-1 h-1 rounded-full bg-white/20" />
                                         <span>Airbus A350-1000</span>
                                     </div>
                                 </div>

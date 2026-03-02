@@ -61,7 +61,7 @@ function PassengerDetailsContent() {
         <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
-            <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12">
+            <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12 pt-28">
                 <div className="flex flex-col lg:flex-row gap-10">
 
                     {/* Left Column - Forms */}
@@ -75,7 +75,7 @@ function PassengerDetailsContent() {
                                 className="bg-amber rounded-[3rem] p-10 shadow-sm border border-amber/20"
                             >
                                 <div className="flex items-center gap-4 mb-10">
-                                    <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center text-black">
+                                    <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center text-black">
                                         <User size={24} />
                                     </div>
                                     <h2 className="text-2xl font-bold text-black">Passenger {p.id}</h2>
@@ -167,7 +167,7 @@ function PassengerDetailsContent() {
                         {/* Contact Information Card */}
                         <div className="bg-amber rounded-[3rem] p-10 shadow-sm border border-amber/20">
                             <div className="flex items-center gap-4 mb-10">
-                                <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center text-black">
+                                <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center text-black">
                                     <Contact size={24} />
                                 </div>
                                 <div>
@@ -209,38 +209,38 @@ function PassengerDetailsContent() {
                     <div className="w-full lg:w-96 flex flex-col gap-8">
 
                         {/* Booking Steps */}
-                        <div className="bg-amber p-10 rounded-[3rem] shadow-sm border border-amber/20">
-                            <h3 className="text-xs font-bold text-black/50 uppercase tracking-widest mb-10">Booking Steps</h3>
+                        <div className="bg-black p-10 rounded-[3rem] shadow-sm border border-white/10">
+                            <h3 className="text-xs font-bold text-white/50 uppercase tracking-widest mb-10">Booking Steps</h3>
                             <div className="space-y-12 relative overflow-hidden">
-                                <div className="absolute top-0 left-[1.125rem] w-[1px] h-full bg-black/10" />
+                                <div className="absolute top-0 left-[1.125rem] w-[1px] h-full bg-white/10" />
 
                                 <div className="flex items-start gap-5 relative z-10">
                                     <div className="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white ring-8 ring-emerald-600/10">
                                         <Check size={18} strokeWidth={3} />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-black">Flight Details</h4>
+                                        <h4 className="font-bold text-white">Flight Details</h4>
                                         <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-0.5">Verified</p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start gap-5 relative z-10">
-                                    <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-amber ring-8 ring-black/10">
+                                    <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-black ring-8 ring-white/10">
                                         <span className="text-sm font-black">2</span>
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-black">Passenger Info</h4>
-                                        <p className="text-[10px] font-bold text-black animate-pulse uppercase tracking-widest mt-0.5">In Progress</p>
+                                        <h4 className="font-bold text-white">Passenger Info</h4>
+                                        <p className="text-[10px] font-bold text-white animate-pulse uppercase tracking-widest mt-0.5">In Progress</p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start gap-5 relative z-10 opacity-40">
-                                    <div className="w-9 h-9 rounded-full bg-black/10 flex items-center justify-center text-black/50">
+                                    <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/50">
                                         <span className="text-sm font-black">3</span>
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-black">Payment</h4>
-                                        <p className="text-[10px] font-bold text-black/50 uppercase tracking-widest mt-0.5">Pending</p>
+                                        <h4 className="font-bold text-white">Payment</h4>
+                                        <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mt-0.5">Pending</p>
                                     </div>
                                 </div>
                             </div>
@@ -263,7 +263,6 @@ function PassengerDetailsContent() {
                                 <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest">Total Amount</span>
                                 <span className="text-5xl font-bold text-black">₦{totalPrice * passengerCount}</span>
                             </div>
-
                             <button
                                 onClick={() => router.push(`/flights/confirmation?${searchParams.toString()}`)}
                                 className="w-full bg-black text-amber py-6 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 transition-all active:scale-95 mb-4 font-outfit"
