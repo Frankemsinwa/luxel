@@ -55,7 +55,7 @@ function AgentConfirmingContent() {
                         <div className="space-y-8">
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                 <div>
-                                    <h1 className="text-4xl font-semibold text-black tracking-tight mb-2">Verifying Availability</h1>
+                                    <h1 className="text-4xl font-bold text-black tracking-tight mb-2">Verifying Availability</h1>
                                     <p className="text-black/60 font-medium">Your request LX-492781 is being handled by our VIP desk.</p>
                                 </div>
                                 <div className="bg-black/5 border border-black/10 rounded-2xl px-6 py-4 flex items-center gap-4">

@@ -201,7 +201,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="text-white text-3xl md:text-5xl font-semibold mb-16 italic leading-tight font-satoshi"
+              className="text-white text-3xl md:text-5xl font-semibold mb-16 italic leading-tight font-satoshi tracking-[0.08em]"
               >
                 Everything You Need For A Perfect Trip
               </motion.h2>

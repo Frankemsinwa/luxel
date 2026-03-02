@@ -72,7 +72,7 @@ function ConfirmationContent() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="text-black/60 text-center mb-16 max-w-lg font-light text-lg"
+                    className="text-black/60 text-center mb-16 max-w-lg font-light text-2xl"
                 >
                     A dedicated Luxel travel agent will contact you shortly to finalize your luxury itinerary for <span className="text-black font-semibold">{route.to}</span>.
                 </motion.p>

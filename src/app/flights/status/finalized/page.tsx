@@ -28,31 +28,31 @@ function FinalizedContent() {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-amber rounded-[3rem] p-16 shadow-2xl shadow-amber/20 border border-amber/20 relative overflow-hidden text-center"
+                            className="bg-black rounded-[3rem] p-16 shadow-2xl shadow-black/20 border border-white/10 relative overflow-hidden text-center"
                         >
                             <div className="flex flex-col items-center max-w-2xl mx-auto relative z-10">
                                 <motion.div
                                     initial={{ scale: 0, rotate: -45 }}
                                     animate={{ scale: 1, rotate: 0 }}
                                     transition={{ type: "spring", damping: 12, stiffness: 200 }}
-                                    className="w-24 h-24 rounded-full bg-amber flex items-center justify-center text-white mb-10 shadow-xl shadow-amber/20 ring-12 ring-amber/5"
+                                    className="w-24 h-24 rounded-full bg-amber flex items-center justify-center text-white mb-10 shadow-xl shadow-amber/20 ring-12 ring-amber/20"
                                 >
                                     <Star size={40} fill="currentColor" />
                                 </motion.div>
 
-                                <h2 className="text-5xl font-black text-zinc-900 mb-6 leading-tight">
+                                <h2 className="text-5xl font-bold text-amber mb-6 leading-tight">
                                     Your trip is ready.
                                 </h2>
-                                <p className="text-zinc-500 leading-relaxed font-light mb-12 text-lg">
+                                <p className="text-white/60 leading-relaxed font-light mb-12 text-lg">
                                     Your ticket has been issued and sent to your email and WhatsApp. You may now download your priority access passes.
                                 </p>
 
                                 <div className="flex flex-col sm:flex-row gap-6 w-full max-w-md">
-                                    <button className="flex-1 bg-amber text-white px-10 py-6 rounded-2xl flex items-center justify-center gap-4 font-bold text-sm shadow-xl shadow-amber/20 hover:scale-105 transition-all active:scale-95 group">
+                                    <button className="flex-1 bg-amber text-black px-10 py-6 rounded-2xl flex items-center justify-center gap-4 font-bold text-sm shadow-xl shadow-amber/20 hover:scale-105 transition-all active:scale-95 group">
                                         <Download size={20} className="group-hover:translate-y-1 transition-transform" />
                                         Download E-Ticket
                                     </button>
-                                    <button className="px-6 py-6 rounded-2xl border border-zinc-100 flex items-center justify-center text-zinc-400 hover:bg-zinc-50 transition-all active:scale-95">
+                                    <button className="px-6 py-6 rounded-2xl border border-white/20 flex items-center justify-center text-white/40 hover:bg-white/10 transition-all active:scale-95">
                                         <Share2 size={20} />
                                     </button>
                                 </div>

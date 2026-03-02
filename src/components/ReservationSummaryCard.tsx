@@ -83,11 +83,11 @@ function ReservationSummaryContent() {
                 </div>
             </div>
 
-            <div className="bg-black/5 p-8 flex items-center justify-between">
-                <span className="text-sm font-medium text-black/60">Estimated Total</span>
+            <div className="bg-black p-8 flex items-center justify-between">
+                <span className="text-sm font-medium text-white/60">Estimated Total</span>
                 <div className="text-right">
-                    <div className="text-2xl font-bold text-black">₦{totalPrice.toFixed(2)}</div>
-                    <div className="text-[8px] font-black text-black/50 uppercase tracking-[0.2em] mt-1">Confirmed Rate</div>
+                    <div className="text-2xl font-bold text-amber">₦{totalPrice.toFixed(2)}</div>
+                    <div className="text-[8px] font-black text-amber uppercase tracking-[0.2em] mt-1">Confirmed Rate</div>
                 </div>
             </div>
         </div>

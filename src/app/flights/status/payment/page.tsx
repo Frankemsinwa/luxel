@@ -52,8 +52,8 @@ function PaymentContent() {
                     <div className="lg:col-span-1 space-y-8">
                         <div className="bg-black rounded-[3rem] p-10 shadow-sm border border-white/10">
                             <div className="flex items-center gap-3 mb-10">
-                                <div className="px-3 py-1 rounded-full bg-amber text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                                <div className="px-3 py-1 rounded-full bg-amber text-black text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-black" />
                                     Availability Confirmed
                                 </div>
                                 <span className="text-[10px] font-bold text-white/50">Ref: #LX-99281</span>
@@ -122,31 +122,31 @@ function PaymentContent() {
                     {/* Right Side: Payment Details */}
                     <div className="lg:col-span-2 space-y-8">
                         {/* Bank Transfer Details */}
-                        <div className="bg-amber/10 rounded-[3rem] shadow-sm border border-amber/20 overflow-hidden">
-                            <div className="bg-amber/5 px-10 py-6 border-b border-amber/10 flex items-center gap-4">
+                        <div className="bg-amber rounded-[3rem] shadow-sm border border-amber/20 overflow-hidden">
+                            <div className="bg-amber/20 px-10 py-6 border-b border-amber/10 flex items-center gap-4">
                                 <Building2 size={20} className="text-amber" />
                                 <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Bank Transfer Details</h2>
                             </div>
                             <div className="p-10">
-                                <p className="text-sm text-zinc-500 font-light mb-10 max-w-2xl">
+                                <p className="text-sm text-black/70 font-light mb-10 max-w-2xl">
                                     Please transfer the total amount to the account details provided below. Use your Reference Code as the transfer narration.
                                 </p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
                                     <div className="space-y-8">
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Bank Name</span>
-                                            <span className="text-lg font-bold text-zinc-900">Zenith Bank PLC</span>
+                                            <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">Bank Name</span>
+                                            <span className="text-lg font-bold text-black">Zenith Bank PLC</span>
                                         </div>
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Account Name</span>
-                                            <span className="text-lg font-bold text-zinc-900">Luxel Travel & Concierge Ltd</span>
+                                            <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">Account Name</span>
+                                            <span className="text-lg font-bold text-black">Luxel Travel & Concierge Ltd</span>
                                         </div>
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Account Number</span>
+                                            <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">Account Number</span>
                                             <div className="flex items-center gap-4">
-                                                <span className="text-3xl font-black text-zinc-900 tracking-tighter">1018823774</span>
-                                                <button onClick={() => copyToClipboard('1018823774')} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 text-[10px] font-bold text-zinc-400 hover:bg-amber hover:text-white transition-all uppercase">
+                                                <span className="text-3xl font-black text-black tracking-tighter">1018823774</span>
+                                                <button onClick={() => copyToClipboard('1018823774')} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white text-[10px] font-bold text-black/60 hover:bg-black hover:text-amber transition-all uppercase">
                                                     <Copy size={12} /> Copy
                                                 </button>
                                             </div>
@@ -155,15 +155,15 @@ function PaymentContent() {
 
                                     <div className="space-y-8">
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">SWIFT / BIC</span>
-                                            <span className="text-lg font-bold text-zinc-900 tracking-wider">ZENINILAX</span>
+                                            <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">SWIFT / BIC</span>
+                                            <span className="text-lg font-bold text-black tracking-wider">ZENINILAX</span>
                                         </div>
                                         <div className="bg-amber/5 rounded-3xl p-8 border border-amber/10 flex items-center justify-between group">
                                             <div>
                                                 <span className="text-[8px] font-black text-amber uppercase tracking-[0.2em] block mb-2">Payment Reference</span>
-                                                <span className="text-xl font-black text-zinc-900">LUX-8829-STR</span>
+                                                <span className="text-xl font-black text-black">LUX-8829-STR</span>
                                             </div>
-                                            <button onClick={() => copyToClipboard('LUX-8829-STR')} className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-zinc-300 group-hover:text-amber transition-colors shadow-sm">
+                                            <button onClick={() => copyToClipboard('LUX-8829-STR')} className="w-10 h-10 rounded-xl bg-black flex items-center justify-center text-amber group-hover:bg-amber group-hover:text-black transition-colors shadow-sm">
                                                 <Copy size={18} />
                                             </button>
                                         </div>
