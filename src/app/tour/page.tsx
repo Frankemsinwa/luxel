@@ -65,10 +65,10 @@ export default function TourLandingPage() {
     ];
 
     const themes = [
-        { name: 'Cultural Journeys', image: '/tour-img/img-4.jpg' },
-        { name: 'Wellness Retreats', image: '/tour-img/img-5.jpg' },
-        { name: 'Active Escapes', image: '/tour-img/img-6.jpg' },
-        { name: 'Culinary Expeditions', image: '/tour-img/img-7.jpg' }
+        { name: 'Cultural Journeys', image: '/culture.jpeg' },
+        { name: 'Wellness Retreats', image: '/wellness.jpeg' },
+        { name: 'Active Escapes', image: '/active.jpeg' },
+        { name: 'Culinary Expeditions', image: '/culinary.jpeg' }
     ];
 
     return (
@@ -77,7 +77,7 @@ export default function TourLandingPage() {
             {/* Hero Section */}
             <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
                 <Image
-                    src="/tour.jpg"
+                    src="/tour.jpeg"
                     alt="Luxury Landscape"
                     fill
                     className="object-cover brightness-75"
@@ -89,7 +89,7 @@ export default function TourLandingPage() {
                     <motion.h1
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-7xl font-serif text-white mb-6 leading-tight"
+                        className="text-5xl md:text-7xl font-semibold text-white mb-6 leading-tight"
                     >
                         Curated journeys.<br />Unforgettable experiences.
                     </motion.h1>
@@ -213,7 +213,7 @@ export default function TourLandingPage() {
                                     </p>
                                     <div className="pt-2">
                                         <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-widest">From</span>
-                                        <p className="text-lg font-black text-amber">{tour.price} <span className="text-xs text-zinc-400 font-medium">PP</span></p>
+                                        <p className="text-2xl font-black text-amber">{tour.price} <span className="text-xs text-zinc-400 font-medium">PP</span></p>
                                     </div>
                                 </div>
                             </Link>
@@ -225,7 +225,7 @@ export default function TourLandingPage() {
             {/* Explore by Theme */}
             <section className="py-24 bg-[#111] text-white overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6 text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-serif mb-4">Explore by Theme</h2>
+                    <h2 className="text-4xl md:text-5xl font-semibold mb-4">Explore by Theme</h2>
                     <p className="text-white/40 font-light text-lg">Tailor your journey to your personal passions and pursuits.</p>
                 </div>
 
@@ -239,22 +239,22 @@ export default function TourLandingPage() {
                             viewport={{ once: true }}
                             className="relative h-[450px] rounded-[2rem] overflow-hidden group cursor-pointer"
                         >
-                            <Image src={theme.image} alt={theme.name} fill className="object-cover group-hover:scale-110 transition-transform duration-1000 grayscale group-hover:grayscale-0" />
+                            <Image src={theme.image} alt={theme.name} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" />
                             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all" />
                             <div className="absolute inset-0 flex items-center justify-center p-8 text-center bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                                 {/* Re-adding label on top for clarity as per design */}
                             </div>
                             <div className="absolute bottom-10 left-0 right-0 text-center">
-                                <h4 className="text-2xl font-serif text-white tracking-wide">{theme.name}</h4>
+                                <h4 className="text-3xl font-semibold text-white tracking-wide">{theme.name}</h4>
                             </div>
                         </motion.div>
                     ))}
                 </div>
             </section>
 
-            {/* Benefits */}
-            <section className="py-24 max-w-7xl mx-auto px-6 border-b border-zinc-100">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+{/* Benefits */}
+            <section className="py-24 border-b border-zinc-100" style={{ backgroundColor: '#FEDB73' }}>
+                <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16">
                     <div className="flex flex-col items-center text-center space-y-6">
                         <div className="w-16 h-16 rounded-3xl bg-amber/10 flex items-center justify-center text-amber">
                             <ShieldCheck size={32} />

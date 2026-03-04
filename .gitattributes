@@ -1,3 +1,8 @@
-*.jpg, filter=lfs diff=lfs merge=lfs -text
-*.png filter=lfs diff=lfs merge=lfs -text
-*.psd, filter=lfs diff=lfs merge=lfs -text
+# Custom .gitattributes - no LFS
+# Images are committed as regular files
+*.jpg binary
+*.png binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
