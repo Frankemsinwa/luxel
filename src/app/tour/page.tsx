@@ -77,7 +77,7 @@ export default function TourLandingPage() {
             {/* Hero Section */}
             <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
                 <Image
-                    src="/tour.jpeg"
+                    src="/tour-img/city-sunset.jpg"
                     alt="Luxury Landscape"
                     fill
                     className="object-cover brightness-75"
