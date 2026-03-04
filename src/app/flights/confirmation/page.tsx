@@ -82,7 +82,7 @@ function ConfirmationContent() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="w-full bg-amber rounded-[3rem] shadow-xl shadow-amber/20 border border-amber/20 overflow-hidden mb-10"
+                    className="w-full bg-flight-card rounded-[3rem] shadow-xl shadow-black/5 border border-black/5 overflow-hidden mb-10"
                 >
                     <div className="p-10 border-b border-black/10 flex flex-wrap items-center justify-between gap-6">
                         <div>
@@ -132,11 +132,11 @@ function ConfirmationContent() {
 
                     <div className="bg-black p-10 flex items-center justify-between">
                         <div>
-                            <span className="text-sm font-medium text-amber/60">Estimated Total</span>
+                            <span className="text-sm font-medium text-flight-card/60">Estimated Total</span>
                         </div>
                         <div className="text-right">
-                            <div className="text-3xl font-black text-amber tracking-tight">₦{totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                            <div className="text-[10px] font-semibold text-amber/50 uppercase tracking-widest mt-1">Pending Concierge Lock</div>
+                            <div className="text-3xl font-black text-flight-card tracking-tight">₦{totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                            <div className="text-[10px] font-semibold text-flight-card/50 uppercase tracking-widest mt-1">Pending Concierge Lock</div>
                         </div>
                     </div>
                 </motion.div>
@@ -163,7 +163,7 @@ function ConfirmationContent() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => router.push(`/flights/status/agent-confirming?${searchParams.toString()}`)}
-                    className="bg-black text-amber px-16 py-6 rounded-[2rem] font-semibold text-sm shadow-xl shadow-black/20 hover:bg-black/80 transition-all"
+                    className="bg-black text-flight-card px-16 py-6 rounded-[2rem] font-semibold text-sm shadow-xl shadow-black/20 hover:bg-black/80 transition-all"
                 >
                     Track Reservation
                 </motion.button>

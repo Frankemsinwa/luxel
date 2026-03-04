@@ -25,7 +25,7 @@ function ReservationSummaryContent() {
     };
 
     return (
-        <div className="bg-amber rounded-[3rem] shadow-xl shadow-amber/20 border border-amber/20 overflow-hidden">
+        <div className="bg-flight-card rounded-[3rem] shadow-xl shadow-black/5 border border-black/5 overflow-hidden">
             <div className="p-8 border-b border-black/10 flex items-center justify-between">
                 <div>
                     <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest block mb-1">Reference</span>
@@ -86,8 +86,8 @@ function ReservationSummaryContent() {
             <div className="bg-black p-8 flex items-center justify-between">
                 <span className="text-sm font-medium text-white/60">Estimated Total</span>
                 <div className="text-right">
-                    <div className="text-2xl font-bold text-amber">₦{totalPrice.toFixed(2)}</div>
-                    <div className="text-[8px] font-black text-amber uppercase tracking-[0.2em] mt-1">Confirmed Rate</div>
+                    <div className="text-2xl font-bold text-flight-card">₦{totalPrice.toFixed(2)}</div>
+                    <div className="text-[8px] font-black text-flight-card uppercase tracking-[0.2em] mt-1">Confirmed Rate</div>
                 </div>
             </div>
         </div>

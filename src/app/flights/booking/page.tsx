@@ -72,7 +72,7 @@ function PassengerDetailsContent() {
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
-                                className="bg-amber rounded-[3rem] p-10 shadow-sm border border-amber/20"
+                                className="bg-flight-card rounded-[3rem] p-10 shadow-sm border border-black/5"
                             >
                                 <div className="flex items-center gap-4 mb-10">
                                     <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center text-black">
@@ -165,7 +165,7 @@ function PassengerDetailsContent() {
                         ))}
 
                         {/* Contact Information Card */}
-                        <div className="bg-amber rounded-[3rem] p-10 shadow-sm border border-amber/20">
+                            <div className="bg-flight-card rounded-[3rem] p-10 shadow-sm border border-black/5">
                             <div className="flex items-center gap-4 mb-10">
                                 <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center text-black">
                                     <Contact size={24} />
@@ -247,7 +247,7 @@ function PassengerDetailsContent() {
                         </div>
 
                         {/* Summary */}
-                        <div className="bg-amber p-10 rounded-[3rem] shadow-xl shadow-amber/20 border border-amber/20">
+                        <div className="bg-flight-card p-10 rounded-[3rem] shadow-xl shadow-black/5 border border-black/5">
                             <h3 className="text-xs font-bold text-black/50 uppercase tracking-widest mb-8">Price Summary</h3>
                             <div className="space-y-5 mb-8 pb-8 border-b border-black/10">
                                 <div className="flex justify-between">
@@ -265,7 +265,7 @@ function PassengerDetailsContent() {
                             </div>
                             <button
                                 onClick={() => router.push(`/flights/confirmation?${searchParams.toString()}`)}
-                                className="w-full bg-black text-amber py-6 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 transition-all active:scale-95 mb-4 font-outfit"
+                                className="w-full bg-black text-flight-card py-6 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 transition-all active:scale-95 mb-4 font-outfit"
                             >
                                 Request Reservation
                             </button>

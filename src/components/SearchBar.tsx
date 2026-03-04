@@ -19,6 +19,14 @@ const locations = [
     'London, UK',
     'Tokyo, Japan',
     'Dubai, UAE',
+    'Paris, France',
+    'Singapore, Singapore',
+    'Sydney, Australia',
+    'Istanbul, Turkey',
+    'Toronto, Canada',
+    'Berlin, Germany',
+    'Mumbai, India',
+    'Lagos, Nigeria',
 ];
 
 const passengerOptions = [
@@ -34,11 +42,17 @@ interface DropdownProps {
     setSelected: (val: string) => void;
     label: string;
     icon: React.ReactNode;
+    hasSearch?: boolean;
 }
 
-const Dropdown = ({ options, selected, setSelected, label, icon }: DropdownProps) => {
+const Dropdown = ({ options, selected, setSelected, label, icon, hasSearch }: DropdownProps) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const filteredOptions = options.filter(option =>
+        option.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -51,6 +65,12 @@ const Dropdown = ({ options, selected, setSelected, label, icon }: DropdownProps
             document.body.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setSearchQuery('');
+        }
+    }, [isOpen]);
 
     return (
         <div className="relative flex-1 min-w-[200px]" ref={dropdownRef}>
@@ -82,22 +102,43 @@ const Dropdown = ({ options, selected, setSelected, label, icon }: DropdownProps
                         transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
                         className="absolute top-full left-0 mt-3 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/20 z-[100] overflow-hidden"
                     >
-                        <div className="p-2">
-                            {options.map(option => (
-                                <div
-                                    key={option}
-                                    onClick={() => {
-                                        setSelected(option);
-                                        setIsOpen(false);
-                                    }}
-                                    className={`p-3 text-sm font-medium rounded-xl cursor-pointer transition-colors flex items-center justify-between ${selected === option ? 'bg-amber/10 text-amber' : 'text-zinc-600 hover:bg-zinc-50'}`}
-                                >
-                                    {option}
-                                    {selected === option && (
-                                        <div className="w-1.5 h-1.5 rounded-full bg-amber" />
-                                    )}
+                        {hasSearch && (
+                            <div className="p-3 pb-1 border-b border-zinc-100">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                                    <input
+                                        type="text"
+                                        placeholder={`Search ${label}...`}
+                                        className="w-full bg-zinc-50 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-amber/20 transition-all outline-none"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        autoFocus
+                                    />
                                 </div>
-                            ))}
+                            </div>
+                        )}
+                        <div className="p-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                            {filteredOptions.length > 0 ? (
+                                filteredOptions.map(option => (
+                                    <div
+                                        key={option}
+                                        onClick={() => {
+                                            setSelected(option);
+                                            setIsOpen(false);
+                                        }}
+                                        className={`p-3 text-sm font-medium rounded-xl cursor-pointer transition-colors flex items-center justify-between ${selected === option ? 'bg-amber/10 text-amber' : 'text-zinc-600 hover:bg-zinc-50'}`}
+                                    >
+                                        {option}
+                                        {selected === option && (
+                                            <div className="w-1.5 h-1.5 rounded-full bg-amber" />
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="p-4 text-center text-sm text-zinc-400">
+                                    No results found
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 )}
@@ -145,6 +186,7 @@ export default function SearchBar({ className, initialValues }: {
                         setSelected={setFrom}
                         label="From"
                         icon={<PlaneTakeoff size={18} strokeWidth={2.5} />}
+                        hasSearch={true}
                     />
 
                     <div className="hidden lg:flex items-center justify-center -mx-4 z-10">
@@ -161,6 +203,7 @@ export default function SearchBar({ className, initialValues }: {
                         setSelected={setTo}
                         label="To"
                         icon={<PlaneLanding size={18} strokeWidth={2.5} />}
+                        hasSearch={true}
                     />
 
                     <div className="w-[1px] h-12 bg-zinc-100 hidden lg:block mx-2" />

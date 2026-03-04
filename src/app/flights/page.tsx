@@ -296,7 +296,7 @@ function FlightsContent() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     layout
-                                    className="bg-amber rounded-[2.5rem] p-8 lg:p-10 shadow-sm border border-amber/20 flex flex-col lg:flex-row items-center gap-10 hover:shadow-xl hover:scale-[1.01] transition-all group"
+                                    className="bg-flight-card rounded-[2.5rem] p-8 lg:p-10 shadow-sm border border-black/5 flex flex-col lg:flex-row items-center gap-10 hover:shadow-xl hover:scale-[1.01] transition-all group"
                                 >
                                     {/* Flight Info */}
                                     <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 items-center gap-8 md:gap-4">
@@ -351,7 +351,7 @@ function FlightsContent() {
                                                 });
                                                 router.push(`/flights/details?${params.toString()}`);
                                             }}
-                                            className="w-full bg-black text-amber py-4 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 hover:scale-105 active:scale-95 transition-all"
+                                            className="w-full bg-black text-flight-card py-4 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 hover:scale-105 active:scale-95 transition-all"
                                         >
                                             Select
                                         </button>
@@ -361,7 +361,7 @@ function FlightsContent() {
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    className="bg-amber rounded-[2.5rem] p-20 text-center border-2 border-dashed border-black/20"
+                                    className="bg-flight-card rounded-[2.5rem] p-20 text-center border-2 border-dashed border-black/20"
                                 >
                                     <div className="w-20 h-20 rounded-full bg-black/10 flex items-center justify-center text-black/30 mx-auto mb-6">
                                         <Search size={32} />

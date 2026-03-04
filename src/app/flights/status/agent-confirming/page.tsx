@@ -108,6 +108,26 @@ function AgentConfirmingContent() {
                             </div>
                         </div>
 
+                        {/* Live Radar / Animation */}
+                        <div className="space-y-6">
+                            <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] pl-1">Live Tracking Radar</h3>
+                            <div className="bg-black rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20 border border-white/5 relative group">
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none" />
+                                <video 
+                                    src="/plane.webm" 
+                                    autoPlay 
+                                    loop 
+                                    muted 
+                                    playsInline
+                                    className="w-full aspect-video object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
+                                />
+                                <div className="absolute bottom-8 left-8 z-20 flex items-center gap-4">
+                                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
+                                    <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Signal Active: Tracking LX-492781</span>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Minimal Timeline */}
                         <div className="space-y-6">
                             <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] pl-1">Live Activity</h3>

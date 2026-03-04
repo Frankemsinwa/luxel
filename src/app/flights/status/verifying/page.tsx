@@ -52,7 +52,7 @@ function VerifyingContent() {
                             </div>
 
                             <div className="relative z-10">
-                                <span className="px-4 py-1.5 rounded-full bg-amber text-black text-[10px] font-black uppercase tracking-[0.2em] mb-8 inline-block shadow-lg shadow-amber/20">
+                                <span className="px-4 py-1.5 rounded-full bg-flight-card text-black text-[10px] font-black uppercase tracking-[0.2em] mb-8 inline-block shadow-lg shadow-black/5">
                                     Processing
                                 </span>
 
@@ -66,7 +66,7 @@ function VerifyingContent() {
                                 <div className="bg-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/10 flex flex-col gap-6 max-w-lg group">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-6">
-                                            <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-amber">
+                                            <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-flight-card">
                                                 <FileText size={32} />
                                             </div>
                                             <div>
@@ -84,13 +84,13 @@ function VerifyingContent() {
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
                                             <span className="text-zinc-500">System Verification</span>
-                                            <span className="text-amber">{Math.round(progress)}%</span>
+                                            <span className="text-flight-card">{Math.round(progress)}%</span>
                                         </div>
                                         <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                                             <motion.div
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${progress}%` }}
-                                                className="h-full bg-amber"
+                                                className="h-full bg-flight-card"
                                             />
                                         </div>
                                     </div>
@@ -110,11 +110,11 @@ function VerifyingContent() {
                                 <div className="absolute top-0 left-[1.125rem] w-[1px] h-full bg-zinc-50" />
 
                                 <div className="flex items-start gap-6 relative z-10">
-                                    <div className="w-9 h-9 rounded-full bg-amber flex items-center justify-center ring-8 ring-amber/10 shadow-lg shadow-amber/10">
-                                        <Loader2 size={16} className="text-white animate-spin" />
+                                    <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center ring-8 ring-black/5 shadow-lg shadow-black/5">
+                                        <Loader2 size={16} className="text-flight-card animate-spin" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-bold text-amber uppercase tracking-widest mb-1">Now</div>
+                                        <div className="text-[10px] font-bold text-flight-card uppercase tracking-widest mb-1">Now</div>
                                         <h4 className="font-bold text-zinc-900 text-sm mb-1">Finance team verifying payment</h4>
                                         <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">Transaction ID validation in process.</p>
                                     </div>

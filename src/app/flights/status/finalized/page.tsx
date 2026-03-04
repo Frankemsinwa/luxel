@@ -35,12 +35,12 @@ function FinalizedContent() {
                                     initial={{ scale: 0, rotate: -45 }}
                                     animate={{ scale: 1, rotate: 0 }}
                                     transition={{ type: "spring", damping: 12, stiffness: 200 }}
-                                    className="w-24 h-24 rounded-full bg-amber flex items-center justify-center text-white mb-10 shadow-xl shadow-amber/20 ring-12 ring-amber/20"
+                                    className="w-24 h-24 rounded-full bg-black flex items-center justify-center text-flight-card mb-10 shadow-xl shadow-black/20 ring-12 ring-white/5"
                                 >
                                     <Star size={40} fill="currentColor" />
                                 </motion.div>
 
-                                <h2 className="text-5xl font-bold text-amber mb-6 leading-tight">
+                                <h2 className="text-5xl font-bold text-flight-card mb-6 leading-tight">
                                     Your trip is ready.
                                 </h2>
                                 <p className="text-white/60 leading-relaxed font-light mb-12 text-lg">
@@ -48,7 +48,7 @@ function FinalizedContent() {
                                 </p>
 
                                 <div className="flex flex-col sm:flex-row gap-6 w-full max-w-md">
-                                    <button className="flex-1 bg-amber text-black px-10 py-6 rounded-2xl flex items-center justify-center gap-4 font-bold text-sm shadow-xl shadow-amber/20 hover:scale-105 transition-all active:scale-95 group">
+                                    <button className="flex-1 bg-black text-flight-card px-10 py-6 rounded-2xl flex items-center justify-center gap-4 font-bold text-sm shadow-xl shadow-black/20 hover:scale-105 transition-all active:scale-95 group">
                                         <Download size={20} className="group-hover:translate-y-1 transition-transform" />
                                         Download E-Ticket
                                     </button>

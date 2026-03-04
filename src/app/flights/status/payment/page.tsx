@@ -52,7 +52,7 @@ function PaymentContent() {
                     <div className="lg:col-span-1 space-y-8">
                         <div className="bg-black rounded-[3rem] p-10 shadow-sm border border-white/10">
                             <div className="flex items-center gap-3 mb-10">
-                                <div className="px-3 py-1 rounded-full bg-amber text-black text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                                <div className="px-3 py-1 rounded-full bg-flight-card text-black text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-black" />
                                     Availability Confirmed
                                 </div>
@@ -78,7 +78,7 @@ function PaymentContent() {
                                 </div>
                                 <div>
                                     <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-1">Cabin Class</span>
-                                    <span className="text-sm font-bold text-amber">First Class (Suite)</span>
+                                    <span className="text-sm font-bold text-flight-card">First Class (Suite)</span>
                                 </div>
                                 <div>
                                     <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-1">Passengers</span>
@@ -93,27 +93,27 @@ function PaymentContent() {
                             <div className="pt-10 border-t border-white/10 flex items-center justify-between">
                                 <span className="text-sm font-medium text-white/50">Total Due</span>
                                 <div className="text-right">
-                                    <span className="text-3xl font-black text-amber">₦{totalPrice.toFixed(2)}</span>
+                                    <span className="text-3xl font-black text-flight-card">₦{totalPrice.toFixed(2)}</span>
                                 </div>
                             </div>
                             <p className="text-[9px] text-white/50 font-medium mt-4 flex items-center gap-2">
-                                <AlertCircle size={10} className="text-amber" />
+                                <AlertCircle size={10} className="text-flight-card" />
                                 Final price includes all taxes, lounge access, and premium handling.
                             </p>
                         </div>
 
                         {/* Reward Card */}
-                        <div className="bg-amber/5 border border-amber/10 rounded-[2.5rem] p-8 flex items-start gap-6 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                        <div className="bg-flight-card/5 border border-black/5 rounded-[2.5rem] p-8 flex items-start gap-6 relative overflow-hidden group hover:scale-[1.02] transition-transform">
                             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                                 <TrendingUp size={80} />
                             </div>
-                            <div className="w-12 h-12 rounded-2xl bg-amber flex items-center justify-center text-white shrink-0">
+                            <div className="w-12 h-12 rounded-2xl bg-black flex items-center justify-center text-flight-card shrink-0">
                                 <span className="font-black text-xl">L</span>
                             </div>
                             <div>
                                 <h4 className="font-bold text-zinc-900 mb-2">Luxel Platinum Reward</h4>
                                 <p className="text-xs text-zinc-500 leading-relaxed font-light">
-                                    This booking earns you <span className="font-bold text-amber">{(totalPrice * 10).toLocaleString()} Luxel Points</span> toward your next private charter.
+                                    This booking earns you <span className="font-bold text-flight-card">{(totalPrice * 10).toLocaleString()} Luxel Points</span> toward your next private charter.
                                 </p>
                             </div>
                         </div>
@@ -122,9 +122,9 @@ function PaymentContent() {
                     {/* Right Side: Payment Details */}
                     <div className="lg:col-span-2 space-y-8">
                         {/* Bank Transfer Details */}
-                        <div className="bg-amber rounded-[3rem] shadow-sm border border-amber/20 overflow-hidden">
-                            <div className="bg-amber/20 px-10 py-6 border-b border-amber/10 flex items-center gap-4">
-                                <Building2 size={20} className="text-amber" />
+                        <div className="bg-flight-card rounded-[3rem] shadow-xl shadow-black/5 border border-black/5 overflow-hidden">
+                            <div className="bg-black/5 px-10 py-6 border-b border-black/10 flex items-center gap-4">
+                                <Building2 size={20} className="text-black/60" />
                                 <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Bank Transfer Details</h2>
                             </div>
                             <div className="p-10">
@@ -146,7 +146,7 @@ function PaymentContent() {
                                             <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">Account Number</span>
                                             <div className="flex items-center gap-4">
                                                 <span className="text-3xl font-black text-black tracking-tighter">1018823774</span>
-                                                <button onClick={() => copyToClipboard('1018823774')} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white text-[10px] font-bold text-black/60 hover:bg-black hover:text-amber transition-all uppercase">
+                                                <button onClick={() => copyToClipboard('1018823774')} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white text-[10px] font-bold text-black/60 hover:bg-black hover:text-flight-card transition-all uppercase">
                                                     <Copy size={12} /> Copy
                                                 </button>
                                             </div>
@@ -158,12 +158,12 @@ function PaymentContent() {
                                             <span className="text-[10px] font-bold text-black/60 uppercase tracking-widest">SWIFT / BIC</span>
                                             <span className="text-lg font-bold text-black tracking-wider">ZENINILAX</span>
                                         </div>
-                                        <div className="bg-amber/5 rounded-3xl p-8 border border-amber/10 flex items-center justify-between group">
+                                        <div className="bg-black/5 rounded-3xl p-8 border border-black/10 flex items-center justify-between group">
                                             <div>
-                                                <span className="text-[8px] font-black text-amber uppercase tracking-[0.2em] block mb-2">Payment Reference</span>
+                                                <span className="text-[8px] font-black text-black/40 uppercase tracking-[0.2em] block mb-2">Payment Reference</span>
                                                 <span className="text-xl font-black text-black">LUX-8829-STR</span>
                                             </div>
-                                            <button onClick={() => copyToClipboard('LUX-8829-STR')} className="w-10 h-10 rounded-xl bg-black flex items-center justify-center text-amber group-hover:bg-amber group-hover:text-black transition-colors shadow-sm">
+                                            <button onClick={() => copyToClipboard('LUX-8829-STR')} className="w-10 h-10 rounded-xl bg-black flex items-center justify-center text-flight-card group-hover:bg-zinc-800 transition-colors shadow-sm">
                                                 <Copy size={18} />
                                             </button>
                                         </div>
@@ -184,7 +184,7 @@ function PaymentContent() {
                                         { step: 3, title: "Upload & Confirm", desc: "Attach the file below and click 'Completed'." }
                                     ].map((p, i) => (
                                         <div key={i} className="flex gap-6 relative z-10">
-                                            <div className="w-9 h-9 rounded-full bg-amber flex items-center justify-center text-white text-xs font-black ring-8 ring-amber/20 shrink-0 shadow-lg shadow-amber/10">
+                                            <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-flight-card text-xs font-black ring-8 ring-white/5 shrink-0 shadow-lg shadow-black/10 border border-white/10">
                                                 {p.step}
                                             </div>
                                             <div>
@@ -198,13 +198,13 @@ function PaymentContent() {
 
                             <div className="bg-black p-10 rounded-[2.5rem] shadow-sm border border-white/10">
                                 <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-10">Upload Proof of Payment</h3>
-                                <div className="border-2 border-dashed border-white/10 rounded-[2rem] p-10 flex flex-col items-center text-center group hover:border-amber transition-colors bg-white/5 cursor-pointer">
-                                    <div className="w-16 h-16 rounded-full bg-amber/20 flex items-center justify-center text-amber mb-6 group-hover:scale-110 transition-transform">
+                                <div className="border-2 border-dashed border-white/10 rounded-[2rem] p-10 flex flex-col items-center text-center group hover:border-flight-card transition-colors bg-white/5 cursor-pointer">
+                                    <div className="w-16 h-16 rounded-full bg-flight-card/10 flex items-center justify-center text-flight-card mb-6 group-hover:scale-110 transition-transform">
                                         <UploadCloud size={28} />
                                     </div>
                                     <p className="text-sm font-bold text-white mb-2">Drop files here</p>
                                     <p className="text-[10px] text-white/50 font-medium mb-8">PDF, JPG or PNG (Max 5MB)</p>
-                                    <button className="px-8 py-3 bg-white rounded-xl text-[10px] font-bold text-black hover:bg-amber hover:text-white transition-colors">
+                                    <button className="px-8 py-3 bg-white rounded-xl text-[10px] font-bold text-black hover:bg-black hover:text-flight-card transition-colors">
                                         CHOOSE FILE
                                     </button>
                                 </div>
@@ -214,13 +214,13 @@ function PaymentContent() {
                         <div className="flex flex-col items-center">
                             <button
                                 onClick={() => router.push(`/flights/status/verifying?${searchParams.toString()}`)}
-                                className="w-full max-w-md bg-amber text-white py-6 rounded-3xl font-bold flex items-center justify-center gap-4 shadow-2xl shadow-amber/20 hover:scale-[1.02] transition-all active:scale-95"
+                                className="w-full max-w-md bg-black text-flight-card py-6 rounded-3xl font-bold flex items-center justify-center gap-4 shadow-2xl shadow-black/20 hover:scale-[1.02] transition-all active:scale-95"
                             >
                                 <Check size={20} strokeWidth={3} />
                                 I HAVE COMPLETED PAYMENT
                             </button>
                             <p className="text-[10px] text-zinc-400 font-bold mt-6 tracking-widest flex items-center gap-2">
-                                Booking will be held for <span className="text-amber">01:59:42</span> while awaiting confirmation.
+                                Booking will be held for <span className="text-flight-card">01:59:42</span> while awaiting confirmation.
                             </p>
                         </div>
                     </div>
