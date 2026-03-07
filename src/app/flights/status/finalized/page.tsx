@@ -5,13 +5,71 @@ import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
 import ReservationSummaryCard from "@/components/ReservationSummaryCard";
 import { motion } from "framer-motion";
-import { Download, CheckCircle2, Star, Share2, ShieldCheck } from "lucide-react";
+import { Download, CheckCircle2, Star, Share2, ShieldCheck, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 function FinalizedContent() {
+    const router = useRouter();
     const searchParams = useSearchParams();
+    const bookingId = searchParams.get('id');
+    const [isVerified, setIsVerified] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const verifyBookingStatus = async () => {
+            if (!bookingId) {
+                router.push('/flights');
+                return;
+            }
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    router.push('/');
+                    return;
+                }
+
+                const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'CONFIRMED') {
+                        setIsVerified(true);
+                    } else {
+                        // Not confirmed yet — redirect to the appropriate step
+                        router.push(`/flights/status/agent-confirming?${searchParams.toString()}`);
+                    }
+                } else {
+                    router.push('/flights');
+                }
+            } catch (err) {
+                console.error('Status check error:', err);
+                router.push('/flights');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        verifyBookingStatus();
+    }, [bookingId, router, searchParams]);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-amber/5 flex flex-col items-center justify-center">
+                <Loader2 size={40} className="text-amber animate-spin mb-4" />
+                <p className="text-zinc-500 font-bold text-sm">Verifying your booking...</p>
+            </div>
+        );
+    }
+
+    if (!isVerified) return null;
 
     return (
         <div className="min-h-screen bg-amber/5 flex flex-col">

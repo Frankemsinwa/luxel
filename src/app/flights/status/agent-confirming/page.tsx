@@ -6,26 +6,86 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
 import ReservationSummaryCard from "@/components/ReservationSummaryCard";
-import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Clock, ShieldCheck, Headphones } from "lucide-react";
+import { motion } from "framer-motion";
+import { MessageSquare, Clock, ShieldCheck, Headphones, ArrowRight, XCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 function AgentConfirmingContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [timeLeft, setTimeLeft] = useState(60); // 1 minute for demo
+    const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
+    const [rejected, setRejected] = useState(false);
+    const reqId = searchParams.get('reqId');
 
     useEffect(() => {
-        if (timeLeft <= 0) {
-            router.push(`/flights/status/agent-confirmed?${searchParams.toString()}`);
-            return;
-        }
+        if (!reqId) return;
 
+        // 1. Check the CURRENT status first (handles page refresh)
+        const checkCurrentStatus = async () => {
+            const { data, error } = await supabase
+                .from('requests')
+                .select('status')
+                .eq('id', reqId)
+                .single();
+
+            if (!error && data) {
+                if (data.status === 'RESOLVED') {
+                    router.push(`/flights/status/agent-confirmed?${searchParams.toString()}`);
+                    return;
+                }
+                if (data.status === 'CLOSED') {
+                    setRejected(true);
+                    return;
+                }
+            }
+        };
+
+        checkCurrentStatus();
+
+        // 2. Real-time listener for future status changes
+        const channel = supabase
+            .channel(`request-tracking-${reqId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'requests',
+                    filter: `id=eq.${reqId}`
+                },
+                (payload) => {
+                    console.log('Request updated:', payload);
+                    if (payload.new.status === 'RESOLVED') {
+                        router.push(`/flights/status/agent-confirmed?${searchParams.toString()}`);
+                    } else if (payload.new.status === 'CLOSED') {
+                        setRejected(true);
+                    }
+                }
+            )
+            .subscribe();
+
+        // 3. Countdown Timer
         const timer = setInterval(() => {
-            setTimeLeft((prev) => prev - 1);
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    return 0;
+                }
+                return prev - 1;
+            });
         }, 1000);
 
-        return () => clearInterval(timer);
-    }, [timeLeft, router, searchParams]);
+        // 4. Fallback Polling (in case Realtime websockets fail or aren't enabled in Supabase Dashboard)
+        const pollingInterval = setInterval(async () => {
+            await checkCurrentStatus();
+        }, 15000); // Check every 15 seconds as a backup
+
+        return () => {
+            clearInterval(timer);
+            clearInterval(pollingInterval);
+            supabase.removeChannel(channel);
+        };
+    }, [reqId, router, searchParams]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -33,8 +93,38 @@ function AgentConfirmingContent() {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const depCode = searchParams.get('depCode') || "LHR";
-    const arrCode = searchParams.get('arrCode') || "JFK";
+    // Rejection screen
+    if (rejected) {
+        return (
+            <div className="min-h-screen bg-amber/5 flex flex-col">
+                <Navbar />
+                <BookingStatusHeader currentStep={2} />
+                <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-12 flex flex-col items-center justify-center text-center">
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="w-24 h-24 rounded-full bg-red-100 flex items-center justify-center text-red-500 mb-10 ring-12 ring-red-50"
+                    >
+                        <XCircle size={48} strokeWidth={2.5} />
+                    </motion.div>
+                    <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight mb-6">
+                        Request Unavailable
+                    </h1>
+                    <p className="text-zinc-500 text-lg font-medium max-w-xl mx-auto mb-12 leading-relaxed">
+                        Unfortunately, our concierge team was unable to confirm availability for this route. No charges have been made. Please try a different flight or contact our support team.
+                    </p>
+                    <button
+                        onClick={() => router.push('/flights')}
+                        className="bg-zinc-900 text-white px-10 py-6 rounded-3xl flex items-center justify-center gap-4 font-black text-xs tracking-widest uppercase shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all group"
+                    >
+                        Search New Flights
+                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                </main>
+                <Footer />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-amber/5 flex flex-col">
@@ -48,15 +138,21 @@ function AgentConfirmingContent() {
             <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12">
                 <div className="flex flex-col lg:flex-row gap-16">
 
-                    {/* Left Side: Status & Timeline (Primary Focus) */}
+                    {/* Left Side: Status & Timeline */}
                     <div className="flex-1 space-y-12">
 
                         {/* Status Section */}
                         <div className="space-y-8">
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                 <div>
-                                    <h1 className="text-4xl font-bold text-black tracking-tight mb-2">Verifying Availability</h1>
-                                    <p className="text-black/60 font-medium">Your request LX-492781 is being handled by our VIP desk.</p>
+                                    <h1 className="text-4xl font-bold text-black tracking-tight mb-2">
+                                        {timeLeft === 0 ? "High Request Volume" : "Verifying Availability"}
+                                    </h1>
+                                    <p className="text-black/60 font-medium">
+                                        {timeLeft === 0
+                                            ? "We are currently experiencing high volume. Your request is queued and will be confirmed shortly."
+                                            : "Your request is being handled by our VIP desk."}
+                                    </p>
                                 </div>
                                 <div className="bg-black/5 border border-black/10 rounded-2xl px-6 py-4 flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-amber shadow-lg shadow-black/20">
@@ -73,7 +169,7 @@ function AgentConfirmingContent() {
                             <div className="relative h-1 w-full bg-black/10 rounded-full overflow-hidden">
                                 <motion.div
                                     initial={{ width: '0%' }}
-                                    animate={{ width: `${((60 - timeLeft) / 60) * 100}%` }}
+                                    animate={{ width: `${((600 - timeLeft) / 600) * 100}%` }}
                                     className="absolute inset-y-0 left-0 bg-black shadow-[0_0_15px_rgba(0,0,0,0.3)]"
                                 />
                             </div>
@@ -113,17 +209,17 @@ function AgentConfirmingContent() {
                             <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] pl-1">Live Tracking Radar</h3>
                             <div className="bg-black rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20 border border-white/5 relative group">
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none" />
-                                <video 
-                                    src="/plane.webm" 
-                                    autoPlay 
-                                    loop 
-                                    muted 
+                                <video
+                                    src="/plane.webm"
+                                    autoPlay
+                                    loop
+                                    muted
                                     playsInline
                                     className="w-full aspect-video object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
                                 />
                                 <div className="absolute bottom-8 left-8 z-20 flex items-center gap-4">
                                     <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
-                                    <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Signal Active: Tracking LX-492781</span>
+                                    <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Signal Active: Tracking Request</span>
                                 </div>
                             </div>
                         </div>
@@ -154,7 +250,7 @@ function AgentConfirmingContent() {
                         </div>
                     </div>
 
-                    {/* Right Side: Details Summary (Details) */}
+                    {/* Right Side: Details Summary */}
                     <div className="w-full lg:w-[450px] space-y-8">
                         <div className="sticky top-32">
                             <div className="flex items-center gap-3 mb-6 pl-4">
@@ -183,10 +279,6 @@ function AgentConfirmingContent() {
         </div>
     );
 }
-
-// Simple ArrowRight icon helper if not imported
-import { ArrowRight as ArrowRightIcon } from "lucide-react";
-const ArrowRight = ArrowRightIcon;
 
 export default function AgentConfirmingPage() {
     return (

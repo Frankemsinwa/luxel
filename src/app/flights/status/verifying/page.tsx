@@ -6,6 +6,7 @@ import BookingStatusHeader from "@/components/BookingStatusHeader";
 import ReservationSummaryCard from "@/components/ReservationSummaryCard";
 import { motion } from "framer-motion";
 import { FileText, Loader2, ShieldCheck, Clock } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,18 +15,52 @@ function VerifyingContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [progress, setProgress] = useState(0);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        const bookingId = searchParams.get('id');
+
+        const confirmAndFinalize = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+
+                if (!session || !bookingId) {
+                    setError('Missing session or booking reference.');
+                    return;
+                }
+
+                // Call the backend to confirm payment — no duplicate insert
+                const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/confirm-payment`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                });
+
+                if (response.ok) {
+                    router.push(`/flights/status/finalized?${searchParams.toString()}`);
+                } else {
+                    const data = await response.json();
+                    setError(data.message || 'Payment confirmation failed.');
+                }
+            } catch (err) {
+                console.error('Confirm payment error:', err);
+                setError('A connection error occurred during verification.');
+            }
+        };
+
+        // Progress bar animation — calls API at 100%
         const timer = setInterval(() => {
             setProgress(prev => {
                 if (prev >= 100) {
                     clearInterval(timer);
-                    router.push(`/flights/status/finalized?${searchParams.toString()}`);
+                    confirmAndFinalize();
                     return 100;
                 }
                 return prev + 1;
             });
-        }, 100); // 10 seconds total
+        }, 100);
 
         return () => clearInterval(timer);
     }, [router, searchParams]);
@@ -34,7 +69,7 @@ function VerifyingContent() {
         <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
-            <BookingStatusHeader currentStep={4} />
+            <BookingStatusHeader currentStep={5} />
 
             <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-6 pb-20">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -62,6 +97,12 @@ function VerifyingContent() {
                                 <p className="text-zinc-400 leading-relaxed font-light mb-12 max-w-xl text-lg">
                                     We have received your proof of payment. Our finance team is currently verifying the transaction. You will be notified as soon as your tickets are issued.
                                 </p>
+
+                                {error && (
+                                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 mb-8">
+                                        <p className="text-red-400 text-sm font-bold">{error}</p>
+                                    </div>
+                                )}
 
                                 <div className="bg-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/10 flex flex-col gap-6 max-w-lg group">
                                     <div className="flex items-center justify-between">

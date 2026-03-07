@@ -38,10 +38,10 @@ export default function TourBookingPage() {
         dates: "Oct 14, 2024 — Oct 21, 2024 (7 Nights)",
         guests: "2 Adults",
         location: "Zermatt & St. Moritz, Switzerland",
-        basePrice: 12400.00,
-        taxes: 942.50,
-        fee: 450.00,
-        total: 13792.50
+        basePrice: 1850000.00,
+        taxes: 145000.00,
+        fee: 85000.00,
+        total: 2080000.00
     };
 
     const handleCompleteBooking = (e: React.FormEvent) => {
@@ -214,7 +214,7 @@ export default function TourBookingPage() {
                                         </div>
                                     </div>
 
-<div className="pt-6 border-t border-zinc-50 space-y-4">
+                                    <div className="pt-6 border-t border-zinc-50 space-y-4">
                                         <div className="flex justify-between text-xs font-bold text-zinc-400">
                                             <span>Base Tour Price</span>
                                             <span className="text-zinc-900">₦{tourSummary.basePrice.toLocaleString()}</span>

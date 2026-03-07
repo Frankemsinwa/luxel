@@ -19,68 +19,12 @@ import {
     Plane
 } from "lucide-react";
 
-const initialFlightResults = [
-    {
-        id: 1,
-        airline: "British Airways",
-        logo: "BA",
-        departureTime: "10:30",
-        departureCode: "LHR",
-        departureCity: "London",
-        arrivalTime: "18:45",
-        arrivalCode: "JFK",
-        arrivalCity: "New York",
-        duration: "8h 15m",
-        stops: "NON-STOP",
-        price: 540
-    },
-    {
-        id: 2,
-        airline: "British Airways",
-        logo: "BA",
-        departureTime: "12:15",
-        departureCode: "LHR",
-        departureCity: "London",
-        arrivalTime: "20:30",
-        arrivalCode: "JFK",
-        arrivalCity: "New York",
-        duration: "8h 15m",
-        stops: "NON-STOP",
-        price: 620
-    },
-    {
-        id: 3,
-        airline: "Virgin Atlantic",
-        logo: "VA",
-        departureTime: "14:00",
-        departureCode: "LHR",
-        departureCity: "London",
-        arrivalTime: "22:15",
-        arrivalCode: "JFK",
-        arrivalCity: "New York",
-        duration: "8h 15m",
-        stops: "NON-STOP",
-        price: 580
-    },
-    {
-        id: 4,
-        airline: "American Airlines",
-        logo: "AA",
-        departureTime: "16:45",
-        departureCode: "LHR",
-        departureCity: "London",
-        arrivalTime: "01:00",
-        arrivalCode: "JFK",
-        arrivalCity: "New York",
-        duration: "8h 15m",
-        stops: "NON-STOP",
-        price: 510
-    }
-];
+const initialFlightResults: any[] = [];
 
 function FlightsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const [isLoading, setIsLoading] = useState(false);
 
     // Search states
     const [searchData, setSearchData] = useState({
@@ -108,24 +52,33 @@ function FlightsContent() {
     const [selectedAirlines, setSelectedAirlines] = useState<string[]>(["British Airways", "Virgin Atlantic", "American Airlines"]);
     const [results, setResults] = useState(initialFlightResults);
 
+    // Fetch from Backend Express API
     useEffect(() => {
-        const filtered = initialFlightResults.filter(flight => {
-            const matchesPrice = flight.price <= priceRange;
-            const matchesAirline = selectedAirlines.includes(flight.airline);
-            return matchesPrice && matchesAirline;
-        });
+        const fetchFlights = async () => {
+            setIsLoading(true);
+            try {
+                const query = new URLSearchParams({
+                    from: searchData.from,
+                    to: searchData.to,
+                    departureDate: searchData.departure || new Date().toISOString(),
+                    passengers: searchData.passengers
+                });
 
-        // Update airport codes based on search data for realism
-        const dynamicResults = filtered.map(flight => ({
-            ...flight,
-            departureCity: searchData.from.split(',')[0],
-            departureCode: searchData.from.includes('(') ? searchData.from.match(/\((.*?)\)/)?.[1] || 'LHR' : 'LHR',
-            arrivalCity: searchData.to.split(',')[0],
-            arrivalCode: searchData.to.includes('(') ? searchData.to.match(/\((.*?)\)/)?.[1] || 'JFK' : 'JFK',
-        }));
+                const response = await fetch(`http://localhost:5000/api/flights/search?${query.toString()}`);
+                const data = await response.json();
 
-        setResults(dynamicResults);
-    }, [priceRange, selectedAirlines, searchData]);
+                if (data.flights) {
+                    setResults(data.flights);
+                }
+            } catch (error) {
+                console.error('Error fetching flights:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchFlights();
+    }, [searchData]);
 
     const handleAirlineToggle = (airline: string) => {
         setSelectedAirlines(prev =>
@@ -205,12 +158,12 @@ function FlightsContent() {
 
                 {/* Filters Sidebar */}
                 <aside className="w-full lg:w-80 flex flex-col gap-8">
-<div className="bg-black p-8 rounded-[2.5rem] shadow-sm border border-white/10">
+                    <div className="bg-black p-8 rounded-[2.5rem] shadow-sm border border-white/10">
                         <div className="flex items-center justify-between mb-8">
                             <h2 className="text-xl font-bold text-white">Filters</h2>
                             <button
                                 onClick={() => {
-                                    setPriceRange(1500);
+                                    setPriceRange(3500000);
                                     setSelectedAirlines(["British Airways", "Virgin Atlantic", "American Airlines"]);
                                 }}
                                 className="text-xs font-bold text-white/60 hover:underline uppercase tracking-widest"
@@ -229,16 +182,17 @@ function FlightsContent() {
                             </div>
                             <input
                                 type="range"
-                                min="200"
-                                max="1500"
+                                min="100000"
+                                max="3500000"
+                                step="50000"
                                 value={priceRange}
                                 onChange={(e) => setPriceRange(parseInt(e.target.value))}
                                 className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber mb-4"
                             />
-                            <div className="flex justify-between text-xs font-bold text-white/50 tracking-tighter">
-                                <span>₦200</span>
-                                <span className="text-white">₦{priceRange}</span>
-                                <span>₦1,500</span>
+                            <div className="flex justify-between text-[10px] font-black text-white/50 tracking-widest uppercase">
+                                <span>₦100k</span>
+                                <span className="text-white">₦{(priceRange / 1000).toFixed(0)}k</span>
+                                <span>₦3.5M</span>
                             </div>
                         </div>
 
@@ -331,7 +285,7 @@ function FlightsContent() {
 
                                     {/* Pricing & Action */}
                                     <div className="w-full lg:w-48 text-center lg:text-right">
-                                        <div className="text-4xl font-bold text-black mb-1">₦{flight.price}</div>
+                                        <div className="text-4xl font-bold text-black mb-1">₦{flight.price.toLocaleString()}</div>
                                         <div className="text-[10px] font-bold text-black/50 uppercase tracking-widest mb-6">Round-trip per person</div>
                                         <button
                                             onClick={() => {

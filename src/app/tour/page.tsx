@@ -37,28 +37,27 @@ export default function TourLandingPage() {
         {
             id: 'tuscan-silk-road',
             title: 'The Tuscan Silk Road',
-            description: 'Culinary excellence through the rolling hills of Italy.',
+            description: 'Culinary excellence through the rolling hills of Italy focusing on fine wines and truffles.',
             image: '/tour-img/img-1.jpg',
-            price: '₦4,200',
+            price: '₦1,850,000',
             duration: '7 Days',
             rating: 5,
-            actualImage: '/lagos.png' // Using existing images for variety if needed, but the prompt says use public/tour
         },
         {
             id: 'kyoto-zen-retreat',
             title: 'Kyoto Zen Retreat',
-            description: 'Mindful immersion in the ancient temples of Japan.',
+            description: 'Mindful immersion in the ancient temples of Japan with exclusive tea ceremonies.',
             image: '/tour-img/img-2.jpg',
-            price: '₦3,800',
+            price: '₦2,450,000',
             duration: '5 Days',
             rating: 5
         },
         {
             id: 'wilderness-refined',
             title: 'Wilderness Refined',
-            description: 'Ultimate luxury safari experience in the Serengeti.',
+            description: 'Ultimate luxury safari experience in the Serengeti with private guides.',
             image: '/tour-img/img-3.jpg',
-            price: '₦9,500',
+            price: '₦4,500,000',
             duration: '10 Days',
             rating: 5
         }
@@ -106,7 +105,10 @@ export default function TourLandingPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.4 }}
                     >
-                        <button className="bg-amber hover:bg-amber-dark text-black px-10 py-4 rounded-full font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl">
+                        <button
+                            onClick={() => router.push('/tour/search')}
+                            className="bg-amber hover:bg-amber-dark text-black px-10 py-4 rounded-full font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl"
+                        >
                             Explore Tours
                         </button>
                     </motion.div>
@@ -176,7 +178,7 @@ export default function TourLandingPage() {
                         <span className="text-amber font-bold text-sm tracking-widest uppercase">Our Selection</span>
                         <h2 className="text-4xl font-serif text-zinc-900 mt-2">Featured Tours</h2>
                     </div>
-                    <Link href="/tour/all" className="flex items-center gap-2 text-zinc-900 font-bold text-sm hover:gap-3 transition-all">
+                    <Link href="/tour/search" className="flex items-center gap-2 text-zinc-900 font-bold text-sm hover:gap-3 transition-all">
                         View All Experiences <ArrowRight size={16} />
                     </Link>
                 </div>
@@ -242,7 +244,6 @@ export default function TourLandingPage() {
                             <Image src={theme.image} alt={theme.name} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" />
                             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all" />
                             <div className="absolute inset-0 flex items-center justify-center p-8 text-center bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                                {/* Re-adding label on top for clarity as per design */}
                             </div>
                             <div className="absolute bottom-10 left-0 right-0 text-center">
                                 <h4 className="text-3xl font-semibold text-white tracking-wide">{theme.name}</h4>
@@ -252,7 +253,7 @@ export default function TourLandingPage() {
                 </div>
             </section>
 
-{/* Benefits */}
+            {/* Benefits */}
             <section className="py-24 border-b border-zinc-100" style={{ backgroundColor: '#FEDB73' }}>
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16">
                     <div className="flex flex-col items-center text-center space-y-6">

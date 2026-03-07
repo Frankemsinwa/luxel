@@ -5,18 +5,49 @@ import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
 import ReservationSummaryCard from "@/components/ReservationSummaryCard";
 import { motion } from "framer-motion";
-import { Wallet, MessageSquare, ShieldCheck, CheckCircle2 } from "lucide-react";
-import { Suspense } from 'react';
+import { Wallet, MessageSquare, ShieldCheck, CheckCircle2, Loader2 } from "lucide-react";
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from "@/lib/supabase";
 
 function AgentConfirmedContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const bookingId = searchParams.get('id');
+    const [confirmedPrice, setConfirmedPrice] = useState<number | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
-    const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
-    const pricePerPerson = Number(searchParams.get('price')) || 540;
-    const totalPrice = pricePerPerson * passengerCount;
+    useEffect(() => {
+        const fetchBookingPrice = async () => {
+            if (!bookingId) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return;
+
+                const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setConfirmedPrice(data.confirmed_price || data.total_price);
+                }
+            } catch (err) {
+                console.error('Error fetching booking price:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBookingPrice();
+    }, [bookingId]);
+
+    // Fallback from search params while loading
+    const displayPrice = confirmedPrice || Number(searchParams.get('price')) || 0;
 
     return (
         <div className="min-h-screen bg-amber/5 flex flex-col">
@@ -46,7 +77,11 @@ function AgentConfirmedContent() {
                                 </div>
                                 <div className="text-right">
                                     <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Total Confirmed Price</div>
-                                    <div className="text-5xl font-black text-zinc-900">₦{totalPrice.toFixed(2)}</div>
+                                    {loading ? (
+                                        <Loader2 size={24} className="text-amber animate-spin ml-auto" />
+                                    ) : (
+                                        <div className="text-5xl font-black text-zinc-900">₦{displayPrice.toLocaleString()}</div>
+                                    )}
                                 </div>
                             </div>
 
@@ -89,7 +124,7 @@ function AgentConfirmedContent() {
                                         <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-50">
                                             <CheckCircle2 size={16} />
                                         </div>
-                                        <p className="text-sm font-bold text-zinc-900">Price confirmed at ₦{totalPrice.toFixed(2)}</p>
+                                        <p className="text-sm font-bold text-zinc-900">Price confirmed at ₦{displayPrice.toLocaleString()}</p>
                                     </div>
                                     <span className="text-[10px] font-black text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-md">NOW</span>
                                 </motion.div>
@@ -98,7 +133,7 @@ function AgentConfirmedContent() {
                                         <div className="w-8 h-8 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 border border-zinc-100">
                                             <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                                         </div>
-                                        <p className="text-sm font-medium text-zinc-500">Routing verification complete (LHR-JFK)</p>
+                                        <p className="text-sm font-medium text-zinc-500">Routing verification complete</p>
                                     </div>
                                     <span className="text-[10px] font-medium text-zinc-400">3 min ago</span>
                                 </div>

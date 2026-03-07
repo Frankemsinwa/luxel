@@ -27,7 +27,7 @@ function FlightDetailsContent() {
 
     // Capture search params with defaults
     const flight = {
-        price: Number(searchParams.get('price')) || 540,
+        price: Number(searchParams.get('price')) || 945000,
         airline: searchParams.get('airline') || "British Airways",
         logo: searchParams.get('logo') || "BA",
         depTime: searchParams.get('depTime') || "10:30 AM",
@@ -42,7 +42,8 @@ function FlightDetailsContent() {
 
     const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
     const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
-    const baseFare = flight.price - 40; // Simulated tax logic
+    const taxes = 45000;
+    const baseFare = flight.price - taxes; // Localized tax logic
     const totalFare = flight.price * passengerCount;
 
     return (
@@ -61,7 +62,7 @@ function FlightDetailsContent() {
                     {/* Left Column - Flight Info */}
                     <div className="flex-1 space-y-8">
 
-                    {/* Route Highlights */}
+                        {/* Route Highlights */}
                         <div className="bg-black rounded-[3rem] p-10 shadow-sm border border-white/10 flex flex-col gap-12 relative overflow-hidden text-flight-card">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-amber/10 rounded-full blur-3xl -mr-32 -mt-32" />
 
@@ -188,7 +189,7 @@ function FlightDetailsContent() {
                                         </div>
                                         <div>
                                             <div className="text-sm font-bold text-black">Refundability</div>
-                                            <div className="text-[10px] text-black/50 font-medium leading-relaxed mt-0.5">Refundable with a fee of ₦150 per person.</div>
+                                            <div className="text-[10px] text-black/50 font-medium leading-relaxed mt-0.5">Refundable with a fee of ₦25,000 per person.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -204,19 +205,19 @@ function FlightDetailsContent() {
                             <div className="space-y-6 mb-10 pb-10 border-b border-black/10">
                                 <div className="flex items-center justify-between">
                                     <span className="text-black/60 font-medium">Base Fare ({passengerCount} Passenger{passengerCount > 1 ? 's' : ''})</span>
-                                    <span className="font-bold text-black">₦{baseFare * passengerCount}</span>
+                                    <span className="font-bold text-black">₦{(baseFare * passengerCount).toLocaleString()}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-black/60 font-medium">Taxes & Fees</span>
-                                    <span className="font-bold text-black">₦{40 * passengerCount}</span>
+                                    <span className="font-bold text-black">₦{(taxes * passengerCount).toLocaleString()}</span>
                                 </div>
                             </div>
 
                             <div className="flex flex-col items-center mb-10">
                                 <div className="text-[10px] font-bold text-black/50 uppercase tracking-widest mb-2">Total Price</div>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-5xl font-bold text-black">₦{totalFare}</span>
-                                    <span className="text-lg font-bold text-black">USD</span>
+                                    <span className="text-5xl font-bold text-black">₦{totalFare.toLocaleString()}</span>
+                                    <span className="text-lg font-bold text-black">NGN</span>
                                 </div>
                             </div>
 

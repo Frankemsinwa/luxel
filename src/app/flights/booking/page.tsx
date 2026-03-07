@@ -5,16 +5,12 @@ import { Suspense, useState, useEffect } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import { supabase } from '@/lib/supabase';
 import {
     User,
-    Mail,
-    Phone,
     Check,
-    Lock,
     ChevronDown,
-    Calendar,
     Contact,
-    Shield,
     Globe
 } from "lucide-react";
 
@@ -35,10 +31,14 @@ function PassengerDetailsContent() {
     // Get context from URL
     const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
     const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
-    const totalPrice = Number(searchParams.get('price')) || 540;
-    const baseFare = totalPrice - 40;
+    const totalPrice = Number(searchParams.get('price')) || 945000;
+    const taxes = 45000;
+    const baseFare = totalPrice - taxes;
 
     const [passengerData, setPassengerData] = useState<any[]>([]);
+    const [contactEmail, setContactEmail] = useState('');
+    const [contactPhone, setContactPhone] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         setPassengerData(
@@ -52,6 +52,58 @@ function PassengerDetailsContent() {
             }))
         );
     }, [passengerCount]);
+
+    const handleRequestReservation = async () => {
+        setIsSubmitting(true);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                alert('Please sign in to make a reservation');
+                setIsSubmitting(false);
+                return;
+            }
+
+            const bookingPayload = {
+                flightData: {
+                    id: searchParams.get('id') || 'FL-DYNAMIC',
+                    departureCode: searchParams.get('depCode'),
+                    arrivalCode: searchParams.get('arrCode'),
+                    airline: searchParams.get('airline'),
+                    price: totalPrice
+                },
+                totalPrice: totalPrice * passengerCount,
+                passengers: passengerData,
+                contactInfo: {
+                    email: contactEmail,
+                    phone: contactPhone
+                }
+            };
+
+            const response = await fetch('http://localhost:5000/api/bookings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify(bookingPayload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Redirect to Confirmation Page for Agent Processing
+                router.push(`/flights/confirmation?ref=${data.bookingRef}&id=${data.bookingId}&reqId=${data.requestId}&${searchParams.toString()}`);
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        } catch (error) {
+            console.error('Reservation error:', error);
+            alert('An unexpected error occurred. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const updatePassenger = (id: number, field: string, value: string) => {
         setPassengerData(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
@@ -165,7 +217,7 @@ function PassengerDetailsContent() {
                         ))}
 
                         {/* Contact Information Card */}
-                            <div className="bg-flight-card rounded-[3rem] p-10 shadow-sm border border-black/5">
+                        <div className="bg-flight-card rounded-[3rem] p-10 shadow-sm border border-black/5">
                             <div className="flex items-center gap-4 mb-10">
                                 <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center text-black">
                                     <Contact size={24} />
@@ -181,6 +233,8 @@ function PassengerDetailsContent() {
                                     <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Email address</label>
                                     <input
                                         type="email"
+                                        value={contactEmail}
+                                        onChange={(e) => setContactEmail(e.target.value)}
                                         placeholder="your@email.com"
                                         className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black focus:ring-2 focus:ring-black/20"
                                     />
@@ -196,6 +250,8 @@ function PassengerDetailsContent() {
                                         </select>
                                         <input
                                             type="tel"
+                                            value={contactPhone}
+                                            onChange={(e) => setContactPhone(e.target.value)}
                                             placeholder="Mobile number"
                                             className="flex-1 bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black focus:ring-2 focus:ring-black/20"
                                         />
@@ -205,69 +261,30 @@ function PassengerDetailsContent() {
                         </div>
                     </div>
 
-                    {/* Right Column - Steps & Summary */}
+                    {/* Right Column - Summary */}
                     <div className="w-full lg:w-96 flex flex-col gap-8">
-
-                        {/* Booking Steps */}
-                        <div className="bg-black p-10 rounded-[3rem] shadow-sm border border-white/10">
-                            <h3 className="text-xs font-bold text-white/50 uppercase tracking-widest mb-10">Booking Steps</h3>
-                            <div className="space-y-12 relative overflow-hidden">
-                                <div className="absolute top-0 left-[1.125rem] w-[1px] h-full bg-white/10" />
-
-                                <div className="flex items-start gap-5 relative z-10">
-                                    <div className="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white ring-8 ring-emerald-600/10">
-                                        <Check size={18} strokeWidth={3} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-white">Flight Details</h4>
-                                        <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-0.5">Verified</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-5 relative z-10">
-                                    <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-black ring-8 ring-white/10">
-                                        <span className="text-sm font-black">2</span>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-white">Passenger Info</h4>
-                                        <p className="text-[10px] font-bold text-white animate-pulse uppercase tracking-widest mt-0.5">In Progress</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-5 relative z-10 opacity-40">
-                                    <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/50">
-                                        <span className="text-sm font-black">3</span>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-white">Payment</h4>
-                                        <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mt-0.5">Pending</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Summary */}
                         <div className="bg-flight-card p-10 rounded-[3rem] shadow-xl shadow-black/5 border border-black/5">
                             <h3 className="text-xs font-bold text-black/50 uppercase tracking-widest mb-8">Price Summary</h3>
                             <div className="space-y-5 mb-8 pb-8 border-b border-black/10">
                                 <div className="flex justify-between">
                                     <span className="text-black/60 font-medium">Base Fare ({passengerCount} Passengers)</span>
-                                    <span className="font-bold text-black">₦{baseFare * passengerCount}</span>
+                                    <span className="font-bold text-black">₦{(baseFare * passengerCount).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-black/60 font-medium">Taxes & Fees</span>
-                                    <span className="font-bold text-black">₦{40 * passengerCount}</span>
+                                    <span className="font-bold text-black">₦{(taxes * passengerCount).toLocaleString()}</span>
                                 </div>
                             </div>
                             <div className="flex flex-col items-center gap-2 mb-8">
                                 <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest">Total Amount</span>
-                                <span className="text-5xl font-bold text-black">₦{totalPrice * passengerCount}</span>
+                                <span className="text-5xl font-bold text-black">₦{(totalPrice * passengerCount).toLocaleString()}</span>
                             </div>
                             <button
-                                onClick={() => router.push(`/flights/confirmation?${searchParams.toString()}`)}
-                                className="w-full bg-black text-flight-card py-6 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 transition-all active:scale-95 mb-4 font-outfit"
+                                onClick={handleRequestReservation}
+                                disabled={isSubmitting}
+                                className={`w-full bg-black text-white py-6 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 transition-all active:scale-95 mb-4 font-outfit ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                Request Reservation
+                                {isSubmitting ? 'Processing...' : 'Request Reservation'}
                             </button>
                             <p className="text-[10px] text-black/50 font-bold text-center uppercase tracking-tighter">Instant confirmation upon approval</p>
                         </div>
@@ -282,7 +299,7 @@ function PassengerDetailsContent() {
 
 export default function PassengerDetailsPage() {
     return (
-        <Suspense fallback={<div>Loading Booking...</div>}>
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading Booking...</div>}>
             <PassengerDetailsContent />
         </Suspense>
     );

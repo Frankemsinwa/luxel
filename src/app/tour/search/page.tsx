@@ -24,7 +24,7 @@ const initialTourResults = [
         title: 'The Tuscan Silk Road',
         description: 'Culinary excellence through the rolling hills of Italy focusing on fine wines and truffles.',
         image: '/tour-img/img-1.jpg',
-        price: 4200,
+        price: 1850000,
         duration: '7 Days',
         rating: 5,
         theme: 'Culinary Expeditions',
@@ -35,7 +35,7 @@ const initialTourResults = [
         title: 'Kyoto Zen Retreat',
         description: 'Mindful immersion in the ancient temples of Japan with exclusive tea ceremonies.',
         image: '/tour-img/img-2.jpg',
-        price: 3800,
+        price: 2450000,
         duration: '5 Days',
         rating: 5,
         theme: 'Wellness Retreats',
@@ -46,7 +46,7 @@ const initialTourResults = [
         title: 'Wilderness Refined',
         description: 'Ultimate luxury safari experience in the Serengeti with private guides.',
         image: '/tour-img/img-3.jpg',
-        price: 9500,
+        price: 4500000,
         duration: '10 Days',
         rating: 5,
         theme: 'Active Escapes',
@@ -57,7 +57,7 @@ const initialTourResults = [
         title: 'Moroccan Mosaic',
         description: 'Vibrant markets, sweeping deserts, and secluded riad sanctuaries.',
         image: '/tour-img/img-4.jpg',
-        price: 3200,
+        price: 3200000,
         duration: '6 Days',
         rating: 4,
         theme: 'Cultural Journeys',
@@ -68,7 +68,7 @@ const initialTourResults = [
         title: 'Swiss Alpine Grand Retreat',
         description: 'Ski-in, ski-out chalets and thermal spas in the shadow of the Matterhorn.',
         image: '/tour-img/img-5.jpg',
-        price: 12400,
+        price: 6400000,
         duration: '7 Days',
         rating: 5,
         theme: 'Wellness Retreats',
@@ -79,7 +79,7 @@ const initialTourResults = [
         title: 'Patagonia Edge of the World',
         description: 'Glacier trekking and luxury lodging at the southern tip of the Americas.',
         image: '/tour-img/img-6.jpg',
-        price: 7800,
+        price: 5800000,
         duration: '9 Days',
         rating: 5,
         theme: 'Active Escapes',
@@ -97,7 +97,7 @@ function TourSearchContent() {
         travelers: searchParams.get('travelers') || '2 Travelers'
     });
 
-    const [priceRange, setPriceRange] = useState(15000);
+    const [priceRange, setPriceRange] = useState(10000000);
     const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
     const [results, setResults] = useState(initialTourResults);
 
@@ -179,7 +179,7 @@ function TourSearchContent() {
                             <h2 className="text-xl font-bold text-zinc-900">Filters</h2>
                             <button
                                 onClick={() => {
-                                    setPriceRange(15000);
+                                    setPriceRange(10000000);
                                     setSelectedThemes([]);
                                 }}
                                 className="text-[10px] font-black text-amber uppercase tracking-widest hover:opacity-80 transition-opacity"
@@ -198,15 +198,15 @@ function TourSearchContent() {
                             </div>
                             <input
                                 type="range"
-                                min="1000"
-                                max="15000"
-                                step="500"
+                                min="1000000"
+                                max="10000000"
+                                step="100000"
                                 value={priceRange}
                                 onChange={(e) => setPriceRange(parseInt(e.target.value))}
                                 className="w-full h-1.5 bg-zinc-100 rounded-lg appearance-none cursor-pointer accent-amber mb-4"
                             />
-<div className="flex justify-between text-xs font-bold text-zinc-400">
-                                <span>₦1,000</span>
+                            <div className="flex justify-between text-xs font-bold text-zinc-400">
+                                <span>₦1,000,000</span>
                                 <span className="text-amber">₦{priceRange.toLocaleString()}</span>
                             </div>
                         </div>

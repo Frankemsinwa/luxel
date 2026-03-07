@@ -2,7 +2,8 @@
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Lock, User, ArrowRight, Github, Chrome } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -17,21 +18,47 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    const [fullName, setFullName] = useState("");
+    const [error, setError] = useState<string | null>(null);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError(null);
 
-        // Simulation delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        try {
+            if (mode === 'signup') {
+                const { error: signUpError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                        }
+                    }
+                });
+                if (signUpError) throw signUpError;
+                setMode('login');
+                setError("Account created! Please check your email or log in.");
+            } else {
+                const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+                if (signInError) throw signInError;
 
-        if (email === "agent@gmail.com" && password === "password") {
-            router.push("/agent/dashboard");
-            onClose();
-        } else {
-            // Standard user logic (mocked)
-            onClose();
+                const role = session?.user?.user_metadata?.role;
+
+                if (role === "AGENT") {
+                    router.push("/agent/dashboard");
+                }
+                onClose();
+            }
+        } catch (err: any) {
+            setError(err.message || "An authentication error occurred.");
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     return (
@@ -84,6 +111,16 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                                         ? 'Access your luxury travel concierge.'
                                         : 'Unlock exclusive rates and priority handling.'}
                                 </p>
+
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className={`mt-4 p-4 rounded-2xl text-[11px] font-bold text-center ${error.includes('Account created') ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-500 border border-red-100'}`}
+                                    >
+                                        {error}
+                                    </motion.div>
+                                )}
                             </div>
 
                             {/* Form */}
@@ -98,6 +135,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                                             <input
                                                 type="text"
                                                 required
+                                                value={fullName}
+                                                onChange={(e) => setFullName(e.target.value)}
                                                 placeholder="Enter your name"
                                                 className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/20 transition-all"
                                             />

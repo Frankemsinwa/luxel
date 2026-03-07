@@ -30,12 +30,12 @@ export default function TourConfirmationPage() {
         dates: "September 14 - September 21, 2024",
         guests: "2 Travelers",
         location: "Amalfi Coast, Italy",
-summary: [
-            { label: "Base Fare (2 travelers)", value: "₦4,200.00" },
-            { label: "Concierge Service", value: "₦250.00" },
-            { label: "Insurance & Taxes", value: "₦345.50" }
+        summary: [
+            { label: "Base Fare (2 travelers)", value: "₦1,850,000.00" },
+            { label: "Concierge Service", value: "₦45,000.00" },
+            { label: "Insurance & Taxes", value: "₦65,500.00" }
         ],
-        total: "₦4,795.50"
+        total: "₦1,960,500.00"
     };
 
     return (

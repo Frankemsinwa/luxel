@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Clock, CreditCard, CheckCircle2 } from "lucide-react";
+import { Check, Clock, CreditCard, CheckCircle2, FileSearch } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface BookingStatusHeaderProps {
@@ -18,24 +18,31 @@ export default function BookingStatusHeader({ currentStep }: BookingStatusHeader
         },
         {
             id: 2,
-            label: "Agent Confirming",
-            activeLabel: "Agent Confirming",
+            label: "Agent Verifying",
+            activeLabel: "Agent Verifying",
             completedLabel: "Agent Confirmed",
             icon: <Clock size={16} strokeWidth={3} />
         },
         {
             id: 3,
+            label: "Confirmed",
+            activeLabel: "Availability Confirmed",
+            completedLabel: "Availability Confirmed",
+            icon: <CheckCircle2 size={16} />
+        },
+        {
+            id: 4,
             label: "Payment",
-            activeLabel: "Waiting for Payment",
+            activeLabel: "Awaiting Payment",
             completedLabel: "Payment Received",
             icon: <CreditCard size={16} />
         },
         {
-            id: 4,
+            id: 5,
             label: "Finalized",
             activeLabel: "Issuing Tickets",
             completedLabel: "Trip Finalized",
-            icon: <CheckCircle2 size={16} />
+            icon: <FileSearch size={16} />
         }
     ];
 
@@ -117,7 +124,7 @@ export default function BookingStatusHeader({ currentStep }: BookingStatusHeader
                                     )}
                                 </div>
 
-                                {/* Hover Tooltip (Professional touch) */}
+                                {/* Hover Tooltip */}
                                 <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-amber text-black text-[9px] font-bold py-2 px-4 rounded-xl pointer-events-none whitespace-nowrap tracking-widest uppercase">
                                     Step {step.id}: {step.label}
                                 </div>

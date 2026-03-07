@@ -11,25 +11,44 @@ import {
     SearchX
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function FlightRequestsPage() {
     const router = useRouter();
+    const [requests, setRequests] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const requests = [
-        { id: "LX-492781", user: "Jonathan Wick", route: "LHR → JFK", class: "First Class", status: "Confirming", priority: "VIP", date: "Oct 24, 2026" },
-        { id: "LX-492802", user: "Sofia Al-Aziz", route: "DXB → NRT", class: "Private Suite", status: "Action Required", priority: "Elite", date: "Oct 25, 2026" },
-        { id: "LX-492815", user: "Michael Chen", route: "SIN → SYD", class: "Business", status: "Verified", priority: "Regular", date: "Oct 26, 2026" },
-        { id: "LX-492833", user: "Elena Rossi", route: "CDG → MIA", class: "First Class", status: "Confirming", priority: "VIP", date: "Oct 27, 2026" },
-        { id: "LX-492901", user: "David Beckham", route: "LHR → LAX", class: "First Class", status: "Confirming", priority: "VIP", date: "Oct 28, 2026" },
-        { id: "LX-492945", user: "Amara Okoro", route: "LOS → LHR", class: "Business", status: "Action Required", priority: "Elite", date: "Oct 29, 2026" },
-    ];
+    useEffect(() => {
+        const fetchRequests = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/agent/requests', {
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    setRequests(data);
+                }
+            } catch (error) {
+                console.error('Error fetching agent requests:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRequests();
+    }, []);
 
     const filteredRequests = requests.filter(req =>
-        req.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (req.profiles?.full_name || "Unknown").toLowerCase().includes(searchQuery.toLowerCase()) ||
         req.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        req.route.toLowerCase().includes(searchQuery.toLowerCase())
+        (req.details?.itinerary || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -105,10 +124,10 @@ export default function FlightRequestsPage() {
                                         </td>
                                         <td className="px-10 py-6 text-sm">
                                             <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${req.status === 'Confirming' ? 'bg-amber/5 text-amber' :
-                                                    req.status === 'Verified' ? 'bg-emerald-50 text-emerald-500' : 'bg-red-50 text-red-500'
+                                                req.status === 'Verified' ? 'bg-emerald-50 text-emerald-500' : 'bg-red-50 text-red-500'
                                                 }`}>
                                                 <div className={`w-1.5 h-1.5 rounded-full ${req.status === 'Confirming' ? 'bg-amber animate-pulse' :
-                                                        req.status === 'Verified' ? 'bg-emerald-500' : 'bg-red-500'
+                                                    req.status === 'Verified' ? 'bg-emerald-500' : 'bg-red-500'
                                                     }`} />
                                                 {req.status}
                                             </div>

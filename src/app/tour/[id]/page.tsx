@@ -50,7 +50,7 @@ export default function TourDetailsPage() {
         title: getTourTitle(tourId),
         image: getHeroImage(tourId),
         location: "Istanbul, Turkey",
-        price: 8500,
+        price: 1850000,
         duration: "12 Days",
         rating: 5,
         description: "Traverse the ancient pathways of merchants and monarchs, where every corner turned reveals a secret from a millennium past, reimagined with the pinnacle of modern luxury.",
