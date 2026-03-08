@@ -56,6 +56,7 @@ function FlightsContent() {
     useEffect(() => {
         const fetchFlights = async () => {
             setIsLoading(true);
+            setResults([]); // Clear previous results while loading
             try {
                 const query = new URLSearchParams({
                     from: searchData.from,
@@ -69,9 +70,12 @@ function FlightsContent() {
 
                 if (data.flights) {
                     setResults(data.flights);
+                } else {
+                    setResults([]);
                 }
             } catch (error) {
                 console.error('Error fetching flights:', error);
+                setResults([]);
             } finally {
                 setIsLoading(false);
             }
@@ -242,89 +246,127 @@ function FlightsContent() {
                     </div>
 
                     <div className="flex flex-col gap-6">
-                        <AnimatePresence mode="popLayout">
-                            {results.length > 0 ? results.map((flight) => (
+                        {isLoading ? (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="flex flex-col items-center justify-center py-32 bg-white/50 backdrop-blur-sm rounded-[2.5rem] border border-black/5"
+                            >
                                 <motion.div
-                                    key={flight.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    layout
-                                    className="bg-flight-card rounded-[2.5rem] p-8 lg:p-10 shadow-sm border border-black/5 flex flex-col lg:flex-row items-center gap-10 hover:shadow-xl hover:scale-[1.01] transition-all group"
+                                    animate={{
+                                        scale: [1, 1.2, 1],
+                                        rotate: [0, 10, -10, 0]
+                                    }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
+                                    className="w-32 h-32 rounded-full bg-amber/10 flex items-center justify-center mb-8 relative"
                                 >
-                                    {/* Flight Info */}
-                                    <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 items-center gap-8 md:gap-4">
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-16 h-16 rounded-2xl bg-black/10 border border-black/10 flex items-center justify-center text-black font-black group-hover:bg-black group-hover:text-amber transition-colors">
-                                                <div className="text-xs font-black">{flight.logo}</div>
-                                            </div>
-                                            <div>
-                                                <div className="text-2xl font-bold text-black">{flight.departureTime}</div>
-                                                <div className="text-sm font-medium text-black/60 tracking-widest">{flight.departureCode} • {flight.departureCity}</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-col items-center justify-center px-4">
-                                            <div className="text-[10px] font-bold text-black/50 uppercase tracking-widest mb-3">{flight.duration}</div>
-                                            <div className="relative w-full h-[2px] bg-black/10 mb-2">
-                                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 border-2 border-black bg-amber rounded-full group-hover:scale-125 transition-transform" />
-                                                <div className="absolute top-1/2 left-0 -translate-y-1/2 w-1.5 h-1.5 bg-black/30 rounded-full" />
-                                                <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1.5 h-1.5 bg-black/30 rounded-full" />
-                                            </div>
-                                            <div className="text-[10px] font-bold text-black uppercase tracking-widest">{flight.stops}</div>
-                                        </div>
-
-                                        <div className="text-right">
-                                            <div className="text-2xl font-bold text-black">{flight.arrivalTime}</div>
-                                            <div className="text-sm font-medium text-black/60 tracking-widest">{flight.arrivalCode}-{flight.arrivalCity}</div>
-                                        </div>
-                                    </div>
-
-                                    {/* Divider */}
-                                    <div className="w-px h-24 bg-black/10 hidden lg:block" />
-
-                                    {/* Pricing & Action */}
-                                    <div className="w-full lg:w-48 text-center lg:text-right">
-                                        <div className="text-4xl font-bold text-black mb-1">₦{flight.price.toLocaleString()}</div>
-                                        <div className="text-[10px] font-bold text-black/50 uppercase tracking-widest mb-6">Round-trip per person</div>
-                                        <button
-                                            onClick={() => {
-                                                const params = new URLSearchParams({
-                                                    ...Object.fromEntries(searchParams.entries()),
-                                                    price: flight.price.toString(),
-                                                    airline: flight.airline,
-                                                    logo: flight.logo,
-                                                    depTime: flight.departureTime,
-                                                    depCode: flight.departureCode,
-                                                    depCity: flight.departureCity,
-                                                    arrTime: flight.arrivalTime,
-                                                    arrCode: flight.arrivalCode,
-                                                    arrCity: flight.arrivalCity,
-                                                    duration: flight.duration,
-                                                    stops: flight.stops
-                                                });
-                                                router.push(`/flights/details?${params.toString()}`);
-                                            }}
-                                            className="w-full bg-black text-flight-card py-4 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 hover:scale-105 active:scale-95 transition-all"
-                                        >
-                                            Select
-                                        </button>
-                                    </div>
+                                    <motion.div
+                                        animate={{
+                                            opacity: [0.5, 1, 0.5],
+                                            scale: [0.8, 1.2, 0.8]
+                                        }}
+                                        transition={{
+                                            duration: 1.5,
+                                            repeat: Infinity,
+                                            ease: "easeInOut"
+                                        }}
+                                        className="absolute inset-0 rounded-full bg-amber/20"
+                                    />
+                                    <Search size={48} className="text-amber relative z-10" />
                                 </motion.div>
-                            )) : (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="bg-flight-card rounded-[2.5rem] p-20 text-center border-2 border-dashed border-black/20"
-                                >
-                                    <div className="w-20 h-20 rounded-full bg-black/10 flex items-center justify-center text-black/30 mx-auto mb-6">
-                                        <Search size={32} />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-black mb-2">No flights found</h3>
-                                    <p className="text-black/50 font-light">Try adjusting your filters to find more options.</p>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                <h3 className="text-2xl font-bold text-black mb-3">Searching for flights...</h3>
+                                <p className="text-black/60 font-medium tracking-wide">Scanning airlines for the best options</p>
+                            </motion.div>
+                        ) : (
+                            <AnimatePresence mode="popLayout">
+                                {results.length > 0 ? results.map((flight) => (
+                                    <motion.div
+                                        key={flight.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        layout
+                                        className="bg-flight-card rounded-[2.5rem] p-8 lg:p-10 shadow-sm border border-black/5 flex flex-col lg:flex-row items-center gap-10 hover:shadow-xl hover:scale-[1.01] transition-all group"
+                                    >
+                                        {/* Flight Info */}
+                                        <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 items-center gap-8 md:gap-4">
+                                            <div className="flex items-center gap-6">
+                                                <div className="w-16 h-16 rounded-2xl bg-black/10 border border-black/10 flex items-center justify-center text-black font-black group-hover:bg-black group-hover:text-amber transition-colors">
+                                                    <div className="text-xs font-black">{flight.logo}</div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-2xl font-bold text-black">{flight.departureTime}</div>
+                                                    <div className="text-sm font-medium text-black/60 tracking-widest">{flight.departureCode} • {flight.departureCity}</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col items-center justify-center px-4">
+                                                <div className="text-[10px] font-bold text-black/50 uppercase tracking-widest mb-3">{flight.duration}</div>
+                                                <div className="relative w-full h-[2px] bg-black/10 mb-2">
+                                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 border-2 border-black bg-amber rounded-full group-hover:scale-125 transition-transform" />
+                                                    <div className="absolute top-1/2 left-0 -translate-y-1/2 w-1.5 h-1.5 bg-black/30 rounded-full" />
+                                                    <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1.5 h-1.5 bg-black/30 rounded-full" />
+                                                </div>
+                                                <div className="text-[10px] font-bold text-black uppercase tracking-widest">{flight.stops}</div>
+                                            </div>
+
+                                            <div className="text-right">
+                                                <div className="text-2xl font-bold text-black">{flight.arrivalTime}</div>
+                                                <div className="text-sm font-medium text-black/60 tracking-widest">{flight.arrivalCode}-{flight.arrivalCity}</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Divider */}
+                                        <div className="w-px h-24 bg-black/10 hidden lg:block" />
+
+                                        {/* Pricing & Action */}
+                                        <div className="w-full lg:w-48 text-center lg:text-right">
+                                            <div className="text-4xl font-bold text-black mb-1">₦{flight.price.toLocaleString()}</div>
+                                            <div className="text-[10px] font-bold text-black/50 uppercase tracking-widest mb-6">Round-trip per person</div>
+                                            <button
+                                                onClick={() => {
+                                                    const params = new URLSearchParams({
+                                                        ...Object.fromEntries(searchParams.entries()),
+                                                        price: flight.price.toString(),
+                                                        airline: flight.airline,
+                                                        logo: flight.logo,
+                                                        depTime: flight.departureTime,
+                                                        depCode: flight.departureCode,
+                                                        depCity: flight.departureCity,
+                                                        arrTime: flight.arrivalTime,
+                                                        arrCode: flight.arrivalCode,
+                                                        arrCity: flight.arrivalCity,
+                                                        duration: flight.duration,
+                                                        stops: flight.stops
+                                                    });
+                                                    router.push(`/flights/details?${params.toString()}`);
+                                                }}
+                                                className="w-full bg-black text-flight-card py-4 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 hover:scale-105 active:scale-95 transition-all"
+                                            >
+                                                Select
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )) : (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="bg-flight-card rounded-[2.5rem] p-20 text-center border-2 border-dashed border-black/20"
+                                    >
+                                        <div className="w-20 h-20 rounded-full bg-black/10 flex items-center justify-center text-black/30 mx-auto mb-6">
+                                            <Search size={32} />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-black mb-2">No flights found</h3>
+                                        <p className="text-black/50 font-light">Try adjusting your filters to find more options.</p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        )}
                     </div>
                 </div>
             </main>

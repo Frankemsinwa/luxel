@@ -26,6 +26,7 @@ function PaymentContent() {
     const [booking, setBooking] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isInitializing, setIsInitializing] = useState(false);
+    const [userEmail, setUserEmail] = useState<string>('client@luxel.com');
 
     const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
     const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
@@ -53,6 +54,10 @@ function PaymentContent() {
                 const { data: { session } } = await import('@/lib/supabase').then(m => m.supabase.auth.getSession());
                 if (!session) return;
 
+                if (session.user?.email) {
+                    setUserEmail(session.user.email);
+                }
+
                 const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
                     headers: { 'Authorization': `Bearer ${session.access_token}` }
                 });
@@ -60,6 +65,10 @@ function PaymentContent() {
                 if (response.ok) {
                     const data = await response.json();
                     setBooking(data);
+
+                    if (data.email || data.contact_email || data.user?.email) {
+                        setUserEmail(data.email || data.contact_email || data.user?.email);
+                    }
                 }
             } catch (err) {
                 console.error('Error fetching booking details:', err);
@@ -91,8 +100,8 @@ function PaymentContent() {
         try {
             // @ts-ignore
             const handler = window.PaystackPop.setup({
-                key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_b8e515d9cc0f0e0c8d1bcbfcddac87cb23ffc396', // Use proper key
-                email: "client@luxel.com", // In a real scenario, use actual customer email
+                key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '', // Use proper key
+                email: userEmail, // Use the dynamically retrieved email
                 amount: priceToPay * 100, // Paystack amount is in kobo
                 currency: 'NGN',
                 ref: `LUX_${Math.floor((Math.random() * 1000000000) + 1)}`, // Generate a reference

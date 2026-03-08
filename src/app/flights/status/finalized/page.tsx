@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
 import ReservationSummaryCard from "@/components/ReservationSummaryCard";
 import { motion } from "framer-motion";
-import { Download, CheckCircle2, Star, Share2, ShieldCheck, Loader2 } from "lucide-react";
+import { Download, CheckCircle2, Star, Share2, ShieldCheck, Loader2, QrCode, Smartphone, Ticket } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 import { useState, useEffect, Suspense } from 'react';
@@ -17,6 +17,43 @@ function FinalizedContent() {
     const bookingId = searchParams.get('id');
     const [isVerified, setIsVerified] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [booking, setBooking] = useState<any>(null);
+
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const handleDownloadTicket = async () => {
+        if (!bookingId) return;
+        setIsDownloading(true);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return;
+
+            const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/ticket`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            });
+
+            if (!response.ok) throw new Error('Failed to download ticket');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `Luxel_Ticket_${booking?.booking_reference || bookingId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error downloading ticket:', error);
+            alert('Failed to download ticket at this time. Please try again later.');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
 
     useEffect(() => {
         const verifyBookingStatus = async () => {
@@ -42,8 +79,8 @@ function FinalizedContent() {
                     const data = await response.json();
                     if (data.status === 'CONFIRMED') {
                         setIsVerified(true);
+                        setBooking(data);
                     } else {
-                        // Not confirmed yet — redirect to the appropriate step
                         router.push(`/flights/status/agent-confirming?${searchParams.toString()}`);
                     }
                 } else {
@@ -79,10 +116,7 @@ function FinalizedContent() {
 
             <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-6 pb-20">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
-                    {/* Main Content Area */}
                     <div className="lg:col-span-2 space-y-10">
-                        {/* Status Card */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -101,17 +135,44 @@ function FinalizedContent() {
                                 <h2 className="text-5xl font-bold text-flight-card mb-6 leading-tight">
                                     Your trip is ready.
                                 </h2>
-                                <p className="text-white/60 leading-relaxed font-light mb-12 text-lg">
-                                    Your ticket has been issued and sent to your email and WhatsApp. You may now download your priority access passes.
+
+                                <div className="bg-white/5 rounded-3xl p-6 mb-10 inline-block border border-white/10 mx-auto transform transition-all hover:scale-105">
+                                    <div className="flex items-center gap-6">
+                                        <QrCode size={48} className="text-flight-card" />
+                                        <div className="text-left">
+                                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-1">Booking Reference (PNR)</span>
+                                            <span className="text-3xl font-black text-white tracking-widest">{booking?.booking_reference || bookingId?.split('-')[0].toUpperCase() || 'LX-592849'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p className="text-white/60 leading-relaxed font-light mb-12 text-base max-w-lg mx-auto">
+                                    Your ticket has been issued and securely sent to your email. You may now download your priority access passes or add them to your mobile wallet.
                                 </p>
 
-                                <div className="flex flex-col sm:flex-row gap-6 w-full max-w-md">
-                                    <button className="flex-1 bg-black text-flight-card px-10 py-6 rounded-2xl flex items-center justify-center gap-4 font-bold text-sm shadow-xl shadow-black/20 hover:scale-105 transition-all active:scale-95 group">
-                                        <Download size={20} className="group-hover:translate-y-1 transition-transform" />
-                                        Download E-Ticket
+                                <div className="flex flex-col sm:flex-row gap-4 w-full justify-center text-left">
+                                    <button
+                                        onClick={handleDownloadTicket}
+                                        disabled={isDownloading}
+                                        className="flex-1 max-w-[200px] bg-flight-card text-black px-6 py-4 rounded-xl flex items-center justify-center gap-4 font-bold text-sm shadow-xl shadow-black/20 hover:scale-[1.02] transition-all active:scale-95 group disabled:opacity-75 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                    >
+                                        {isDownloading ? (
+                                            <Loader2 size={24} className="animate-spin" />
+                                        ) : (
+                                            <Download size={24} className="group-hover:translate-y-1 transition-transform" />
+                                        )}
+                                        <div className="leading-tight">
+                                            <span>{isDownloading ? 'Generating...' : 'Download'}</span>
+                                            <span className="block text-[10px] font-bold text-black/60 uppercase tracking-wider mt-0.5">E-Ticket (PDF)</span>
+                                        </div>
                                     </button>
-                                    <button className="px-6 py-6 rounded-2xl border border-white/20 flex items-center justify-center text-white/40 hover:bg-white/10 transition-all active:scale-95">
-                                        <Share2 size={20} />
+
+                                    <button className="flex-1 max-w-[200px] bg-white/5 text-white border border-white/20 px-6 py-4 rounded-xl flex items-center justify-center gap-4 font-bold text-sm shadow-xl hover:bg-white/10 hover:scale-[1.02] transition-all active:scale-95 group">
+                                        <Smartphone size={24} className="group-hover:-translate-y-1 transition-transform" />
+                                        <div className="leading-tight">
+                                            <span>Add to Wallet</span>
+                                            <span className="block text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Apple / Google</span>
+                                        </div>
                                     </button>
                                 </div>
                             </div>

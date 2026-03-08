@@ -187,6 +187,9 @@ export const initializePayment = async (req: any, res: Response) => {
     }
 };
 
+import { generateTicketPdf } from '../services/ticketService.js';
+import { sendETicketEmail } from '../services/emailService.js';
+
 /**
  * @swagger
  * /api/bookings/verify-payment/{reference}:
@@ -215,6 +218,15 @@ export const verifyPayment = async (req: any, res: Response) => {
         if (verification.data.status === 'success') {
             const bookingId = verification.data.metadata.booking_id;
 
+            // Optional: Check current status to prevent duplicate emails
+            const { data: existingBooking } = await supabaseAdmin
+                .from('bookings')
+                .select('status')
+                .eq('id', bookingId)
+                .single();
+
+            const isAlreadyConfirmed = existingBooking?.status === 'CONFIRMED';
+
             // 2. Update booking status
             const { data, error } = await supabaseAdmin
                 .from('bookings')
@@ -227,6 +239,23 @@ export const verifyPayment = async (req: any, res: Response) => {
                 .single();
 
             if (error) throw error;
+
+            // 3. Dispatch E-Ticket Email if this is the first time confirming
+            if (!isAlreadyConfirmed) {
+                try {
+                    const email = req.user?.email || 'passenger@luxel.travel';
+                    const passengerName = email.split('@')[0].toUpperCase();
+
+                    // Generate PDF Buffer secretly in background
+                    const pdfBuffer = await generateTicketPdf(data, passengerName, email);
+
+                    // Fire Off Email (await it to ensure it sends, or let it run async)
+                    await sendETicketEmail(email, data.booking_reference, pdfBuffer);
+                } catch (emailErr) {
+                    console.error('Failed to send auto-ticket email:', emailErr);
+                    // We do not fail the request if the email fails, the booking is still confirmed.
+                }
+            }
 
             return res.json({
                 message: 'Payment successful and booking confirmed',
@@ -293,8 +322,22 @@ export const confirmPayment = async (req: any, res: Response) => {
 
         if (error) throw error;
 
+        try {
+            const email = req.user?.email || 'passenger@luxel.travel';
+            const passengerName = email.split('@')[0].toUpperCase();
+
+            // Generate PDF Buffer
+            const pdfBuffer = await generateTicketPdf(data, passengerName, email);
+
+            // Dispatch Email
+            await sendETicketEmail(email, data.booking_reference, pdfBuffer);
+        } catch (emailErr) {
+            console.error('Failed to send auto-ticket email for bank confirm:', emailErr);
+            // Non-blocking
+        }
+
         return res.json({
-            message: 'Payment confirmed. Your tickets are being issued.',
+            message: 'Payment confirmed. Your tickets has been issued.',
             booking: data
         });
 

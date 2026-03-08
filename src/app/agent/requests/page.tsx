@@ -8,42 +8,48 @@ import {
     PlaneTakeoff,
     Calendar,
     ArrowUpRight,
-    SearchX
+    SearchX,
+    RefreshCw
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function FlightRequestsPage() {
     const router = useRouter();
     const [requests, setRequests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
 
-    useEffect(() => {
-        const fetchRequests = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
+    const fetchRequests = useCallback(async (showFullLoading = true) => {
+        if (showFullLoading) setLoading(true);
+        else setIsRefreshing(true);
 
-            try {
-                const response = await fetch('http://localhost:5000/api/agent/requests', {
-                    headers: {
-                        'Authorization': `Bearer ${session.access_token}`
-                    }
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    setRequests(data);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        try {
+            const response = await fetch('http://localhost:5000/api/agent/requests', {
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
                 }
-            } catch (error) {
-                console.error('Error fetching agent requests:', error);
-            } finally {
-                setLoading(false);
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setRequests(data);
             }
-        };
-
-        fetchRequests();
+        } catch (error) {
+            console.error('Error fetching agent requests:', error);
+        } finally {
+            setLoading(false);
+            setIsRefreshing(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchRequests();
+    }, [fetchRequests]);
 
     const filteredRequests = requests.filter(req =>
         (req.profiles?.full_name || "Unknown").toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -70,6 +76,18 @@ export default function FlightRequestsPage() {
                             className="w-full bg-white border-none rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-zinc-900 shadow-sm focus:ring-2 focus:ring-amber/10 transition-all"
                         />
                     </div>
+                    <button
+                        onClick={() => fetchRequests(false)}
+                        disabled={isRefreshing}
+                        className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-zinc-400 hover:text-amber shadow-sm transition-all disabled:opacity-50"
+                    >
+                        <motion.div
+                            animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        >
+                            <RefreshCw size={20} />
+                        </motion.div>
+                    </button>
                     <button className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-zinc-400 hover:text-zinc-900 shadow-sm transition-all">
                         <Filter size={20} />
                     </button>
