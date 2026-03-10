@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import ImageUpload from "@/components/ImageUpload";
 
