@@ -1,19 +1,12 @@
 import { Request, Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabaseAdmin } from '../config/supabase.js';
 
 export const getRooms = async (req: Request, res: Response) => {
     try {
         const user = (req as any).user;
         const role = user.user_metadata?.role || 'USER';
 
-        let query = supabase
+        let query = supabaseAdmin
             .from('chat_rooms')
             .select(`
                 *,
@@ -42,7 +35,7 @@ export const getMessages = async (req: Request, res: Response) => {
         const user = (req as any).user;
 
         // Verify user has access to this room
-        const { data: room, error: roomError } = await supabase
+        const { data: room, error: roomError } = await supabaseAdmin
             .from('chat_rooms')
             .select('*')
             .eq('id', roomId)
@@ -57,7 +50,7 @@ export const getMessages = async (req: Request, res: Response) => {
             return res.status(403).json({ message: 'Access denied' });
         }
 
-        const { data: messages, error } = await supabase
+        const { data: messages, error } = await supabaseAdmin
             .from('chat_messages')
             .select(`
                 *,
@@ -79,7 +72,7 @@ export const createOrGetRoom = async (req: Request, res: Response) => {
         const user = (req as any).user;
 
         // Check if a room already exists for this request
-        let query = supabase
+        let query = supabaseAdmin
             .from('chat_rooms')
             .select('*')
             .eq('customer_id', user.id);
@@ -97,7 +90,7 @@ export const createOrGetRoom = async (req: Request, res: Response) => {
         }
 
         // Create new room
-        const { data: newRoom, error: createError } = await supabase
+        const { data: newRoom, error: createError } = await supabaseAdmin
             .from('chat_rooms')
             .insert({
                 customer_id: user.id,

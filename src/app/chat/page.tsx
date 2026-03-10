@@ -72,13 +72,21 @@ function ChatContent() {
                 setRoomInfo(currentRoom);
 
                 // 3. Setup Socket connection
-                const socket = io('https://luxel-8o9h.vercel.app', {
-                    auth: { token: session.access_token }
+                const socketUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'https://luxel-8o9h.vercel.app';
+                console.log('Connecting to socket at:', socketUrl);
+                
+                const socket = io(socketUrl, {
+                    auth: { token: session.access_token },
+                    transports: ['websocket', 'polling']
                 });
 
                 socket.on('connect', () => {
-                    console.log('Connected to chat server');
+                    console.log('✅ Connected to chat server');
                     socket.emit('join_room', roomId);
+                });
+
+                socket.on('connect_error', (err) => {
+                    console.error('❌ Socket connection error:', err.message);
                 });
 
                 socket.on('new_message', (message) => {

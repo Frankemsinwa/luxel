@@ -2,7 +2,7 @@ import axios from 'axios';
 import { supabase } from './supabase';
 
 const api = axios.create({
-  baseURL: 'https://luxel-8o9h.vercel.app/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://luxel-8o9h.vercel.app/api',
   headers: {
     'Content-Type': 'application/json',
   },

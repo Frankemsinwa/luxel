@@ -1,12 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabaseAdmin } from '../config/supabase.js';
 
 export const setupSocket = (server: any) => {
     const io = new Server(server, {
@@ -26,7 +19,7 @@ export const setupSocket = (server: any) => {
             }
 
             // Verify the token with Supabase
-            const { data: { user }, error } = await supabase.auth.getUser(token);
+            const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
 
             if (error || !user) {
                 return next(new Error('Authentication error: Invalid token'));
@@ -54,7 +47,7 @@ export const setupSocket = (server: any) => {
 
             try {
                 // 1. Save to Database via Supabase
-                const { data: message, error } = await supabase
+                const { data: message, error } = await supabaseAdmin
                     .from('chat_messages')
                     .insert({
                         room_id: roomId,
@@ -71,7 +64,7 @@ export const setupSocket = (server: any) => {
                 io.to(roomId).emit('new_message', message);
                 
                 // 3. Update room's last_message_at
-                await supabase
+                await supabaseAdmin
                     .from('chat_rooms')
                     .update({ last_message_at: new Date().toISOString() })
                     .eq('id', roomId);

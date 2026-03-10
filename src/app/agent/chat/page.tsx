@@ -15,7 +15,8 @@ import {
     Clock,
     Loader2,
     CheckCheck as CheckCircle2,
-    User
+    User,
+    MessageSquare
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
@@ -25,6 +26,7 @@ import api from "@/lib/api";
 export default function AgentChatPage() {
     const [rooms, setRooms] = useState<any[]>([]);
     const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+    const selectedRoomIdRef = useRef<string | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState("");
     const [isLoadingRooms, setIsLoadingRooms] = useState(true);
@@ -34,6 +36,11 @@ export default function AgentChatPage() {
     
     const socketRef = useRef<Socket | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Sync ref with state to avoid stale closures
+    useEffect(() => {
+        selectedRoomIdRef.current = selectedRoomId;
+    }, [selectedRoomId]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -56,26 +63,37 @@ export default function AgentChatPage() {
                 setRooms(roomsRes.data);
                 
                 if (roomsRes.data.length > 0) {
-                    setSelectedRoomId(roomsRes.data[0].id);
+                    const firstRoomId = roomsRes.data[0].id;
+                    setSelectedRoomId(firstRoomId);
+                    selectedRoomIdRef.current = firstRoomId;
                 }
 
                 // Socket setup
-                const socket = io('https://luxel-8o9h.vercel.app', {
-                    auth: { token: session.access_token }
+                const socketUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'https://luxel-8o9h.vercel.app';
+                console.log('Agent connecting to socket at:', socketUrl);
+
+                const socket = io(socketUrl, {
+                    auth: { token: session.access_token },
+                    transports: ['websocket', 'polling']
                 });
 
                 socket.on('connect', () => {
-                    console.log('Agent connected to chat server');
+                    console.log('✅ Agent connected to chat server');
+                    // Join existing rooms to receive updates/notifications
+                    roomsRes.data.forEach((room: any) => {
+                        socket.emit('join_room', room.id);
+                    });
+                });
+
+                socket.on('connect_error', (err) => {
+                    console.error('❌ Agent socket connection error:', err.message);
                 });
 
                 socket.on('new_message', (message) => {
-                    // 1. Add to messages if it's for the selected room
-                    setMessages(prev => {
-                        if (message.room_id === selectedRoomId) {
-                            return [...prev, message];
-                        }
-                        return prev;
-                    });
+                    // 1. Add to messages if it's for the selected room (check against Ref)
+                    if (message.room_id === selectedRoomIdRef.current) {
+                        setMessages(prev => [...prev, message]);
+                    }
 
                     // 2. Update rooms list to show last message/update order
                     setRooms(prev => {
@@ -92,7 +110,7 @@ export default function AgentChatPage() {
                 });
 
                 socket.on('user_typing', ({ userId, typing, roomId }) => {
-                    if (roomId === selectedRoomId && userId !== session.user.id) {
+                    if (roomId === selectedRoomIdRef.current && userId !== session.user.id) {
                         setIsTyping(typing);
                     }
                 });
