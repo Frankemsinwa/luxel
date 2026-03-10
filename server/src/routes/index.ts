@@ -5,6 +5,7 @@ import agentRoutes from './agentRoutes.js';
 import authRoutes from './authRoutes.js';
 import tourRoutes from './tourRoutes.js';
 import uploadRoutes from './uploadRoutes.js';
+import chatRoutes from './chatRoutes.js';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/agent', agentRoutes);
 router.use('/auth', authRoutes);
 router.use('/tours', tourRoutes);
 router.use('/uploads', uploadRoutes);
+router.use('/chat', chatRoutes);
 
 export default router;

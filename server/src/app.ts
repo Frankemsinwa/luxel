@@ -1,14 +1,20 @@
 import express, { Request, Response, NextFunction } from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import router from './routes/index.js';
 import swaggerUi from 'swagger-ui-express';
 import { specs } from './config/swagger.js';
+import { setupSocket } from './services/socketService.js';
 
 dotenv.config();
 
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 5000;
+
+// Initialize Socket.io
+setupSocket(httpServer);
 
 // Middleware
 app.use(cors());
@@ -38,7 +44,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     });
 });
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     console.log(`🚀 Luxel Backend running on http://localhost:${PORT}`);
 });
 

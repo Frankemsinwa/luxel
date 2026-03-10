@@ -7,15 +7,31 @@ import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
 import ReservationSummaryCard from "@/components/ReservationSummaryCard";
 import { motion } from "framer-motion";
-import { MessageSquare, Clock, ShieldCheck, Headphones, ArrowRight, XCircle } from "lucide-react";
+import { MessageSquare, Clock, ShieldCheck, Headphones, ArrowRight, XCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import api from "@/lib/api";
 
 function AgentConfirmingContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
     const [rejected, setRejected] = useState(false);
+    const [isStartingChat, setIsStartingChat] = useState(false);
     const reqId = searchParams.get('reqId');
+
+    const handleChatWithConcierge = async () => {
+        setIsStartingChat(true);
+        try {
+            const response = await api.post('/chat/rooms', { requestId: reqId });
+            const roomId = response.data.id;
+            window.open(`/chat?room=${roomId}`, '_blank');
+        } catch (error) {
+            console.error('Failed to start chat:', error);
+            alert('Could not initialize concierge session. Please try again.');
+        } finally {
+            setIsStartingChat(false);
+        }
+    };
 
     useEffect(() => {
         if (!reqId) return;
@@ -177,10 +193,14 @@ function AgentConfirmingContent() {
 
                         {/* Quick Actions Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <button className="bg-zinc-900 text-white p-8 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-all cursor-pointer">
+                            <button 
+                                onClick={handleChatWithConcierge}
+                                disabled={isStartingChat}
+                                className="bg-zinc-900 text-white p-8 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-all cursor-pointer disabled:opacity-70"
+                            >
                                 <div className="flex items-center gap-5">
                                     <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-                                        <MessageSquare size={22} className="text-amber" />
+                                        {isStartingChat ? <Loader2 size={22} className="text-amber animate-spin" /> : <MessageSquare size={22} className="text-amber" />}
                                     </div>
                                     <div className="text-left">
                                         <h3 className="font-bold text-white uppercase tracking-widest text-[10px] mb-1">Direct Access</h3>
