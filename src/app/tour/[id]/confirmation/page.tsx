@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import {
     CheckCircle2,
     Download,
@@ -17,32 +17,106 @@ import {
     ShieldCheck,
     CreditCard
 } from 'lucide-react';
+import { Suspense, useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
-export default function TourConfirmationPage() {
+function ConfirmationContent() {
     const params = useParams();
+    const searchParams = useSearchParams();
+    const bookingId = searchParams.get('bookingId');
+    const [booking, setBooking] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    const bookingDetails = {
-        id: "LUX-882910",
-        title: "Mediterranean Sunset Yacht Tour",
-        image: "/tour-img/img-1.jpg",
-        dates: "September 14 - September 21, 2024",
-        guests: "2 Travelers",
-        location: "Amalfi Coast, Italy",
-        summary: [
-            { label: "Base Fare (2 travelers)", value: "₦1,850,000.00" },
-            { label: "Concierge Service", value: "₦45,000.00" },
-            { label: "Insurance & Taxes", value: "₦65,500.00" }
-        ],
-        total: "₦1,960,500.00"
-    };
+    useEffect(() => {
+        const fetchBooking = async () => {
+            if (!bookingId) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return;
+
+                const response = await fetch(`http://localhost:5000/api/tours/bookings/${bookingId}`, {
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setBooking(data);
+                }
+            } catch (err) {
+                console.error('Error fetching booking details:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBooking();
+    }, [bookingId]);
+
+    if (loading) return (
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+            <div className="w-12 h-12 border-4 border-amber border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest">Retrieving Secure Itinerary...</p>
+        </div>
+    );
+
+    if (!booking) return (
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-6">
+            <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Booking Not Found</h2>
+            <p className="text-zinc-500 font-medium max-w-xs text-center">We couldn't locate your itinerary. If you just completed payment, it may take a moment to synchronize.</p>
+            <Link href="/dashboard" className="px-8 py-3 bg-amber text-black font-black text-xs uppercase tracking-widest rounded-xl">Go to Dashboard</Link>
+        </div>
+    );
+
+    const tour = booking.tour;
+    const bookingRef = booking.id.split('-')[0].toUpperCase();
+    const guestsText = `${booking.guest_count} Traveler${booking.guest_count > 1 ? 's' : ''}`;
+    const formattedDate = new Date(booking.created_at).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    });
+
+    // Reconstruct summary
+    const baseTourPrice = tour.price * booking.guest_count;
+    const taxes = baseTourPrice * 0.075;
+    const serviceFee = 85000;
+    const totalPaid = booking.total_price;
+
+    const summaryItems = [
+        { label: `Base Fare (${guestsText})`, value: `₦${baseTourPrice.toLocaleString()}` },
+        { label: "Concierge & Service fee", value: `₦${serviceFee.toLocaleString()}` },
+        { label: "Taxes & Luxel Insurance", value: `₦${taxes.toLocaleString()}` }
+    ];
+
+    const guide = tour.guides?.[0] || { name: 'Alessandro V.', role: 'Senior Expedition Leader' };
 
     return (
         <div className="bg-[#F8F9FA] min-h-screen">
             <Navbar />
-            <div className="py-24 px-6">
-                <div className="max-w-6xl mx-auto space-y-16">
+            <main className="min-h-screen bg-[#F8F9FA] pt-32 pb-20 px-6">
+                <style jsx global>{`
+                    @media print {
+                        .no-print, 
+                        nav, 
+                        footer, 
+                        button {
+                            display: none !important;
+                        }
+                        main {
+                            padding-top: 0 !important;
+                        }
+                        .print-only {
+                            display: block !important;
+                        }
+                    }
+                `}</style>
+                <div className="max-w-7xl mx-auto space-y-16">
 
                     {/* Success Header */}
                     <div className="text-center space-y-4">
@@ -53,11 +127,11 @@ export default function TourConfirmationPage() {
                         >
                             <CheckCircle2 size={40} />
                         </motion.div>
-                        <h1 className="text-5xl md:text-6xl font-black text-zinc-900 tracking-tight">Your journey begins soon</h1>
+                        <h1 className="text-5xl md:text-6xl font-semibold text-zinc-900 tracking-tight">Your journey begins soon</h1>
                         <p className="text-zinc-500 font-medium text-lg">A confirmation email has been sent to your inbox.</p>
                         <div className="inline-block bg-zinc-100 px-6 py-2.5 rounded-full border border-zinc-200 mt-6">
                             <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mr-2">Booking ID:</span>
-                            <span className="text-[10px] font-black text-amber uppercase tracking-widest">{bookingDetails.id}</span>
+                            <span className="text-[10px] font-black text-amber uppercase tracking-widest">{bookingRef}</span>
                         </div>
                     </div>
 
@@ -69,23 +143,25 @@ export default function TourConfirmationPage() {
                             {/* Main Card */}
                             <div className="bg-white rounded-[3rem] border border-zinc-100 shadow-sm overflow-hidden group">
                                 <div className="relative h-96">
-                                    <Image src={bookingDetails.image} alt={bookingDetails.title} fill className="object-cover" />
+                                    <Image src={tour.hero_image || '/tour-img/fallback.jpg'} alt={tour.title} fill className="object-cover" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                     <div className="absolute bottom-10 left-10 right-10">
-                                        <div className="bg-amber text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-md inline-block mb-4">Confirmed</div>
-                                        <h2 className="text-4xl font-black text-white mb-6 uppercase tracking-tight">{bookingDetails.title}</h2>
+                                        <div className="bg-amber text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-md inline-block mb-4">
+                                            {booking.status}
+                                        </div>
+                                        <h2 className="text-4xl font-black text-white mb-6 uppercase tracking-tight">{tour.title}</h2>
                                         <div className="flex flex-wrap gap-6 text-white/80">
                                             <div className="flex items-center gap-2 text-xs font-bold">
                                                 <Calendar size={16} className="text-amber" />
-                                                {bookingDetails.dates}
+                                                {formattedDate} ({tour.duration})
                                             </div>
                                             <div className="flex items-center gap-2 text-xs font-bold">
                                                 <Users size={16} className="text-amber" />
-                                                {bookingDetails.guests}
+                                                {guestsText}
                                             </div>
                                             <div className="flex items-center gap-2 text-xs font-bold">
                                                 <MapPin size={16} className="text-amber" />
-                                                {bookingDetails.location}
+                                                {tour.location}
                                             </div>
                                         </div>
                                     </div>
@@ -107,11 +183,18 @@ export default function TourConfirmationPage() {
                                         </div>
                                         <div>
                                             <h4 className="font-black text-zinc-900 mb-2">What to Pack</h4>
-                                            <p className="text-xs text-zinc-500 font-medium leading-relaxed">Essential items and weather-appropriate attire for your trip.</p>
+                                            <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                                                {tour.packing_list?.length > 0
+                                                    ? `Don't forget: ${tour.packing_list.slice(0, 3).join(', ')}...`
+                                                    : 'Essential items and weather-appropriate attire for your trip.'
+                                                }
+                                            </p>
                                         </div>
-                                        <button className="text-[10px] font-black text-amber uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform">
-                                            View Checklist <ExternalLink size={12} />
-                                        </button>
+                                        <div className="flex flex-wrap gap-2">
+                                            {tour.packing_list?.slice(0, 5).map((item: string, i: number) => (
+                                                <span key={i} className="text-[9px] font-black text-zinc-400 bg-zinc-50 px-2 py-1 rounded-md uppercase tracking-tight">✓ {item}</span>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     {/* Meeting Point */}
@@ -121,18 +204,16 @@ export default function TourConfirmationPage() {
                                         </div>
                                         <div>
                                             <h4 className="font-black text-zinc-900 mb-2">Meeting Point</h4>
-                                            <p className="text-xs text-zinc-500 font-medium leading-relaxed">Detailed directions and map to the Amalfi Harbor pier.</p>
+                                            <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                                                {tour.meeting_point || 'Detailed directions and map to the local harbor pier.'}
+                                            </p>
                                         </div>
                                         <div className="h-24 rounded-2xl bg-zinc-100 overflow-hidden relative">
-                                            {/* Map placeholder */}
                                             <div className="absolute inset-0 bg-zinc-200" />
                                             <div className="absolute inset-0 flex items-center justify-center">
                                                 <MapPin className="text-amber" size={24} />
                                             </div>
                                         </div>
-                                        <button className="text-[10px] font-black text-amber uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform">
-                                            Get Directions <ExternalLink size={12} />
-                                        </button>
                                     </div>
 
                                     {/* Your Guide */}
@@ -142,11 +223,13 @@ export default function TourConfirmationPage() {
                                         </div>
                                         <div>
                                             <h4 className="font-black text-zinc-900 mb-2">Your Guide</h4>
-                                            <p className="text-xs text-zinc-500 font-medium leading-relaxed">Meet Alessandro, your local expert for this journey.</p>
+                                            <p className="text-xs text-zinc-500 font-medium leading-relaxed">Meet your local expert for this journey.</p>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-[10px] font-black text-white">AV</div>
-                                            <span className="text-xs font-black text-zinc-900">Alessandro V.</span>
+                                            <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-[10px] font-black text-white italic overflow-hidden">
+                                                {guide.image ? <Image src={guide.image} alt={guide.name} width={40} height={40} className="object-cover" /> : guide.name.substring(0, 2).toUpperCase()}
+                                            </div>
+                                            <span className="text-xs font-black text-zinc-900">{guide.name}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -159,7 +242,7 @@ export default function TourConfirmationPage() {
                                 <h3 className="text-2xl font-black text-zinc-900 tracking-tight">Booking Summary</h3>
 
                                 <div className="space-y-6">
-                                    {bookingDetails.summary.map((item, i) => (
+                                    {summaryItems.map((item, i) => (
                                         <div key={i} className="flex justify-between items-center">
                                             <span className="text-xs font-bold text-zinc-400">{item.label}</span>
                                             <span className="text-sm font-black text-zinc-900">{item.value}</span>
@@ -168,27 +251,29 @@ export default function TourConfirmationPage() {
 
                                     <div className="pt-6 border-t border-zinc-50 flex items-center justify-between">
                                         <span className="text-lg font-black text-zinc-900">Total Paid</span>
-                                        <span className="text-3xl font-black text-amber">{bookingDetails.total}</span>
+                                        <span className="text-3xl font-black text-amber">₦{totalPaid.toLocaleString()}</span>
                                     </div>
                                 </div>
 
                                 <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100 space-y-4">
                                     <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center justify-between">
-                                        Payment Method
+                                        Secure Payment Engine
                                         <ShieldCheck size={14} className="text-emerald-500" />
                                     </div>
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-8 bg-zinc-900 rounded-md flex items-center justify-center text-[8px] font-black text-white italic">VISA</div>
-                                        <span className="text-sm font-bold text-zinc-900">•••• 4429</span>
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Paystack_Logo.png/1200px-Paystack_Logo.png" alt="Paystack" className="h-4 object-contain opacity-50" />
+                                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Verified Reference</span>
+                                    </div>
+                                    <div className="text-[10px] font-black text-zinc-900 truncate">
+                                        {booking.preferences?.payment_reference || 'REF-CONFIRMED'}
                                     </div>
                                 </div>
 
-                                <div className="space-y-4">
-                                    <Link href="/dashboard" className="w-full bg-amber hover:bg-amber-dark text-black py-5 rounded-2xl font-black text-xs tracking-widest uppercase flex items-center justify-center gap-3 transition-all shadow-xl shadow-amber/10">
-                                        <LayoutDashboard size={18} />
-                                        Go to Dashboard
-                                    </Link>
-                                    <button className="w-full bg-white border border-zinc-100 hover:bg-zinc-50 text-zinc-900 py-5 rounded-2xl font-black text-xs tracking-widest uppercase flex items-center justify-center gap-3 transition-all">
+                                <div className="space-y-4 no-print">
+                                    <button
+                                        onClick={() => window.print()}
+                                        className="w-full bg-amber hover:bg-amber-dark text-black py-5 rounded-2xl font-black text-xs tracking-widest uppercase flex items-center justify-center gap-3 transition-all shadow-xl shadow-amber/10"
+                                    >
                                         <Download size={18} />
                                         Download Itinerary
                                     </button>
@@ -203,8 +288,21 @@ export default function TourConfirmationPage() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </main>
             <Footer />
         </div>
+    );
+}
+
+export default function TourConfirmationPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+                <div className="w-12 h-12 border-4 border-amber border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest">Synchronizing Journey...</p>
+            </div>
+        }>
+            <ConfirmationContent />
+        </Suspense>
     );
 }

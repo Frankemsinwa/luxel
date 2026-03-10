@@ -13,12 +13,17 @@ export const generateTicketPdf = async (booking: any, passengerName: string, ema
     const logoBase64 = fs.readFileSync(logoFullSizePath, { encoding: 'base64' });
     const logoDataUrl = `data:image/png;base64,${logoBase64}`;
 
+    const firstPassenger = booking.flight_data?.passengers?.[0];
+    const passengerDisplayName = firstPassenger
+        ? `${firstPassenger.firstName} ${firstPassenger.lastName}`.toUpperCase()
+        : (passengerName || email?.split('@')[0].toUpperCase() || 'VIP PASSENGER');
+
     // 1. Prepare Template Data
     const templateData = {
         logoPath: logoDataUrl,
         pnr: booking.booking_reference || booking.id.split('-')[0].toUpperCase(),
-        passengerName: passengerName || email?.split('@')[0].toUpperCase() || 'VIP PASSENGER',
-        email: email || 'passenger@luxel.travel',
+        passengerName: passengerDisplayName,
+        email: email || booking.flight_data?.contact?.email || 'passenger@luxel.travel',
         flight: {
             from: booking.flight_data?.departureCode || 'LHR',
             fromCity: booking.flight_data?.departureCity || 'London',

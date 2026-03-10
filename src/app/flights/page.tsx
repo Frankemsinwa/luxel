@@ -296,27 +296,38 @@ function FlightsContent() {
                                         {/* Flight Info */}
                                         <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 items-center gap-8 md:gap-4">
                                             <div className="flex items-center gap-6">
-                                                <div className="w-16 h-16 rounded-2xl bg-black/10 border border-black/10 flex items-center justify-center text-black font-black group-hover:bg-black group-hover:text-amber transition-colors">
-                                                    <div className="text-xs font-black">{flight.logo}</div>
+                                                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-3 border border-black/5 group-hover:bg-white transition-colors overflow-hidden">
+                                                    {flight.logo && flight.logo.startsWith('http') ? (
+                                                        <img
+                                                            src={flight.logo}
+                                                            alt={flight.airline}
+                                                            className="w-full h-full object-contain"
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).parentElement!.innerHTML = `<span class="text-xs font-semibold uppercase">${flight.airline}</span>`;
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className="text-xs font-semibold">{flight.logo}</div>
+                                                    )}
                                                 </div>
                                                 <div>
-                                                    <div className="text-2xl font-bold text-black">{flight.departureTime}</div>
+                                                    <div className="text-2xl font-semibold text-black">{flight.departureTime}</div>
                                                     <div className="text-sm font-medium text-black/60 tracking-widest">{flight.departureCode} • {flight.departureCity}</div>
                                                 </div>
                                             </div>
 
                                             <div className="flex flex-col items-center justify-center px-4">
-                                                <div className="text-[10px] font-bold text-black/50 uppercase tracking-widest mb-3">{flight.duration}</div>
+                                                <div className="text-[10px] font-semibold text-black/50 uppercase tracking-widest mb-3">{flight.duration}</div>
                                                 <div className="relative w-full h-[2px] bg-black/10 mb-2">
                                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 border-2 border-black bg-amber rounded-full group-hover:scale-125 transition-transform" />
                                                     <div className="absolute top-1/2 left-0 -translate-y-1/2 w-1.5 h-1.5 bg-black/30 rounded-full" />
                                                     <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1.5 h-1.5 bg-black/30 rounded-full" />
                                                 </div>
-                                                <div className="text-[10px] font-bold text-black uppercase tracking-widest">{flight.stops}</div>
+                                                <div className="text-[10px] font-semibold text-black uppercase tracking-widest">{flight.stops}</div>
                                             </div>
 
                                             <div className="text-right">
-                                                <div className="text-2xl font-bold text-black">{flight.arrivalTime}</div>
+                                                <div className="text-2xl font-semibold text-black">{flight.arrivalTime}</div>
                                                 <div className="text-sm font-medium text-black/60 tracking-widest">{flight.arrivalCode}-{flight.arrivalCity}</div>
                                             </div>
                                         </div>
@@ -326,12 +337,13 @@ function FlightsContent() {
 
                                         {/* Pricing & Action */}
                                         <div className="w-full lg:w-48 text-center lg:text-right">
-                                            <div className="text-4xl font-bold text-black mb-1">₦{flight.price.toLocaleString()}</div>
-                                            <div className="text-[10px] font-bold text-black/50 uppercase tracking-widest mb-6">Round-trip per person</div>
+                                            <div className="text-4xl font-semibold text-black mb-1">₦{flight.price.toLocaleString()}</div>
+                                            <div className="text-[10px] font-semibold text-black/50 uppercase tracking-widest mb-6">Round-trip per person</div>
                                             <button
                                                 onClick={() => {
                                                     const params = new URLSearchParams({
                                                         ...Object.fromEntries(searchParams.entries()),
+                                                        id: flight.id,
                                                         price: flight.price.toString(),
                                                         airline: flight.airline,
                                                         logo: flight.logo,
@@ -346,7 +358,7 @@ function FlightsContent() {
                                                     });
                                                     router.push(`/flights/details?${params.toString()}`);
                                                 }}
-                                                className="w-full bg-black text-flight-card py-4 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black/80 hover:scale-105 active:scale-95 transition-all"
+                                                className="w-full bg-black text-flight-card py-4 rounded-2xl font-semibold text-sm shadow-lg shadow-black/20 hover:bg-black/80 hover:scale-105 active:scale-95 transition-all"
                                             >
                                                 Select
                                             </button>

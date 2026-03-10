@@ -75,3 +75,54 @@ export const sendETicketEmail = async (
         throw error;
     }
 };
+
+/**
+ * Notify User about Tour Booking
+ */
+export const sendTourConfirmationEmail = async (userEmail: string, tourTitle: string, bookingRef: string) => {
+    try {
+        const mailOptions = {
+            from: process.env.SMTP_FROM || '"Luxel Concierge" <concierge@luxel.travel>',
+            to: userEmail,
+            subject: `Experience Confirmed: ${tourTitle}`,
+            html: `
+                <div style="font-family: 'Segoe UI', Arial, sans-serif; color: #111; max-width: 600px; margin: auto; padding: 40px; border: 1px solid #eee; border-radius: 20px;">
+                    <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 24px;">Your Journey Begins.</h1>
+                    <p style="font-size: 16px; color: #555; line-height: 1.6;">Your reservation for <strong>${tourTitle}</strong> has been received by our global desk.</p>
+                    <div style="background: #fcfcfc; padding: 20px; border-radius: 12px; margin: 30px 0;">
+                        <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #999; margin: 0;">Reservation Reference</p>
+                        <p style="font-size: 20px; font-weight: bold; margin: 5px 0; color: #dbb35e;">#${bookingRef.substring(0, 8).toUpperCase()}</p>
+                    </div>
+                    <p style="font-size: 14px; color: #555;">An expert travel designer will contact you within 24 hours to personalize your itinerary details.</p>
+                </div>
+            `
+        };
+        return await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Tour email error:', error);
+    }
+};
+
+/**
+ * Notify Agent about incoming high-intent lead
+ */
+export const sendAgentTourNotification = async (agentEmail: string, tourTitle: string, guestName: string) => {
+    try {
+        const mailOptions = {
+            from: process.env.SMTP_FROM || '"Luxel System" <system@luxel.travel>',
+            to: agentEmail,
+            subject: `🔥 NEW High-Intent Lead: ${tourTitle}`,
+            html: `
+                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ffd700;">
+                    <h2>New Tour Booking Request</h2>
+                    <p><strong>Experience:</strong> ${tourTitle}</p>
+                    <p><strong>Guest:</strong> ${guestName}</p>
+                    <p>Please log in to the Agent Dashboard to review requirements and reach out to the guest.</p>
+                </div>
+            `
+        };
+        return await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Agent notification error:', error);
+    }
+};

@@ -53,7 +53,11 @@ export const createBooking = async (req: any, res: Response) => {
             .from('bookings')
             .insert({
                 user_id: userId,
-                flight_data: flightData,
+                flight_data: {
+                    ...flightData,
+                    passengers: passengers,
+                    contact: contactInfo
+                },
                 total_price: totalPrice,
                 status: 'PENDING',
                 booking_reference: `LX-${Math.random().toString(36).substring(2, 8).toUpperCase()}`

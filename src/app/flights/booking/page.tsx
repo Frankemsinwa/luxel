@@ -11,7 +11,8 @@ import {
     Check,
     ChevronDown,
     Contact,
-    Globe
+    Globe,
+    Loader2
 } from "lucide-react";
 
 const countries = [
@@ -27,18 +28,53 @@ const months = [
 function PassengerDetailsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const flightId = searchParams.get('id');
 
-    // Get context from URL
+    const [flightDetails, setFlightDetails] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
     const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
     const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
-    const totalPrice = Number(searchParams.get('price')) || 945000;
     const taxes = 45000;
-    const baseFare = totalPrice - taxes;
 
     const [passengerData, setPassengerData] = useState<any[]>([]);
     const [contactEmail, setContactEmail] = useState('');
     const [contactPhone, setContactPhone] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitStep, setSubmitStep] = useState(0); // 0: Idle, 1: Verifying, 2: Creating, 3: Finalizing
+    const [showErrors, setShowErrors] = useState(false);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user?.email) {
+                setContactEmail(session.user.email);
+            }
+        };
+        fetchUser();
+    }, []);
+
+    useEffect(() => {
+        const fetchDetails = async () => {
+            if (!flightId) {
+                setIsLoading(false);
+                return;
+            }
+            try {
+                const response = await fetch(`http://localhost:5000/api/flights/${flightId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setFlightDetails(data);
+                }
+            } catch (error) {
+                console.error("Error fetching flight details for booking:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDetails();
+    }, [flightId]);
 
     useEffect(() => {
         setPassengerData(
@@ -48,13 +84,42 @@ function PassengerDetailsContent() {
                 firstName: '',
                 lastName: '',
                 gender: 'Male',
-                nationality: 'United Kingdom'
+                nationality: 'United Kingdom',
+                dobDay: '',
+                dobMonth: '',
+                dobYear: '',
+                passportNumber: ''
             }))
         );
     }, [passengerCount]);
 
+    const totalPrice = flightDetails?.price || Number(searchParams.get('price')) || 0;
+    const baseFare = totalPrice - taxes;
+
+    const isFormValid = () => {
+        const passengersValid = passengerData.every(p =>
+            p.firstName.trim() !== '' &&
+            p.lastName.trim() !== '' &&
+            p.dobDay !== '' &&
+            p.dobMonth !== '' &&
+            p.dobYear !== '' &&
+            p.passportNumber.trim() !== ''
+        );
+        const contactValid = contactEmail.trim() !== '' && contactPhone.trim() !== '';
+        return passengersValid && contactValid;
+    };
+
     const handleRequestReservation = async () => {
+        if (!isFormValid()) {
+            setShowErrors(true);
+            const firstError = document.querySelector('.border-red-500');
+            if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
         setIsSubmitting(true);
+        setSubmitStep(1);
+
         try {
             const { data: { session } } = await supabase.auth.getSession();
 
@@ -64,12 +129,16 @@ function PassengerDetailsContent() {
                 return;
             }
 
+            // Artificial delay for premium feel
+            await new Promise(r => setTimeout(r, 1500));
+            setSubmitStep(2);
+
             const bookingPayload = {
                 flightData: {
-                    id: searchParams.get('id') || 'FL-DYNAMIC',
-                    departureCode: searchParams.get('depCode'),
-                    arrivalCode: searchParams.get('arrCode'),
-                    airline: searchParams.get('airline'),
+                    id: flightId,
+                    departureCode: flightDetails?.departureCode || searchParams.get('depCode'),
+                    arrivalCode: flightDetails?.arrivalCode || searchParams.get('arrCode'),
+                    airline: flightDetails?.airline || searchParams.get('airline'),
                     price: totalPrice
                 },
                 totalPrice: totalPrice * passengerCount,
@@ -92,15 +161,16 @@ function PassengerDetailsContent() {
             const data = await response.json();
 
             if (response.ok) {
-                // Redirect to Confirmation Page for Agent Processing
+                setSubmitStep(3);
+                await new Promise(r => setTimeout(r, 800));
                 router.push(`/flights/confirmation?ref=${data.bookingRef}&id=${data.bookingId}&reqId=${data.requestId}&${searchParams.toString()}`);
             } else {
                 alert(`Error: ${data.message}`);
+                setIsSubmitting(false);
             }
         } catch (error) {
             console.error('Reservation error:', error);
             alert('An unexpected error occurred. Please try again.');
-        } finally {
             setIsSubmitting(false);
         }
     };
@@ -108,6 +178,15 @@ function PassengerDetailsContent() {
     const updatePassenger = (id: number, field: string, value: string) => {
         setPassengerData(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-amber/5 flex flex-col items-center justify-center">
+                <Loader2 size={40} className="text-amber animate-spin mb-4" />
+                <p className="text-zinc-500 font-semibold text-sm">Preparing your reservation suite...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-amber/5 flex flex-col">
@@ -130,17 +209,17 @@ function PassengerDetailsContent() {
                                     <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center text-black">
                                         <User size={24} />
                                     </div>
-                                    <h2 className="text-2xl font-bold text-black">Passenger {p.id}</h2>
+                                    <h2 className="text-2xl font-semibold text-black">Passenger {p.id}</h2>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                     <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Title</label>
+                                        <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">Title</label>
                                         <div className="relative">
                                             <select
                                                 value={p.title}
                                                 onChange={(e) => updatePassenger(p.id, 'title', e.target.value)}
-                                                className="w-full bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black focus:ring-2 focus:ring-black/20 appearance-none cursor-pointer"
+                                                className="w-full bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black focus:ring-2 focus:ring-black/20 appearance-none cursor-pointer"
                                             >
                                                 <option>Mr.</option>
                                                 <option>Mrs.</option>
@@ -151,65 +230,91 @@ function PassengerDetailsContent() {
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">First name</label>
+                                        <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">First name</label>
                                         <input
                                             type="text"
+                                            value={p.firstName}
+                                            onChange={(e) => updatePassenger(p.id, 'firstName', e.target.value)}
                                             placeholder="As shown on passport"
-                                            className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black placeholder:text-black/30 focus:ring-2 focus:ring-black/20"
+                                            className={`bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black placeholder:text-black/30 focus:ring-2 focus:ring-black/20 ${showErrors && !p.firstName ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
                                         />
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Last name</label>
+                                        <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">Last name</label>
                                         <input
                                             type="text"
+                                            value={p.lastName}
+                                            onChange={(e) => updatePassenger(p.id, 'lastName', e.target.value)}
                                             placeholder="As shown on passport"
-                                            className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black placeholder:text-black/30 focus:ring-2 focus:ring-black/20"
+                                            className={`bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black placeholder:text-black/30 focus:ring-2 focus:ring-black/20 ${showErrors && !p.lastName ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
                                         />
                                     </div>
 
                                     <div className="flex flex-col gap-2 lg:col-span-2">
-                                        <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Date of birth</label>
+                                        <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">Date of birth</label>
                                         <div className="grid grid-cols-3 gap-4">
-                                            <input type="number" placeholder="DD" className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black text-center focus:ring-2 focus:ring-black/20" />
+                                            <input
+                                                type="number"
+                                                placeholder="DD"
+                                                value={p.dobDay}
+                                                onChange={(e) => updatePassenger(p.id, 'dobDay', e.target.value)}
+                                                className={`bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black text-center focus:ring-2 focus:ring-black/20 ${showErrors && !p.dobDay ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
+                                            />
                                             <div className="relative">
-                                                <select className="w-full bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black appearance-none cursor-pointer focus:ring-2 focus:ring-black/20">
+                                                <select
+                                                    value={p.dobMonth}
+                                                    onChange={(e) => updatePassenger(p.id, 'dobMonth', e.target.value)}
+                                                    className={`w-full bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black appearance-none cursor-pointer focus:ring-2 focus:ring-black/20 ${showErrors && !p.dobMonth ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
+                                                >
                                                     <option value="">Month</option>
                                                     {months.map(m => <option key={m} value={m}>{m}</option>)}
                                                 </select>
                                                 <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-black/50" />
                                             </div>
-                                            <input type="number" placeholder="YYYY" className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black text-center focus:ring-2 focus:ring-black/20" />
+                                            <input
+                                                type="number"
+                                                placeholder="YYYY"
+                                                value={p.dobYear}
+                                                onChange={(e) => updatePassenger(p.id, 'dobYear', e.target.value)}
+                                                className={`bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black text-center focus:ring-2 focus:ring-black/20 ${showErrors && !p.dobYear ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
+                                            />
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Gender</label>
+                                        <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">Gender</label>
                                         <div className="flex items-center gap-8 h-full">
                                             {['Male', 'Female'].map(g => (
                                                 <label key={g} className="flex items-center gap-3 cursor-pointer group" onClick={() => updatePassenger(p.id, 'gender', g)}>
                                                     <div className={`w-5 h-5 rounded-full border-2 transition-all flex items-center justify-center p-1 ${p.gender === g ? 'border-black bg-black' : 'border-black/30'}`}>
                                                         {p.gender === g && <div className="w-full h-full bg-amber rounded-full" />}
                                                     </div>
-                                                    <span className={`text-sm font-bold transition-colors ${p.gender === g ? 'text-black' : 'text-black/50'}`}>{g}</span>
+                                                    <span className={`text-sm font-semibold transition-colors ${p.gender === g ? 'text-black' : 'text-black/50'}`}>{g}</span>
                                                 </label>
                                             ))}
                                         </div>
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Nationality</label>
+                                        <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">Nationality</label>
                                         <div className="relative">
-                                            <select className="w-full bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black appearance-none cursor-pointer focus:ring-2 focus:ring-black/20">
+                                            <select
+                                                value={p.nationality}
+                                                onChange={(e) => updatePassenger(p.id, 'nationality', e.target.value)}
+                                                className="w-full bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black appearance-none cursor-pointer focus:ring-2 focus:ring-black/20"
+                                            >
                                                 {countries.map(c => <option key={c} value={c}>{c}</option>)}
                                             </select>
                                             <Globe size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-black/30" />
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-2 lg:col-span-2">
-                                        <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Passport Number</label>
+                                        <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">Passport Number</label>
                                         <input
                                             type="text"
+                                            value={p.passportNumber}
+                                            onChange={(e) => updatePassenger(p.id, 'passportNumber', e.target.value)}
                                             placeholder="Letter & digits"
-                                            className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black placeholder:text-black/30 focus:ring-2 focus:ring-black/20"
+                                            className={`bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black placeholder:text-black/30 focus:ring-2 focus:ring-black/20 ${showErrors && !p.passportNumber ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
                                         />
                                     </div>
                                 </div>
@@ -236,7 +341,7 @@ function PassengerDetailsContent() {
                                         value={contactEmail}
                                         onChange={(e) => setContactEmail(e.target.value)}
                                         placeholder="your@email.com"
-                                        className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black focus:ring-2 focus:ring-black/20"
+                                        className={`bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black focus:ring-2 focus:ring-black/20 ${showErrors && !contactEmail ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-2">
@@ -253,7 +358,7 @@ function PassengerDetailsContent() {
                                             value={contactPhone}
                                             onChange={(e) => setContactPhone(e.target.value)}
                                             placeholder="Mobile number"
-                                            className="flex-1 bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black focus:ring-2 focus:ring-black/20"
+                                            className={`flex-1 bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black focus:ring-2 focus:ring-black/20 ${showErrors && !contactPhone ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
                                         />
                                     </div>
                                 </div>
@@ -291,6 +396,39 @@ function PassengerDetailsContent() {
                     </div>
                 </div>
             </main>
+
+            {isSubmitting && (
+                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-[3rem] p-12 max-w-md w-full text-center shadow-2xl"
+                    >
+                        <div className="relative w-20 h-20 mx-auto mb-8">
+                            <div className="absolute inset-0 rounded-full border-4 border-black/5" />
+                            <motion.div
+                                className="absolute inset-0 rounded-full border-4 border-t-black"
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <Check className={`text-black transition-all duration-500 ${submitStep === 3 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} size={32} />
+                            </div>
+                        </div>
+
+                        <h3 className="text-2xl font-bold text-zinc-900 mb-2">
+                            {submitStep === 1 && "Verifying Routing"}
+                            {submitStep === 2 && "Securing Private Rate"}
+                            {submitStep === 3 && "Request Dispatched"}
+                        </h3>
+                        <p className="text-zinc-500 text-sm font-medium leading-relaxed">
+                            {submitStep === 1 && "Confirming real-time availability with our Global GDS network..."}
+                            {submitStep === 2 && "Locking in your exclusive elite fare for the next 2 hours..."}
+                            {submitStep === 3 && "Your VIP concierge desk has received the request successfully."}
+                        </p>
+                    </motion.div>
+                </div>
+            )}
 
             <Footer />
         </div>

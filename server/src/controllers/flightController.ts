@@ -82,6 +82,17 @@ export const searchFlights = async (req: Request, res: Response) => {
  *         description: Flight details
  */
 export const getFlightDetails = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    res.json({ id, message: 'Flight details coming soon in Phase 3' });
+    try {
+        const { id } = req.params;
+        const flight = await amadeusService.getFlightById(id as string);
+
+        if (!flight) {
+            return res.status(404).json({ message: 'Flight details not found or expired' });
+        }
+
+        return res.json(flight);
+    } catch (error) {
+        console.error('Flight details controller error:', error);
+        return res.status(500).json({ message: 'Internal server error while fetching flight details' });
+    }
 };

@@ -14,7 +14,7 @@ import {
     Headset,
     Gem
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -33,35 +33,25 @@ export default function TourLandingPage() {
         router.push(`/tour/search?${params.toString()}`);
     };
 
-    const featuredTours = [
-        {
-            id: 'tuscan-silk-road',
-            title: 'The Tuscan Silk Road',
-            description: 'Culinary excellence through the rolling hills of Italy focusing on fine wines and truffles.',
-            image: '/tour-img/img-1.jpg',
-            price: '₦1,850,000',
-            duration: '7 Days',
-            rating: 5,
-        },
-        {
-            id: 'kyoto-zen-retreat',
-            title: 'Kyoto Zen Retreat',
-            description: 'Mindful immersion in the ancient temples of Japan with exclusive tea ceremonies.',
-            image: '/tour-img/img-2.jpg',
-            price: '₦2,450,000',
-            duration: '5 Days',
-            rating: 5
-        },
-        {
-            id: 'wilderness-refined',
-            title: 'Wilderness Refined',
-            description: 'Ultimate luxury safari experience in the Serengeti with private guides.',
-            image: '/tour-img/img-3.jpg',
-            price: '₦4,500,000',
-            duration: '10 Days',
-            rating: 5
-        }
-    ];
+    const [tours, setTours] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchTours = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/tours');
+                if (response.ok) {
+                    const data = await response.json();
+                    setTours(data);
+                }
+            } catch (err) {
+                console.error('Error fetching tours:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchTours();
+    }, []);
 
     const themes = [
         { name: 'Cultural Journeys', image: '/culture.jpeg' },
@@ -184,7 +174,9 @@ export default function TourLandingPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    {featuredTours.map((tour, i) => (
+                    {isLoading ? (
+                        <div className="col-span-3 py-20 text-center font-bold text-zinc-300">Synchronizing with luxury global desk...</div>
+                    ) : tours.length > 0 ? tours.map((tour, i) => (
                         <motion.div
                             key={tour.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -193,9 +185,9 @@ export default function TourLandingPage() {
                             viewport={{ once: true }}
                             className="group cursor-pointer"
                         >
-                            <Link href={`/tour/${tour.id}`}>
+                            <Link href={`/tour/${tour.slug}`}>
                                 <div className="relative h-[400px] rounded-[2.5rem] overflow-hidden mb-6 shadow-lg transform group-hover:scale-[1.02] transition-all">
-                                    <Image src={tour.image} alt={tour.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                                    <Image src={tour.hero_image || '/tour-img/fallback.jpg'} alt={tour.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                                     <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-900">
                                         {tour.duration}
                                     </div>
@@ -205,7 +197,7 @@ export default function TourLandingPage() {
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-xl font-bold text-zinc-900">{tour.title}</h3>
                                         <div className="flex gap-0.5">
-                                            {[...Array(tour.rating)].map((_, i) => (
+                                            {[...Array(Math.floor(tour.rating || 5))].map((_, i) => (
                                                 <Star key={i} size={14} className="fill-amber text-amber" />
                                             ))}
                                         </div>
@@ -215,12 +207,14 @@ export default function TourLandingPage() {
                                     </p>
                                     <div className="pt-2">
                                         <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-widest">From</span>
-                                        <p className="text-2xl font-black text-amber">{tour.price} <span className="text-xs text-zinc-400 font-medium">PP</span></p>
+                                        <p className="text-2xl font-black text-amber">₦{Number(tour.price).toLocaleString()} <span className="text-xs text-zinc-400 font-medium">PP</span></p>
                                     </div>
                                 </div>
                             </Link>
                         </motion.div>
-                    ))}
+                    )) : (
+                        <div className="col-span-3 py-20 text-center font-bold text-zinc-300">No journeys available. Please check back soon.</div>
+                    )}
                 </div>
             </section>
 
