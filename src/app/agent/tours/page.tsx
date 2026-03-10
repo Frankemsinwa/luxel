@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { motion } from "framer-motion";
 import {
     Plus,
@@ -27,22 +28,14 @@ export default function ToursManagementPage() {
     useEffect(() => {
         const fetchTours = async () => {
             try {
+                const response = await api.get('/tours/my/listings');
+                setTours(response.data);
+            } catch (error) {
+                console.error('Error fetching tours:', error);
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) {
                     router.push('/');
-                    return;
                 }
-
-                const response = await fetch('http://localhost:5000/api/tours/my/listings', {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setTours(data);
-                }
-            } catch (error) {
-                console.error('Error fetching tours:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -55,19 +48,9 @@ export default function ToursManagementPage() {
         if (!confirm('Are you sure you want to archive this tour? It will be removed from public listings.')) return;
 
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
+            const response = await api.patch(`/tours/${id}`, { status: 'ARCHIVED' });
 
-            const response = await fetch(`http://localhost:5000/api/tours/${id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({ status: 'ARCHIVED' })
-            });
-
-            if (response.ok) {
+            if (response.status === 200) {
                 setTours(tours.map(t => t.id === id ? { ...t, status: 'ARCHIVED' } : t));
             } else {
                 alert('Failed to archive experience.');

@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { motion, AnimatePresence } from "framer-motion";
 import {
     ChevronLeft,
@@ -59,39 +60,30 @@ export default function EditTourPage() {
     useEffect(() => {
         const fetchTour = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) {
-                    router.push('/');
-                    return;
-                }
-
                 // Fetching by ID from our backend
-                const response = await fetch(`http://localhost:5000/api/tours/id/${tourId}`, {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                const response = await api.get(`/tours/id/${tourId}`);
+                const data = response.data;
+                setFormData({
+                    ...data,
+                    price: data.price.toString(),
+                    available_slots: data.available_slots?.toString() || '50',
+                    tags: data.tags || [],
+                    themes: data.themes || [],
+                    itinerary: data.itinerary || [],
+                    guides: data.guides || [],
+                    included: data.included || [],
+                    excluded: data.excluded || [],
+                    meeting_point: data.meeting_point || '',
+                    packing_list: data.packing_list || []
                 });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setFormData({
-                        ...data,
-                        price: data.price.toString(),
-                        available_slots: data.available_slots?.toString() || '50',
-                        tags: data.tags || [],
-                        themes: data.themes || [],
-                        itinerary: data.itinerary || [],
-                        guides: data.guides || [],
-                        included: data.included || [],
-                        excluded: data.excluded || [],
-                        meeting_point: data.meeting_point || '',
-                        packing_list: data.packing_list || []
-                    });
+            } catch (error: any) {
+                console.error('Fetch error:', error);
+                if (error.response?.status === 401) {
+                    router.push('/');
                 } else {
                     alert('Failed to fetch tour details');
                     router.push('/agent/tours');
                 }
-            } catch (error) {
-                console.error('Fetch error:', error);
-                alert('An error occurred while fetching tour details');
             } finally {
                 setIsFetching(false);
             }
@@ -142,31 +134,20 @@ export default function EditTourPage() {
     const handleSubmit = async () => {
         setIsLoading(true);
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) throw new Error('Not authenticated');
-
-            const response = await fetch(`http://localhost:5000/api/tours/${tourId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({
-                    ...formData,
-                    price: Number(formData.price),
-                    available_slots: Number(formData.available_slots)
-                })
+            const response = await api.patch(`/tours/${tourId}`, {
+                ...formData,
+                price: Number(formData.price),
+                available_slots: Number(formData.available_slots)
             });
 
-            if (response.ok) {
+            if (response.status === 200) {
                 router.push('/agent/tours');
             } else {
-                const err = await response.json();
-                alert(`Error: ${err.message}`);
+                alert(`Error: ${response.data.message}`);
             }
         } catch (error: any) {
             console.error('Update error:', error);
-            alert(`Failed to update tour: ${error.message}`);
+            alert(`Failed to update tour: ${error.response?.data?.message || error.message}`);
         } finally {
             setIsLoading(false);
         }

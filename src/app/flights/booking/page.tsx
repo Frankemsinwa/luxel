@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, useEffect } from 'react';
 import Navbar from "@/components/Navbar";
@@ -61,11 +62,8 @@ function PassengerDetailsContent() {
                 return;
             }
             try {
-                const response = await fetch(`http://localhost:5000/api/flights/${flightId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setFlightDetails(data);
-                }
+                const response = await api.get(`/flights/${flightId}`);
+                setFlightDetails(response.data);
             } catch (error) {
                 console.error("Error fetching flight details for booking:", error);
             } finally {
@@ -149,28 +147,20 @@ function PassengerDetailsContent() {
                 }
             };
 
-            const response = await fetch('http://localhost:5000/api/bookings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify(bookingPayload)
-            });
+            const response = await api.post('/bookings', bookingPayload);
 
-            const data = await response.json();
-
-            if (response.ok) {
+            if (response.status === 200 || response.status === 201) {
+                const data = response.data;
                 setSubmitStep(3);
                 await new Promise(r => setTimeout(r, 800));
                 router.push(`/flights/confirmation?ref=${data.bookingRef}&id=${data.bookingId}&reqId=${data.requestId}&${searchParams.toString()}`);
             } else {
-                alert(`Error: ${data.message}`);
+                alert(`Error: ${response.data.message}`);
                 setIsSubmitting(false);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Reservation error:', error);
-            alert('An unexpected error occurred. Please try again.');
+            alert(error.response?.data?.message || 'An unexpected error occurred. Please try again.');
             setIsSubmitting(false);
         }
     };

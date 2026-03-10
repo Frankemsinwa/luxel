@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
@@ -25,19 +26,11 @@ function FinalizedContent() {
         if (!bookingId) return;
         setIsDownloading(true);
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
-
-            const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/ticket`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`
-                }
+            const response = await api.get(`/bookings/${bookingId}/ticket`, {
+                responseType: 'blob'
             });
 
-            if (!response.ok) throw new Error('Failed to download ticket');
-
-            const blob = await response.blob();
+            const blob = new Blob([response.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.style.display = 'none';
@@ -63,32 +56,21 @@ function FinalizedContent() {
             }
 
             try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) {
-                    router.push('/');
-                    return;
+                const response = await api.get(`/bookings/${bookingId}/status`);
+                const data = response.data;
+                if (data.status === 'CONFIRMED') {
+                    setIsVerified(true);
+                    setBooking(data);
+                } else {
+                    router.push(`/flights/status/agent-confirming?${searchParams.toString()}`);
                 }
-
-                const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
-                    headers: {
-                        'Authorization': `Bearer ${session.access_token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.status === 'CONFIRMED') {
-                        setIsVerified(true);
-                        setBooking(data);
-                    } else {
-                        router.push(`/flights/status/agent-confirming?${searchParams.toString()}`);
-                    }
+            } catch (err: any) {
+                console.error('Status check error:', err);
+                if (err.response?.status === 401) {
+                    router.push('/');
                 } else {
                     router.push('/flights');
                 }
-            } catch (err) {
-                console.error('Status check error:', err);
-                router.push('/flights');
             } finally {
                 setIsLoading(false);
             }

@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { motion, AnimatePresence } from "framer-motion";
 import {
     ChevronLeft,
@@ -95,31 +96,20 @@ export default function CreateTourPage() {
     const handleSubmit = async () => {
         setIsLoading(true);
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) throw new Error('Not authenticated');
-
-            const response = await fetch('http://localhost:5000/api/tours', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({
-                    ...formData,
-                    price: Number(formData.price),
-                    available_slots: Number(formData.available_slots)
-                })
+            const response = await api.post('/tours', {
+                ...formData,
+                price: Number(formData.price),
+                available_slots: Number(formData.available_slots)
             });
 
-            if (response.ok) {
+            if (response.status === 201 || response.status === 200) {
                 router.push('/agent/tours');
             } else {
-                const err = await response.json();
-                alert(`Error: ${err.message}`);
+                alert(`Error: ${response.data.message}`);
             }
         } catch (error: any) {
             console.error('Submit error:', error);
-            alert(`Failed to save tour: ${error.message}`);
+            alert(`Failed to save tour: ${error.response?.data?.message || error.message}`);
         } finally {
             setIsLoading(false);
         }

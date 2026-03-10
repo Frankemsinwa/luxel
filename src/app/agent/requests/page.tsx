@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { motion } from "framer-motion";
 import {
     Search,
@@ -26,26 +27,19 @@ export default function FlightRequestsPage() {
         if (showFullLoading) setLoading(true);
         else setIsRefreshing(true);
 
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-
         try {
-            const response = await fetch('http://localhost:5000/api/agent/requests', {
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`
-                }
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setRequests(data);
-            }
-        } catch (error) {
+            const response = await api.get('/agent/requests');
+            setRequests(response.data);
+        } catch (error: any) {
             console.error('Error fetching agent requests:', error);
+            if (error.response?.status === 401) {
+                router.push('/');
+            }
         } finally {
             setLoading(false);
             setIsRefreshing(false);
         }
-    }, []);
+    }, [router]);
 
     useEffect(() => {
         fetchRequests();

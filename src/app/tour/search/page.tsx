@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,8 +19,6 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-
-
 
 function TourSearchContent() {
     const searchParams = useSearchParams();
@@ -40,17 +39,14 @@ function TourSearchContent() {
     const fetchTours = async () => {
         setIsLoading(true);
         try {
-            const params = new URLSearchParams();
-            if (searchData.dest) params.append('location', searchData.dest);
-            if (selectedThemes.length > 0) params.append('theme', selectedThemes[0]);
-            params.append('maxPrice', priceRange.toString());
-
-            const url = `http://localhost:5000/api/tours?${params.toString()}`;
-            const response = await fetch(url);
-            if (response.ok) {
-                const data = await response.json();
-                setResults(data);
-            }
+            const response = await api.get('/tours', {
+                params: {
+                    location: searchData.dest || undefined,
+                    theme: selectedThemes.length > 0 ? selectedThemes[0] : undefined,
+                    maxPrice: priceRange.toString()
+                }
+            });
+            setResults(response.data);
         } catch (error) {
             console.error('Search error:', error);
         } finally {

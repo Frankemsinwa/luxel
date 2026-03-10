@@ -1,5 +1,6 @@
 'use client';
 
+import api from '@/lib/api';
 import { Image as ImageIcon, X, Loader2 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import Image from 'next/image';
@@ -21,9 +22,8 @@ export default function ImageUpload({ value, onChange, onRemove }: ImageUploadPr
         setIsUploading(true);
         try {
             // 1. Get secure signature from Luxel backend
-            const sigRes = await fetch('http://localhost:5000/api/uploads/signature');
-            if (!sigRes.ok) throw new Error('Failed to get signature');
-            const { signature, timestamp, cloud_name, api_key, folder } = await sigRes.json();
+            const sigRes = await api.get('/uploads/signature');
+            const { signature, timestamp, cloud_name, api_key, folder } = sigRes.data;
 
             // 2. Upload file directly to Cloudinary using the signature
             const formData = new FormData();
