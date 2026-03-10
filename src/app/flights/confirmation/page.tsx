@@ -1,194 +1,145 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from "framer-motion";
 import {
-    Check,
-    PlaneTakeoff,
-    PlaneLanding,
-    Users,
-    Briefcase,
-    MessageCircle,
+    CheckCircle2,
+    ArrowRight,
+    Clock,
     ShieldCheck,
-    Lock,
-    Headphones,
-    MessageSquare
+    Plane,
+    MapPin,
+    Calendar,
+    Search
 } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import BookingStatusHeader from "@/components/BookingStatusHeader";
 
 function ConfirmationContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
-    const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
-    const pricePerPerson = Number(searchParams.get('price')) || 540;
-    const totalPrice = pricePerPerson * passengerCount;
+    // Extract flight details for the summary
+    const ref = searchParams.get('ref') || 'LX-PENDING';
+    const depCity = searchParams.get('depCity') || 'London';
+    const arrCity = searchParams.get('arrCity') || 'New York';
+    const depCode = searchParams.get('depCode') || 'LHR';
+    const arrCode = searchParams.get('arrCode') || 'JFK';
+    const date = searchParams.get('depTime') || 'October 24, 2026';
 
-    const route = {
-        from: searchParams.get('depCity') || "London",
-        fromCode: searchParams.get('depCode') || "LHR",
-        to: searchParams.get('arrCity') || "New York",
-        toCode: searchParams.get('arrCode') || "JFK",
-        depTime: searchParams.get('depTime') || "10:30 AM",
-        arrTime: searchParams.get('arrTime') || "06:45 PM",
-        date: searchParams.get('date') || "Oct 12, 2026",
-        cabin: searchParams.get('class') || "First Class"
+    const handleTrackReservation = () => {
+        router.push(`/flights/status/agent-confirming?${searchParams.toString()}`);
     };
-
-    // Generate a semi-random reference for demo
-    const reference = `LX-${Math.floor(100000 + Math.random() * 900000)}`;
 
     return (
         <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
-            <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-20 flex flex-col items-center">
+            <BookingStatusHeader currentStep={1} />
+
+            <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-12 flex flex-col items-center justify-center text-center">
 
                 {/* Success Icon */}
                 <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                    className="w-24 h-24 rounded-full bg-black/10 flex items-center justify-center text-black mb-10"
+                    initial={{ scale: 0, rotate: -45 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", damping: 12, stiffness: 200 }}
+                    className="w-24 h-24 rounded-full bg-emerald-500 flex items-center justify-center text-white mb-10 shadow-xl shadow-emerald-100 ring-12 ring-emerald-50"
                 >
-                    <div className="w-16 h-16 rounded-full bg-black flex items-center justify-center text-amber ring-8 ring-black/10">
-                        <Check size={32} strokeWidth={3} />
-                    </div>
+                    <CheckCircle2 size={48} strokeWidth={2.5} />
                 </motion.div>
 
-                <motion.h1
+                {/* Main Message */}
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="text-4xl md:text-5xl font-semibold text-black text-center mb-6 leading-tight max-w-2xl"
                 >
-                    Your reservation request has been received.
-                </motion.h1>
+                    <h1 className="text-4xl md:text-5xl font-semibold text-zinc-900 tracking-tight mb-6">
+                        Request Received
+                    </h1>
+                    <p className="text-zinc-500 text-lg font-medium max-w-xl mx-auto mb-12 leading-relaxed">
+                        Your private travel inquiry has been transmitted to our VIP Concierge Desk. An elite agent is currently verifying aircraft availability and seat assignments.
+                    </p>
+                </motion.div>
 
-                <motion.p
+                {/* Booking Brief */}
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="text-black/60 text-center mb-16 max-w-lg font-light text-2xl"
+                    className="w-full bg-white rounded-[3rem] p-10 border border-zinc-100 shadow-sm mb-12 relative overflow-hidden group"
                 >
-                    A dedicated Luxel travel agent will contact you shortly to finalize your luxury itinerary for <span className="text-black font-semibold">{route.to}</span>.
-                </motion.p>
+                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
+                        <Plane size={120} />
+                    </div>
 
-                {/* Detail Card */}
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                        <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 rounded-[1.5rem] bg-zinc-900 flex items-center justify-center text-amber">
+                                <Plane size={28} />
+                            </div>
+                            <div className="text-left">
+                                <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1">Reference Number</p>
+                                <h3 className="text-xl font-semibold text-zinc-900">#{ref}</h3>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <div className="text-right">
+                                <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1">Itinerary</p>
+                                <p className="text-sm font-semibold text-zinc-900">{depCode} → {arrCode}</p>
+                            </div>
+                            <div className="w-px h-8 bg-zinc-100" />
+                            <div className="text-left">
+                                <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1">Date</p>
+                                <p className="text-sm font-semibold text-zinc-900 underline decoration-amber decoration-2 underline-offset-4">{date}</p>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Actions */}
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="w-full bg-flight-card rounded-[3rem] shadow-xl shadow-black/5 border border-black/5 overflow-hidden mb-10"
+                    className="flex flex-col sm:flex-row gap-6 w-full max-w-md"
                 >
-                    <div className="p-10 border-b border-black/10 flex flex-wrap items-center justify-between gap-6">
-                        <div>
-                            <span className="text-[10px] font-semibold text-black/50 uppercase tracking-widest block mb-1">Reservation Reference</span>
-                            <span className="text-2xl font-semibold text-black tracking-tight">{reference}</span>
-                        </div>
-                        <div className="px-6 py-2 rounded-full bg-black/10 text-black text-[10px] font-semibold uppercase tracking-widest flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
-                            Pending Specialist Review
-                        </div>
-                    </div>
-
-                    <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-12">
-                        <div className="space-y-10">
-                            <div className="flex gap-6">
-                                <div className="w-10 h-10 rounded-xl bg-black/10 flex items-center justify-center text-black/50">
-                                    <PlaneTakeoff size={20} />
-                                </div>
-                                <div>
-                                    <span className="text-[10px] font-semibold text-black/50 uppercase tracking-widest block mb-1">Full Itinerary</span>
-                                    <div className="font-semibold text-black">{route.from} ({route.fromCode}) → {route.to} ({route.toCode})</div>
-                                    <div className="text-xs text-black/50 mt-1">{route.date} • {route.depTime}</div>
-                                </div>
-                            </div>
-                            <div className="flex gap-6">
-                                <div className="w-10 h-10 rounded-xl bg-black/10 flex items-center justify-center text-black/50">
-                                    <Users size={20} />
-                                </div>
-                                <div>
-                                    <span className="text-[10px] font-semibold text-black/50 uppercase tracking-widest block mb-1">Travel Group</span>
-                                    <div className="font-semibold text-black">{passengerCount} {passengerCount > 1 ? 'Guests' : 'Guest'} • {route.cabin}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col justify-center gap-10 border-l border-black/10 pl-12 bg-black/5 rounded-r-[3rem]">
-                            <div>
-                                <span className="text-[10px] font-semibold text-black/50 uppercase tracking-widest block mb-1">Service Level</span>
-                                <div className="font-semibold text-black text-lg uppercase tracking-widest">Ultra-Luxury</div>
-                            </div>
-                            <div>
-                                <span className="text-[10px] font-semibold text-black/50 uppercase tracking-widest block mb-1">Status</span>
-                                <div className="font-semibold text-emerald-600 text-lg uppercase tracking-widest">Priority Queue</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-black p-10 flex items-center justify-between">
-                        <div>
-                            <span className="text-sm font-medium text-flight-card/60">Estimated Total</span>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-3xl font-black text-flight-card tracking-tight">₦{totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                            <div className="text-[10px] font-semibold text-flight-card/50 uppercase tracking-widest mt-1">Pending Concierge Lock</div>
-                        </div>
-                    </div>
+                    <button
+                        onClick={handleTrackReservation}
+                        className="flex-1 bg-zinc-900 text-white px-10 py-6 rounded-3xl flex items-center justify-center gap-4 font-semibold text-xs tracking-widest uppercase shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all group"
+                    >
+                        Track Reservation
+                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                    <button
+                        onClick={() => router.push('/')}
+                        className="px-8 py-6 rounded-3xl border border-zinc-100 text-zinc-400 font-semibold text-xs tracking-widest uppercase hover:bg-zinc-50 transition-all active:scale-95"
+                    >
+                        Return Home
+                    </button>
                 </motion.div>
-
-                {/* WhatsApp Widget */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="w-full bg-amber border border-amber/20 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center gap-8 mb-12"
-                >
-                    <div className="w-16 h-16 rounded-full bg-black flex items-center justify-center text-amber shadow-lg shadow-black/20 ring-8 ring-black/10">
-                        <MessageSquare size={28} />
-                    </div>
-                    <div>
-                        <h4 className="text-black font-semibold text-lg mb-1">Priority Concierge Active</h4>
-                        <p className="text-black/60 text-sm font-medium leading-relaxed">
-                            Our team is reviewing the flight availability. Watch for a WhatsApp notification from a Luxel verified business account.
-                        </p>
-                    </div>
-                </motion.div>
-
-                <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => router.push(`/flights/status/agent-confirming?${searchParams.toString()}`)}
-                    className="bg-black text-flight-card px-16 py-6 rounded-[2rem] font-semibold text-sm shadow-xl shadow-black/20 hover:bg-black/80 transition-all"
-                >
-                    Track Reservation
-                </motion.button>
 
                 {/* Trust Badges */}
-                <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-12 w-full pt-12 border-t border-black/10">
-                    <div className="flex flex-col items-center gap-4 text-center">
-                        <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center text-black">
-                            <ShieldCheck size={24} />
-                        </div>
-                        <p className="text-[10px] font-semibold text-black/50 uppercase tracking-widest">Secure & Encrypted Payments</p>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="flex items-center gap-8 mt-16"
+                >
+                    <div className="flex items-center gap-2 text-zinc-400">
+                        <Clock size={16} />
+                        <span className="text-[10px] font-semibold uppercase tracking-widest">Verification: ~10 Mins</span>
                     </div>
-                    <div className="flex flex-col items-center gap-4 text-center">
-                        <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center text-black">
-                            <Check size={24} />
-                        </div>
-                        <p className="text-[10px] font-semibold text-black/50 uppercase tracking-widest">No Hidden Fees Guaranteed</p>
+                    <div className="flex items-center gap-2 text-zinc-400">
+                        <ShieldCheck size={16} className="text-emerald-500" />
+                        <span className="text-[10px] font-semibold uppercase tracking-widest">Secure Concierge</span>
                     </div>
-                    <div className="flex flex-col items-center gap-4 text-center">
-                        <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center text-black">
-                            <Headphones size={24} />
-                        </div>
-                        <p className="text-[10px] font-semibold text-black/50 uppercase tracking-widest">24/7 Dedicated Support</p>
-                    </div>
-                </div>
+                </motion.div>
+
             </main>
 
             <Footer />
@@ -198,7 +149,7 @@ function ConfirmationContent() {
 
 export default function ConfirmationPage() {
     return (
-        <Suspense fallback={<div>Loading Confirmation...</div>}>
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Finalizing Request...</div>}>
             <ConfirmationContent />
         </Suspense>
     );

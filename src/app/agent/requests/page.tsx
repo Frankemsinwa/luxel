@@ -8,28 +8,53 @@ import {
     PlaneTakeoff,
     Calendar,
     ArrowUpRight,
-    SearchX
+    SearchX,
+    RefreshCw
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function FlightRequestsPage() {
     const router = useRouter();
+    const [requests, setRequests] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const requests = [
-        { id: "LX-492781", user: "Jonathan Wick", route: "LHR → JFK", class: "First Class", status: "Confirming", priority: "VIP", date: "Oct 24, 2026" },
-        { id: "LX-492802", user: "Sofia Al-Aziz", route: "DXB → NRT", class: "Private Suite", status: "Action Required", priority: "Elite", date: "Oct 25, 2026" },
-        { id: "LX-492815", user: "Michael Chen", route: "SIN → SYD", class: "Business", status: "Verified", priority: "Regular", date: "Oct 26, 2026" },
-        { id: "LX-492833", user: "Elena Rossi", route: "CDG → MIA", class: "First Class", status: "Confirming", priority: "VIP", date: "Oct 27, 2026" },
-        { id: "LX-492901", user: "David Beckham", route: "LHR → LAX", class: "First Class", status: "Confirming", priority: "VIP", date: "Oct 28, 2026" },
-        { id: "LX-492945", user: "Amara Okoro", route: "LOS → LHR", class: "Business", status: "Action Required", priority: "Elite", date: "Oct 29, 2026" },
-    ];
+    const fetchRequests = useCallback(async (showFullLoading = true) => {
+        if (showFullLoading) setLoading(true);
+        else setIsRefreshing(true);
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        try {
+            const response = await fetch('http://localhost:5000/api/agent/requests', {
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setRequests(data);
+            }
+        } catch (error) {
+            console.error('Error fetching agent requests:', error);
+        } finally {
+            setLoading(false);
+            setIsRefreshing(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchRequests();
+    }, [fetchRequests]);
 
     const filteredRequests = requests.filter(req =>
-        req.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (req.profiles?.full_name || "Unknown").toLowerCase().includes(searchQuery.toLowerCase()) ||
         req.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        req.route.toLowerCase().includes(searchQuery.toLowerCase())
+        (req.details?.itinerary || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -37,7 +62,7 @@ export default function FlightRequestsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-black text-zinc-900 tracking-tight mb-2">Flight Requests</h1>
+                    <h1 className="text-3xl font-semibold text-zinc-900 tracking-tight mb-2">Flight Requests</h1>
                     <p className="text-zinc-500 font-medium">Manage and process incoming luxury travel inquiries.</p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -48,9 +73,21 @@ export default function FlightRequestsPage() {
                             placeholder="Search by ID, name or route..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-white border-none rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-zinc-900 shadow-sm focus:ring-2 focus:ring-amber/10 transition-all"
+                            className="w-full bg-white border-none rounded-2xl py-4 pl-12 pr-4 text-xs font-semibold text-zinc-900 shadow-sm focus:ring-2 focus:ring-amber/10 transition-all"
                         />
                     </div>
+                    <button
+                        onClick={() => fetchRequests(false)}
+                        disabled={isRefreshing}
+                        className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-zinc-400 hover:text-amber shadow-sm transition-all disabled:opacity-50"
+                    >
+                        <motion.div
+                            animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        >
+                            <RefreshCw size={20} />
+                        </motion.div>
+                    </button>
                     <button className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-zinc-400 hover:text-zinc-900 shadow-sm transition-all">
                         <Filter size={20} />
                     </button>
@@ -63,13 +100,13 @@ export default function FlightRequestsPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-zinc-50/50">
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Inquiry ID</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Client Name</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Itinerary</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Date</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Status</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Tier</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest"></th>
+                                <th className="px-10 py-6 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Inquiry ID</th>
+                                <th className="px-10 py-6 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Client Name</th>
+                                <th className="px-10 py-6 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Itinerary</th>
+                                <th className="px-10 py-6 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Date</th>
+                                <th className="px-10 py-6 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Status</th>
+                                <th className="px-10 py-6 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Tier</th>
+                                <th className="px-10 py-6 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-50">
@@ -104,17 +141,17 @@ export default function FlightRequestsPage() {
                                             </div>
                                         </td>
                                         <td className="px-10 py-6 text-sm">
-                                            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${req.status === 'Confirming' ? 'bg-amber/5 text-amber' :
-                                                    req.status === 'Verified' ? 'bg-emerald-50 text-emerald-500' : 'bg-red-50 text-red-500'
+                                            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest ${req.status === 'Confirming' ? 'bg-amber/5 text-amber' :
+                                                req.status === 'Verified' ? 'bg-emerald-50 text-emerald-500' : 'bg-red-50 text-red-500'
                                                 }`}>
                                                 <div className={`w-1.5 h-1.5 rounded-full ${req.status === 'Confirming' ? 'bg-amber animate-pulse' :
-                                                        req.status === 'Verified' ? 'bg-emerald-500' : 'bg-red-500'
+                                                    req.status === 'Verified' ? 'bg-emerald-500' : 'bg-red-500'
                                                     }`} />
                                                 {req.status}
                                             </div>
                                         </td>
                                         <td className="px-10 py-6">
-                                            <span className={`text-[10px] font-black px-2 py-1 rounded border-l-2 ${req.priority === 'VIP' ? 'bg-zinc-900 text-white border-amber' : 'bg-zinc-100 text-zinc-500 border-zinc-300'
+                                            <span className={`text-[10px] font-semibold px-2 py-1 rounded border-l-2 ${req.priority === 'VIP' ? 'bg-zinc-900 text-white border-amber' : 'bg-zinc-100 text-zinc-500 border-zinc-300'
                                                 }`}>
                                                 {req.priority}
                                             </span>
@@ -147,7 +184,7 @@ export default function FlightRequestsPage() {
                         <button className="w-10 h-10 rounded-xl hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-all font-bold text-xs">2</button>
                         <button className="w-10 h-10 rounded-xl hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-all font-bold text-xs">3</button>
                         <div className="h-4 w-px bg-zinc-100 mx-2" />
-                        <button className="flex items-center gap-2 text-zinc-400 hover:text-amber transition-all font-black text-[10px] uppercase tracking-widest">
+                        <button className="flex items-center gap-2 text-zinc-400 hover:text-amber transition-all font-semibold text-[10px] uppercase tracking-widest">
                             Next Page
                             <ChevronRight size={14} />
                         </button>

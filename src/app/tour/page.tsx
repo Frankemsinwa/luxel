@@ -14,7 +14,7 @@ import {
     Headset,
     Gem
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -33,36 +33,25 @@ export default function TourLandingPage() {
         router.push(`/tour/search?${params.toString()}`);
     };
 
-    const featuredTours = [
-        {
-            id: 'tuscan-silk-road',
-            title: 'The Tuscan Silk Road',
-            description: 'Culinary excellence through the rolling hills of Italy.',
-            image: '/tour-img/img-1.jpg',
-            price: '₦4,200',
-            duration: '7 Days',
-            rating: 5,
-            actualImage: '/lagos.png' // Using existing images for variety if needed, but the prompt says use public/tour
-        },
-        {
-            id: 'kyoto-zen-retreat',
-            title: 'Kyoto Zen Retreat',
-            description: 'Mindful immersion in the ancient temples of Japan.',
-            image: '/tour-img/img-2.jpg',
-            price: '₦3,800',
-            duration: '5 Days',
-            rating: 5
-        },
-        {
-            id: 'wilderness-refined',
-            title: 'Wilderness Refined',
-            description: 'Ultimate luxury safari experience in the Serengeti.',
-            image: '/tour-img/img-3.jpg',
-            price: '₦9,500',
-            duration: '10 Days',
-            rating: 5
-        }
-    ];
+    const [tours, setTours] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchTours = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/tours');
+                if (response.ok) {
+                    const data = await response.json();
+                    setTours(data);
+                }
+            } catch (err) {
+                console.error('Error fetching tours:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchTours();
+    }, []);
 
     const themes = [
         { name: 'Cultural Journeys', image: '/culture.jpeg' },
@@ -106,7 +95,10 @@ export default function TourLandingPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.4 }}
                     >
-                        <button className="bg-amber hover:bg-amber-dark text-black px-10 py-4 rounded-full font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl">
+                        <button
+                            onClick={() => router.push('/tour/search')}
+                            className="bg-amber hover:bg-amber-dark text-black px-10 py-4 rounded-full font-bold transition-all transform hover:scale-105 active:scale-95 shadow-xl"
+                        >
                             Explore Tours
                         </button>
                     </motion.div>
@@ -176,13 +168,15 @@ export default function TourLandingPage() {
                         <span className="text-amber font-bold text-sm tracking-widest uppercase">Our Selection</span>
                         <h2 className="text-4xl font-serif text-zinc-900 mt-2">Featured Tours</h2>
                     </div>
-                    <Link href="/tour/all" className="flex items-center gap-2 text-zinc-900 font-bold text-sm hover:gap-3 transition-all">
+                    <Link href="/tour/search" className="flex items-center gap-2 text-zinc-900 font-bold text-sm hover:gap-3 transition-all">
                         View All Experiences <ArrowRight size={16} />
                     </Link>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    {featuredTours.map((tour, i) => (
+                    {isLoading ? (
+                        <div className="col-span-3 py-20 text-center font-bold text-zinc-300">Synchronizing with luxury global desk...</div>
+                    ) : tours.length > 0 ? tours.map((tour, i) => (
                         <motion.div
                             key={tour.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -191,9 +185,9 @@ export default function TourLandingPage() {
                             viewport={{ once: true }}
                             className="group cursor-pointer"
                         >
-                            <Link href={`/tour/${tour.id}`}>
+                            <Link href={`/tour/${tour.slug}`}>
                                 <div className="relative h-[400px] rounded-[2.5rem] overflow-hidden mb-6 shadow-lg transform group-hover:scale-[1.02] transition-all">
-                                    <Image src={tour.image} alt={tour.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                                    <Image src={tour.hero_image || '/tour-img/fallback.jpg'} alt={tour.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                                     <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-900">
                                         {tour.duration}
                                     </div>
@@ -203,7 +197,7 @@ export default function TourLandingPage() {
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-xl font-bold text-zinc-900">{tour.title}</h3>
                                         <div className="flex gap-0.5">
-                                            {[...Array(tour.rating)].map((_, i) => (
+                                            {[...Array(Math.floor(tour.rating || 5))].map((_, i) => (
                                                 <Star key={i} size={14} className="fill-amber text-amber" />
                                             ))}
                                         </div>
@@ -213,12 +207,14 @@ export default function TourLandingPage() {
                                     </p>
                                     <div className="pt-2">
                                         <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-widest">From</span>
-                                        <p className="text-2xl font-black text-amber">{tour.price} <span className="text-xs text-zinc-400 font-medium">PP</span></p>
+                                        <p className="text-2xl font-black text-amber">₦{Number(tour.price).toLocaleString()} <span className="text-xs text-zinc-400 font-medium">PP</span></p>
                                     </div>
                                 </div>
                             </Link>
                         </motion.div>
-                    ))}
+                    )) : (
+                        <div className="col-span-3 py-20 text-center font-bold text-zinc-300">No journeys available. Please check back soon.</div>
+                    )}
                 </div>
             </section>
 
@@ -242,7 +238,6 @@ export default function TourLandingPage() {
                             <Image src={theme.image} alt={theme.name} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" />
                             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all" />
                             <div className="absolute inset-0 flex items-center justify-center p-8 text-center bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                                {/* Re-adding label on top for clarity as per design */}
                             </div>
                             <div className="absolute bottom-10 left-0 right-0 text-center">
                                 <h4 className="text-3xl font-semibold text-white tracking-wide">{theme.name}</h4>
@@ -252,7 +247,7 @@ export default function TourLandingPage() {
                 </div>
             </section>
 
-{/* Benefits */}
+            {/* Benefits */}
             <section className="py-24 border-b border-zinc-100" style={{ backgroundColor: '#FEDB73' }}>
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16">
                     <div className="flex flex-col items-center text-center space-y-6">

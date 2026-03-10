@@ -19,7 +19,7 @@ import {
     Car,
     ShieldCheck
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -28,69 +28,34 @@ export default function TourDetailsPage() {
     const router = useRouter();
     const [guests, setGuests] = useState(2);
     const [selectedDate, setSelectedDate] = useState('September 12, 2024');
+    const [tour, setTour] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const tourId = params.id as string;
+    const tourSlug = params.id as string;
 
-    const getHeroImage = (id: string) => {
-        if (id === 'tuscan-silk-road') return '/tour-img/img-1.jpg';
-        if (id === 'kyoto-zen-retreat') return '/tour-img/img-2.jpg';
-        if (id === 'wilderness-refined') return '/tour-img/img-3.jpg';
-        return '/tour/Screen-2.png';
-    };
-
-    const getTourTitle = (id: string) => {
-        if (id === 'tuscan-silk-road') return 'The Tuscan Silk Road';
-        if (id === 'kyoto-zen-retreat') return 'Kyoto Zen Retreat';
-        if (id === 'wilderness-refined') return 'Wilderness Refined';
-        return 'The Silk Road Reimagined';
-    };
-
-    const tour = {
-        id: tourId,
-        title: getTourTitle(tourId),
-        image: getHeroImage(tourId),
-        location: "Istanbul, Turkey",
-        price: 8500,
-        duration: "12 Days",
-        rating: 5,
-        description: "Traverse the ancient pathways of merchants and monarchs, where every corner turned reveals a secret from a millennium past, reimagined with the pinnacle of modern luxury.",
-        tags: ["Limited Edition", "12 Days"],
-        itinerary: [
-            {
-                day: 1,
-                title: "Twilight Over the Bosphorus",
-                subtitle: "Arrival & Welcome Dinner",
-                content: "Step into a world where East meets West. Your private chauffeur awaits to whisk you to your suite overlooking the shimmering Bosphorus. As the sun dips below the horizon, enjoy an exclusive six-course welcome dinner curated by a Michelin-starred chef on a private rooftop terrace.",
-                images: ["/tour-img/img-2.jpg", "/tour-img/img-3.jpg"]
-            },
-            {
-                day: 2,
-                title: "The Golden Horn & Hidden Vaults",
-                subtitle: "Private Museum Access",
-                content: "Experience the history of the Ottoman Empire without the crowds. Exclusive early access to the Topkapi Palace and Hagia Sophia.",
-            },
-            {
-                day: 3,
-                title: "Anatolian Echoes",
-                subtitle: "Luxury Transit to Cappadocia",
-                content: "A private jet flight followed by a stay in a luxury cave resort with panoramic views of the valley.",
+    useEffect(() => {
+        const fetchTour = async () => {
+            try {
+                const response = await fetch(`http://localhost:5000/api/tours/${tourSlug}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setTour(data);
+                }
+            } catch (err) {
+                console.error('Error fetching tour:', err);
+            } finally {
+                setIsLoading(false);
             }
-        ],
-        guides: [
-            { name: "Elif Demir", role: "Art Historian • 12 Years exp.", image: "/tour-img/img-4.jpg" },
-            { name: "Julian Vance", role: "Logistics & Gastronomy", image: "/tour-img/img-5.jpg" }
-        ],
-        included: [
-            { icon: <Hotel size={24} />, label: "5-Star Stays" },
-            { icon: <Utensils size={24} />, label: "Michelin Dining" },
-            { icon: <Car size={24} />, label: "Private Driver" },
-            { icon: <ShieldCheck size={24} />, label: "All Access" }
-        ]
-    };
+        };
+        fetchTour();
+    }, [tourSlug]);
 
     const handleBooking = () => {
-        router.push(`/tour/${tour.id}/booking?guests=${guests}&date=${selectedDate}`);
+        router.push(`/tour/${tour.slug}/booking?guests=${guests}&date=${selectedDate}`);
     };
+
+    if (isLoading) return <div className="min-h-screen bg-white flex items-center justify-center font-bold text-zinc-300">Synchronizing your elite itinerary...</div>;
+    if (!tour) return <div className="min-h-screen bg-white flex items-center justify-center font-bold text-zinc-300">Experience not found.</div>;
 
     return (
         <div className="bg-white min-h-screen">
@@ -98,7 +63,7 @@ export default function TourDetailsPage() {
             {/* Hero Section */}
             <section className="relative h-[65vh] flex items-end">
                 <Image
-                    src={tour.image}
+                    src={tour.hero_image || '/tour-img/fallback.jpg'}
                     alt={tour.title}
                     fill
                     className="object-cover"
@@ -112,7 +77,7 @@ export default function TourDetailsPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex flex-wrap gap-4 mb-6"
                     >
-                        {tour.tags.map(tag => (
+                        {(tour.tags || []).map((tag: any) => (
                             <span key={tag} className="bg-amber text-black text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
                                 {tag}
                             </span>
@@ -136,7 +101,7 @@ export default function TourDetailsPage() {
                             className="text-right"
                         >
                             <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Starting From</p>
-                            <p className="text-4xl font-black text-amber">₦{tour.price.toLocaleString()} <span className="text-sm text-white/40 font-medium">/ guest</span></p>
+                            <p className="text-4xl font-black text-amber">₦{Number(tour.price).toLocaleString()} <span className="text-sm text-white/40 font-medium">/ guest</span></p>
                         </motion.div>
                     </div>
                 </div>
@@ -167,16 +132,16 @@ export default function TourDetailsPage() {
                             <div className="space-y-12 relative pl-8">
                                 <div className="absolute left-[1.2rem] top-4 bottom-4 w-[2px] bg-zinc-100" />
 
-                                {tour.itinerary.map((item, i) => (
+                                {(tour.itinerary || []).map((item: any, i: any) => (
                                     <motion.div
-                                        key={item.day}
+                                        key={i}
                                         initial={{ opacity: 0, x: -20 }}
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true }}
                                         className="relative"
                                     >
                                         <div className="absolute -left-11 w-8 h-8 rounded-full bg-white border-2 border-amber flex items-center justify-center text-xs font-black text-amber z-10 shadow-sm">
-                                            {item.day}
+                                            {i + 1 || item.day}
                                         </div>
 
                                         <div className="space-y-4">
@@ -196,7 +161,7 @@ export default function TourDetailsPage() {
 
                                             {item.images && (
                                                 <div className="grid grid-cols-2 gap-4 pt-4">
-                                                    {item.images.map((img, idx) => (
+                                                    {item.images.map((img: any, idx: any) => (
                                                         <div key={idx} className="relative h-48 rounded-[2rem] overflow-hidden shadow-md">
                                                             <Image src={img} alt="Itinerary point" fill className="object-cover" />
                                                         </div>
@@ -213,10 +178,10 @@ export default function TourDetailsPage() {
                         <div className="bg-zinc-50 rounded-[3rem] p-12 border border-zinc-100">
                             <h3 className="text-center text-xl font-serif text-zinc-900 mb-10">What's Included</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                                {tour.included.map((item, i) => (
+                                {(tour.included || []).map((item: any, i: any) => (
                                     <div key={i} className="flex flex-col items-center gap-4 text-center">
                                         <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-amber shadow-sm">
-                                            {item.icon}
+                                            <ShieldCheck size={24} />
                                         </div>
                                         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{item.label}</span>
                                     </div>
@@ -278,7 +243,7 @@ export default function TourDetailsPage() {
                         <div className="p-10 bg-white rounded-[3rem] border border-zinc-100 shadow-sm">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-8">Your Expert Guides</h4>
                             <div className="space-y-6">
-                                {tour.guides.map((guide, i) => (
+                                {tour.guides.map((guide: any, i: any) => (
                                     <div key={i} className="flex items-center gap-4">
                                         <div className="w-14 h-14 rounded-2xl bg-zinc-100 border border-zinc-200 overflow-hidden relative">
                                             <Image src={guide.image} alt={guide.name} fill className="object-cover" />

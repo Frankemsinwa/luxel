@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxel E-Ticket</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #0d0d0d;
+            color: #ffffff;
+            /* A4 size */
+            width: 210mm;
+            min-height: 297mm;
+        }
+
+        .ticket-container {
+            position: relative;
+            padding: 40px;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+            min-height: 297mm;
+            box-shadow: inset 0 0 100px rgba(220, 168, 62, 0.05);
+            /* very subtle amber tint */
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 25px;
+            margin-bottom: 40px;
+        }
+
+        .brand-logo {
+            font-size: 32px;
+            font-weight: 900;
+            color: #dbb35e;
+            /* flight-card amber/gold */
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .ticket-title {
+            text-align: right;
+        }
+
+        .ticket-title h1 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin: 0 0 5px 0;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+        }
+
+        .ticket-title p {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .main-card {
+            background: #000000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .flight-cities {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+
+        .city-block {
+            flex: 1;
+        }
+
+        .city-block.right {
+            text-align: right;
+        }
+
+        .city-code {
+            font-size: 64px;
+            font-weight: 900;
+            color: #ffffff;
+            margin: 0 0 5px 0;
+            line-height: 1;
+        }
+
+        .city-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .flight-line {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 30px;
+        }
+
+        .plane-icon {
+            color: #dbb35e;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .dotted-line {
+            width: 100%;
+            height: 2px;
+            border-top: 2px dashed rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .dotted-line::before,
+        .dotted-line::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #dbb35e;
+            border-radius: 50%;
+            top: -5px;
+        }
+
+        .dotted-line::before {
+            left: 0;
+        }
+
+        .dotted-line::after {
+            right: 0;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .detail-item .label {
+            font-size: 10px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .detail-item .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .detail-item .value.highlight {
+            color: #dbb35e;
+            /* Gold color for highlights like class / PNR */
+        }
+
+        .ticket-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 60px;
+        }
+
+        .barcode {
+            width: 300px;
+            height: 60px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="60"><rect width="300" height="60" fill="white"/><rect x="10" width="5" height="60" fill="black"/><rect x="20" width="10" height="60" fill="black"/><rect x="35" width="2" height="60" fill="black"/><rect x="42" width="8" height="60" fill="black"/><rect x="55" width="4" height="60" fill="black"/><rect x="65" width="12" height="60" fill="black"/><rect x="85" width="5" height="60" fill="black"/><rect x="95" width="8" height="60" fill="black"/><rect x="110" width="3" height="60" fill="black"/><rect x="120" width="10" height="60" fill="black"/><rect x="140" width="5" height="60" fill="black"/><rect x="150" width="12" height="60" fill="black"/><rect x="170" width="2" height="60" fill="black"/><rect x="180" width="8" height="60" fill="black"/><rect x="195" width="6" height="60" fill="black"/><rect x="210" width="10" height="60" fill="black"/><rect x="225" width="5" height="60" fill="black"/><rect x="240" width="15" height="60" fill="black"/><rect x="260" width="8" height="60" fill="black"/><rect x="275" width="4" height="60" fill="black"/><rect x="285" width="8" height="60" fill="black"/></svg>') no-repeat center;
+            opacity: 0.9;
+            filter: invert(1);
+            /* Invert so the barcode looks white on black */
+        }
+
+        .barcode-text {
+            font-family: monospace;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 5px;
+            letter-spacing: 5px;
+        }
+
+        .terms {
+            max-width: 400px;
+            font-size: 10px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: right;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 150px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.02);
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ticket-container">
+        <div class="watermark">LUXEL CHARTERS</div>
+
+        <div class="header">
+            <img src="<%- logoPath %>" alt="LUXEL" style="height: 48px; width: auto;">
+            <div class="ticket-title">
+                <h1>Official E-Ticket</h1>
+                <p>Private Charter Itinerary</p>
+            </div>
+        </div>
+
+        <div class="main-card">
+
+            <div class="details-grid" style="border-top: none; padding-top: 0;">
+                <div class="detail-item">
+                    <div class="label">Passenger</div>
+                    <div class="value">
+                        <%= passengerName %>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Booking Ref</div>
+                    <div class="value highlight">
+                        <%= pnr %>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Date Issued</div>
+                    <div class="value">
+                        <%= dateIssued %>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Status</div>
+                    <div class="value" style="color: #10b981;">CONFIRMED</div>
+                </div>
+            </div>
+
+            <div class="flight-cities">
+                <div class="city-block">
+                    <div class="city-code">
+                        <%= flight.from %>
+                    </div>
+                    <div class="city-name">
+                        <%= flight.fromCity %>
+                    </div>
+                </div>
+                <div class="flight-line">
+                    <div class="plane-icon">✈</div>
+                    <div class="dotted-line"></div>
+                </div>
+                <div class="city-block right">
+                    <div class="city-code">
+                        <%= flight.to %>
+                    </div>
+                    <div class="city-name">
+                        <%= flight.toCity %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <div class="label">Departure</div>
+                    <div class="value">
+                        <%= flight.departureTime %>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Airline</div>
+                    <div class="value">
+                        <%= flight.airline %>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Aircraft</div>
+                    <div class="value">
+                        <%= flight.aircraft %>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Cabin Class</div>
+                    <div class="value highlight">
+                        <%= cabinClass %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticket-footer">
+            <div>
+                <div class="barcode"></div>
+                <div class="barcode-text">
+                    <%= pnr %>-LX-2026
+                </div>
+            </div>
+
+            <div class="terms">
+                Please arrive at the FBO (Fixed Base Operator) terminal at least 30 minutes prior to departure. Valid
+                government-issued ID matches passenger name is required. For inquiries, contact your dedicated Luxel
+                concierge agent at +44 20 7123 4567.
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
