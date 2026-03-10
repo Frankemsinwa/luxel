@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
@@ -52,11 +53,8 @@ export default function TourBookingPage() {
                     setFormData(prev => ({ ...prev, email: session.user.email || '' }));
                 }
 
-                const response = await fetch(`http://localhost:5000/api/tours/${params.id}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setTour(data);
-                }
+                const response = await api.get(`/tours/${params.id}`);
+                setTour(response.data);
             } catch (err) {
                 console.error('Error fetching tour:', err);
             } finally {
@@ -81,44 +79,29 @@ export default function TourBookingPage() {
     const handleCompleteBooking = async (reference: string) => {
         setIsSubmitting(true);
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                alert('Session expired. Please sign in again.');
-                router.push('/login');
-                return;
-            }
-
-            const response = await fetch(`http://localhost:5000/api/tours/${tour.id}/book`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
+            const response = await api.post(`/tours/${tour.id}/book`, {
+                guestCount: guestsCount,
+                contactInfo: {
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email
                 },
-                body: JSON.stringify({
-                    guestCount: guestsCount,
-                    contactInfo: {
-                        firstName: formData.firstName,
-                        lastName: formData.lastName,
-                        email: formData.email
-                    },
-                    preferences: {
-                        dietary: formData.dietary,
-                        requests: formData.requests
-                    },
-                    paymentReference: reference
-                })
+                preferences: {
+                    dietary: formData.dietary,
+                    requests: formData.requests
+                },
+                paymentReference: reference
             });
 
-            if (response.ok) {
-                const booking = await response.json();
+            if (response.status === 200 || response.status === 201) {
+                const booking = response.data;
                 router.push(`/tour/${params.id}/confirmation?bookingId=${booking.id}`);
             } else {
-                const err = await response.json();
-                alert(`Booking confirmation failed: ${err.message}`);
+                alert(`Booking confirmation failed: ${response.data.message}`);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Booking confirmation error:', error);
-            alert('An unexpected error occurred during confirmation.');
+            alert(error.response?.data?.message || 'An unexpected error occurred during confirmation.');
         } finally {
             setIsSubmitting(false);
         }

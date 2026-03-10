@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -39,11 +40,8 @@ export default function TourLandingPage() {
     useEffect(() => {
         const fetchTours = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/tours');
-                if (response.ok) {
-                    const data = await response.json();
-                    setTours(data);
-                }
+                const response = await api.get('/tours');
+                setTours(response.data);
             } catch (err) {
                 console.error('Error fetching tours:', err);
             } finally {

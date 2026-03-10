@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { useSearchParams } from 'next/navigation';
 import { PlaneTakeoff, PlaneLanding } from "lucide-react";
 import { Suspense, useState, useEffect } from 'react';
@@ -18,17 +19,8 @@ function ReservationSummaryContent() {
                 return;
             }
             try {
-                const { data: { session } } = await import('@/lib/supabase').then(m => m.supabase.auth.getSession());
-                if (!session) return;
-
-                const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setBooking(data);
-                }
+                const response = await api.get(`/bookings/${bookingId}/status`);
+                setBooking(response.data);
             } catch (err) {
                 console.error(err);
             } finally {

@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from "@/lib/supabase";
 
 function PaymentContent() {
     const router = useRouter();
@@ -49,36 +51,30 @@ function PaymentContent() {
             }
 
             try {
-                // Fetch using API (need admin session or we can fetch public info if exposed, 
-                // but since it's authenticated backend, we use standard fetch)
-                const { data: { session } } = await import('@/lib/supabase').then(m => m.supabase.auth.getSession());
-                if (!session) return;
-
-                if (session.user?.email) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user?.email) {
                     setUserEmail(session.user.email);
                 }
 
-                const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
-                });
+                const response = await api.get(`/bookings/${bookingId}/status`);
+                const data = response.data;
+                setBooking(data);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setBooking(data);
-
-                    if (data.email || data.contact_email || data.user?.email) {
-                        setUserEmail(data.email || data.contact_email || data.user?.email);
-                    }
+                if (data.email || data.contact_email || data.user?.email) {
+                    setUserEmail(data.email || data.contact_email || data.user?.email);
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Error fetching booking details:', err);
+                if (err.response?.status === 401) {
+                    router.push('/');
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         fetchBooking();
-    }, [bookingId]);
+    }, [bookingId, router]);
 
     // 2. Load Paystack Script
     useEffect(() => {

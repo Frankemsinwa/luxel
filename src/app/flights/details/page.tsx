@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from "@/components/Navbar";
@@ -52,11 +53,8 @@ function FlightDetailsContent() {
                 return;
             }
             try {
-                const response = await fetch(`http://localhost:5000/api/flights/${flightId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setFullFlight(data);
-                }
+                const response = await api.get(`/flights/${flightId}`);
+                setFullFlight(response.data);
             } catch (error) {
                 console.error("Error fetching flight details:", error);
             } finally {

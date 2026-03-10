@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { motion, AnimatePresence } from "framer-motion";
 import {
     ChevronLeft,
@@ -42,34 +43,26 @@ export default function RequestDetailsPage() {
 
     useEffect(() => {
         const fetchRequest = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
-
             try {
-                const response = await fetch(`http://localhost:5000/api/agent/requests/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${session.access_token}`
-                    }
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    setRequest(data);
-                }
-            } catch (error) {
+                const response = await api.get(`/agent/requests/${id}`);
+                setRequest(response.data);
+            } catch (error: any) {
                 console.error('Error fetching request details:', error);
+                if (error.response?.status === 401) {
+                    router.push('/');
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         fetchRequest();
-    }, [id]);
+    }, [id, router]);
 
     // Verify flight price through Amadeus API
     const handleVerifyPrice = async () => {
         setVerifyLoading(true);
         setVerifiedFlights([]);
-        const { data: { session } } = await supabase.auth.getSession();
 
         try {
             const itinerary = request.details?.itinerary || '';
@@ -77,22 +70,15 @@ export default function RequestDetailsPage() {
             const depCode = codes[0] || request.details?.flight_data?.departureCode || 'LHR';
             const arrCode = codes[1] || request.details?.flight_data?.arrivalCode || 'JFK';
 
-            const response = await fetch('http://localhost:5000/api/agent/verify-price', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.access_token}`
-                },
-                body: JSON.stringify({
-                    from: depCode,
-                    to: arrCode,
-                    departureDate: new Date().toISOString().split('T')[0],
-                    passengers: String(request.details?.passengers?.length || 1)
-                })
+            const response = await api.post('/agent/verify-price', {
+                from: depCode,
+                to: arrCode,
+                departureDate: new Date().toISOString().split('T')[0],
+                passengers: String(request.details?.passengers?.length || 1)
             });
 
-            const data = await response.json();
-            if (response.ok && data.flights) {
+            const data = response.data;
+            if (data.flights) {
                 setVerifiedFlights(data.flights);
                 if (data.flights.length > 0) {
                     setSelectedFlight(data.flights[0]);
@@ -116,26 +102,15 @@ export default function RequestDetailsPage() {
     const handleConfirm = async () => {
         if (!confirmedPrice) return;
         setIsActing(true);
-        const { data: { session } } = await supabase.auth.getSession();
 
         try {
-            const response = await fetch(`http://localhost:5000/api/agent/requests/${id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.access_token}`
-                },
-                body: JSON.stringify({
-                    status: 'RESOLVED',
-                    confirmedPrice: Number(confirmedPrice)
-                })
+            const response = await api.patch(`/agent/requests/${id}`, {
+                status: 'RESOLVED',
+                confirmedPrice: Number(confirmedPrice)
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                setRequest(data);
-                setShowVerifyModal(false);
-            }
+            setRequest(response.data);
+            setShowVerifyModal(false);
         } catch (error) {
             console.error('Error confirming request:', error);
         } finally {
@@ -146,22 +121,10 @@ export default function RequestDetailsPage() {
     // Reject request
     const handleReject = async () => {
         setIsActing(true);
-        const { data: { session } } = await supabase.auth.getSession();
 
         try {
-            const response = await fetch(`http://localhost:5000/api/agent/requests/${id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.access_token}`
-                },
-                body: JSON.stringify({ status: 'CLOSED' })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setRequest(data);
-            }
+            const response = await api.patch(`/agent/requests/${id}`, { status: 'CLOSED' });
+            setRequest(response.data);
         } catch (error) {
             console.error('Error rejecting request:', error);
         } finally {

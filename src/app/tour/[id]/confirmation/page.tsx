@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -37,18 +38,9 @@ function ConfirmationContent() {
             }
 
             try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) return;
-
-                const response = await fetch(`http://localhost:5000/api/tours/bookings/${bookingId}`, {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setBooking(data);
-                }
-            } catch (err) {
+                const response = await api.get(`/tours/bookings/${bookingId}`);
+                setBooking(response.data);
+            } catch (err: any) {
                 console.error('Error fetching booking details:', err);
             } finally {
                 setLoading(false);

@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from "@/components/Navbar";
@@ -58,18 +59,17 @@ function FlightsContent() {
             setIsLoading(true);
             setResults([]); // Clear previous results while loading
             try {
-                const query = new URLSearchParams({
-                    from: searchData.from,
-                    to: searchData.to,
-                    departureDate: searchData.departure || new Date().toISOString(),
-                    passengers: searchData.passengers
+                const response = await api.get('/flights/search', {
+                    params: {
+                        from: searchData.from,
+                        to: searchData.to,
+                        departureDate: searchData.departure || new Date().toISOString(),
+                        passengers: searchData.passengers
+                    }
                 });
 
-                const response = await fetch(`http://localhost:5000/api/flights/search?${query.toString()}`);
-                const data = await response.json();
-
-                if (data.flights) {
-                    setResults(data.flights);
+                if (response.data.flights) {
+                    setResults(response.data.flights);
                 } else {
                     setResults([]);
                 }

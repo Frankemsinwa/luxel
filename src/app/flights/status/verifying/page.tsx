@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
@@ -22,31 +23,22 @@ function VerifyingContent() {
 
         const confirmAndFinalize = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
-
-                if (!session || !bookingId) {
-                    setError('Missing session or booking reference.');
+                if (!bookingId) {
+                    setError('Missing booking reference.');
                     return;
                 }
 
-                // Call the backend to confirm payment — no duplicate insert
-                const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/confirm-payment`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.access_token}`
-                    }
-                });
+                // Call the backend to confirm payment — using our centralized api client
+                const response = await api.patch(`/bookings/${bookingId}/confirm-payment`);
 
-                if (response.ok) {
+                if (response.status === 200 || response.status === 204) {
                     router.push(`/flights/status/finalized?${searchParams.toString()}`);
                 } else {
-                    const data = await response.json();
-                    setError(data.message || 'Payment confirmation failed.');
+                    setError(response.data?.message || 'Payment confirmation failed.');
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Confirm payment error:', err);
-                setError('A connection error occurred during verification.');
+                setError(err.response?.data?.message || 'A connection error occurred during verification.');
             }
         };
 

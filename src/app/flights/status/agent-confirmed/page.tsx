@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
@@ -25,26 +26,20 @@ function AgentConfirmedContent() {
             }
 
             try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) return;
-
-                const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setConfirmedPrice(data.confirmed_price || data.total_price);
-                }
-            } catch (err) {
+                const response = await api.get(`/bookings/${bookingId}/status`);
+                setConfirmedPrice(response.data.confirmed_price || response.data.total_price);
+            } catch (err: any) {
                 console.error('Error fetching booking price:', err);
+                if (err.response?.status === 401) {
+                    router.push('/');
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         fetchBookingPrice();
-    }, [bookingId]);
+    }, [bookingId, router]);
 
     // Fallback from search params while loading
     const displayPrice = confirmedPrice || Number(searchParams.get('price')) || 0;

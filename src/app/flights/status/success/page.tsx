@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -24,18 +25,16 @@ function SuccessContent() {
             }
 
             try {
-                const { data: { session } } = await supabase.auth.getSession();
-                const response = await fetch(`http://localhost:5000/api/bookings/verify-payment/${trxRef}`, {
-                    headers: {
-                        'Authorization': `Bearer ${session?.access_token}`
-                    }
-                });
+                const response = await api.get(`/bookings/verify-payment/${trxRef}`);
 
-                if (response.ok) {
+                if (response.status === 200) {
                     setIsSuccess(true);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Verification failed:', error);
+                if (error.response?.status === 401) {
+                    // Token might be missing or expired
+                }
             } finally {
                 setIsVerifying(false);
             }

@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
@@ -30,30 +31,22 @@ export default function AgentSignupPage() {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:5000/api/auth/agent/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    fullName,
-                    email,
-                    password
-                })
+            const response = await api.post('/auth/agent/signup', {
+                fullName,
+                email,
+                password
             });
 
-            const data = await response.json();
-
-            if (response.ok) {
+            if (response.status === 201 || response.status === 200) {
                 setIsSuccess(true);
                 setTimeout(() => {
                     router.push('/');
                 }, 3000);
             } else {
-                setError(data.message || "Failed to create agent account.");
+                setError(response.data.message || "Failed to create agent account.");
             }
-        } catch (err) {
-            setError("A connection error occurred. Please try again.");
+        } catch (err: any) {
+            setError(err.response?.data?.message || "A connection error occurred. Please try again.");
         } finally {
             setIsLoading(false);
         }

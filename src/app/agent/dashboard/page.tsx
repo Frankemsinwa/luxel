@@ -1,5 +1,6 @@
 'use client'
 
+import api from '@/lib/api';
 import { motion } from "framer-motion";
 import {
     Clock,
@@ -32,32 +33,20 @@ export default function AgentDashboard() {
     useEffect(() => {
         const fetchRequests = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
-
-                if (!session) {
-                    router.push('/'); // Redirect if not logged in
-                    return;
-                }
-
-                const response = await fetch('http://localhost:5000/api/agent/requests', {
-                    headers: {
-                        'Authorization': `Bearer ${session.access_token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setRequestsData(data);
-                }
-            } catch (error) {
+                const response = await api.get('/agent/requests');
+                setRequestsData(response.data);
+            } catch (error: any) {
                 console.error('Error fetching agent requests:', error);
+                if (error.response?.status === 401) {
+                    router.push('/');
+                }
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchRequests();
-    }, []);
+    }, [router]);
 
     return (
         <div className="space-y-10">
