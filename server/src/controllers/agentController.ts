@@ -136,7 +136,7 @@ export const verifyFlightPrice = async (req: any, res: Response) => {
             from,
             to,
             departureDate,
-            passengers: passengers || '1'
+            adults: passengers || '1'
         });
 
         return res.json({
