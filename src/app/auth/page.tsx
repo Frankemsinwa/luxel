@@ -121,7 +121,7 @@ function AuthContent() {
                             className="absolute bottom-0 right-0 w-[80%] h-[60%] pointer-events-none"
                         >
                             <Image 
-                                src="/login-img.png" 
+                                src="/login-img-1.png" 
                                 alt="Luxel Journey" 
                                 fill 
                                 className="object-contain object-right-bottom opacity-80"
@@ -149,14 +149,15 @@ function AuthContent() {
                         animate={{ opacity: 1, x: 0 }}
                         className="w-full max-w-[480px] space-y-10"
                     >
-                        <div className="space-y-4">
-                            <div className="inline-block px-4 py-1.5 rounded-full bg-amber/10 text-amber text-[10px] font-bold uppercase tracking-[0.2em]">
-                                {mode === 'login' ? 'Private Portal' : 'Join the Elite'}
+                        <div className="space-y-6">
+                            <div className="inline-block px-4 py-1.5 rounded-full bg-zinc-900 text-amber text-[10px] font-bold uppercase tracking-[0.2em]">
+                                {mode === 'login' ? 'Private Portal' : 'Membership Access'}
                             </div>
-                            <h2 className="text-4xl font-medium text-zinc-900 tracking-tight">
-                                {mode === 'login' ? 'Welcome Back' : 'Create Account'}
-                            </h2>
-                            <p className="text-zinc-500 font-normal text-base">
+                            <h1 className="text-6xl font-medium text-zinc-900 leading-[1.1] tracking-tight font-satoshi">
+                                {mode === 'login' ? 'Welcome' : 'Join the'} <br />
+                                <span className="text-amber italic font-newton">{mode === 'login' ? 'Back' : 'Elite'}</span>.
+                            </h1>
+                            <p className="text-zinc-500 font-normal text-lg leading-relaxed">
                                 {mode === 'login' 
                                     ? 'Enter your credentials to access your luxury concierge.' 
                                     : 'Unlock exclusive rates, priority handling, and global access.'}
@@ -247,27 +248,11 @@ function AuthContent() {
                             >
                                 <div className="absolute inset-0 bg-amber -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
                                 <span className="relative z-10 group-hover:text-black transition-colors">
-                                    {isLoading ? 'Processing Access...' : mode === 'login' ? 'Sign In to Portal' : 'Create Elite Account'}
+                                    {isLoading ? 'Processing Access...' : mode === 'login' ? 'Sign In' : 'Sign Up'}
                                 </span>
                                 {!isLoading && <ArrowRight size={18} className="relative z-10 group-hover:text-black transition-colors" />}
                             </button>
                         </form>
-
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-100" /></div>
-                            <div className="relative flex justify-center text-[10px] uppercase tracking-widest"><span className="bg-white px-4 text-zinc-400 font-bold">Premium SSO</span></div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <button className="flex items-center justify-center gap-3 py-4 rounded-2xl border border-zinc-100 hover:bg-zinc-50 transition-all group font-semibold text-xs text-zinc-600">
-                                <Chrome size={18} className="text-zinc-400 group-hover:text-amber transition-colors" />
-                                Google
-                            </button>
-                            <button className="flex items-center justify-center gap-3 py-4 rounded-2xl border border-zinc-100 hover:bg-zinc-50 transition-all group font-semibold text-xs text-zinc-600">
-                                <Github size={18} className="text-zinc-400 group-hover:text-amber transition-colors" />
-                                Apple
-                            </button>
-                        </div>
 
                         <div className="text-center pt-4">
                             <p className="text-sm font-medium text-zinc-500">
@@ -276,7 +261,7 @@ function AuthContent() {
                                     onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
                                     className="text-amber font-black hover:underline ml-1"
                                 >
-                                    {mode === 'login' ? 'Request Membership' : 'Sign In'}
+                                    {mode === 'login' ? 'Sign Up' : 'Sign In'}
                                 </button>
                             </p>
                         </div>
