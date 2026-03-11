@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import CalendarDropdown from './CalendarDropdown';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -10,85 +10,92 @@ import {
     Search,
     ChevronRight,
     PlaneTakeoff,
-    PlaneLanding
+    PlaneLanding,
+    ChevronDown,
+    Plus,
+    Minus,
+    Gem,
+    Building2,
+    Loader2
 } from 'lucide-react';
+import api from '@/lib/api';
 
-const locations = [
-    'Karachi, Pakistan',
-    'New York, USA',
-    'London, UK',
-    'Tokyo, Japan',
-    'Dubai, UAE',
-    'Paris, France',
-    'Singapore, Singapore',
-    'Sydney, Australia',
-    'Istanbul, Turkey',
-    'Toronto, Canada',
-    'Berlin, Germany',
-    'Mumbai, India',
-    'Lagos, Nigeria',
-];
-
-const passengerOptions = [
-    '1 Passenger',
-    '2 Passengers',
-    '3 Passengers',
-    '4+ Passengers',
-]
-
-interface DropdownProps {
-    options: string[];
-    selected: string;
-    setSelected: (val: string) => void;
-    label: string;
-    icon: React.ReactNode;
-    hasSearch?: boolean;
+// --- Types ---
+interface Location {
+    name: string;
+    iataCode: string;
+    city: string;
+    country: string;
+    type: string;
 }
 
-const Dropdown = ({ options, selected, setSelected, label, icon, hasSearch }: DropdownProps) => {
+interface Travelers {
+    adults: number;
+    children: number;
+    cabinClass: 'ECONOMY' | 'PREMIUM_ECONOMY' | 'BUSINESS' | 'FIRST';
+}
+
+// --- Autocomplete Dropdown ---
+const AutocompleteDropdown = ({ 
+    label, 
+    icon, 
+    value, 
+    onChange 
+}: { 
+    label: string; 
+    icon: React.ReactNode; 
+    value: string; 
+    onChange: (val: string) => void;
+}) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [keyword, setKeyword] = useState('');
+    const [suggestions, setSuggestions] = useState<Location[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const filteredOptions = options.filter(option =>
-        option.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        };
-        document.body.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.body.removeEventListener('mousedown', handleClickOutside);
-        };
+    // Fetch locations from backend
+    const fetchLocations = useCallback(async (query: string) => {
+        if (query.length < 2) return;
+        setIsLoading(true);
+        try {
+            const res = await api.get(`/flights/locations?keyword=${query}`);
+            setSuggestions(res.data);
+        } catch (err) {
+            console.error('Location search failed:', err);
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
 
     useEffect(() => {
-        if (!isOpen) {
-            setSearchQuery('');
-        }
-    }, [isOpen]);
+        const timer = setTimeout(() => {
+            if (keyword) fetchLocations(keyword);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [keyword, fetchLocations]);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setIsOpen(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     return (
-        <div className="relative flex-1 min-w-[200px]" ref={dropdownRef}>
+        <div className="relative flex-1 min-w-[240px]" ref={dropdownRef}>
             <div
                 onClick={() => setIsOpen(!isOpen)}
-                className={`group flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 cursor-pointer border border-transparent hover:border-zinc-200 hover:bg-white/80 hover:shadow-sm ${isOpen ? 'bg-white shadow-md border-zinc-200' : ''}`}
+                className={`group flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 cursor-pointer border border-transparent hover:border-zinc-200 hover:bg-white/80 ${isOpen ? 'bg-white shadow-md border-zinc-200' : ''}`}
             >
                 <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 ${isOpen ? 'bg-amber text-white ring-4 ring-amber/10' : 'bg-zinc-50 text-zinc-400 group-hover:bg-amber group-hover:text-white group-hover:scale-110'}`}>
                     {icon}
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col flex-1">
                     <span className="text-[10px] uppercase tracking-[0.1em] text-zinc-400 font-bold mb-0.5">{label}</span>
                     <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-semibold text-zinc-900 line-clamp-1">{selected}</span>
-                        <ChevronRight
-                            size={12}
-                            className={`text-amber transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-0'}`}
-                        />
+                        <span className="text-sm font-semibold text-zinc-900 truncate max-w-[160px]">{value || 'Select City'}</span>
+                        <ChevronDown size={12} className={`text-amber transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                     </div>
                 </div>
             </div>
@@ -96,47 +103,59 @@ const Dropdown = ({ options, selected, setSelected, label, icon, hasSearch }: Dr
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-                        className="absolute top-full left-0 mt-3 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/20 z-[100] overflow-hidden"
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                        className="absolute top-full left-0 mt-3 w-[320px] bg-white rounded-3xl shadow-2xl border border-zinc-100 z-[100] overflow-hidden p-3"
                     >
-                        {hasSearch && (
-                            <div className="p-3 pb-1 border-b border-zinc-100">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-                                    <input
-                                        type="text"
-                                        placeholder={`Search ${label}...`}
-                                        className="w-full bg-zinc-50 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-amber/20 transition-all outline-none"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        autoFocus
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        <div className="p-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                            {filteredOptions.length > 0 ? (
-                                filteredOptions.map(option => (
-                                    <div
-                                        key={option}
-                                        onClick={() => {
-                                            setSelected(option);
-                                            setIsOpen(false);
-                                        }}
-                                        className={`p-3 text-sm font-medium rounded-xl cursor-pointer transition-colors flex items-center justify-between ${selected === option ? 'bg-amber/10 text-amber' : 'text-zinc-600 hover:bg-zinc-50'}`}
-                                    >
-                                        {option}
-                                        {selected === option && (
-                                            <div className="w-1.5 h-1.5 rounded-full bg-amber" />
-                                        )}
+                        <div className="relative mb-3">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Search city or airport..."
+                                className="w-full bg-zinc-50 border-none rounded-2xl py-3 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-amber/20 outline-none"
+                                value={keyword}
+                                onChange={(e) => setKeyword(e.target.value)}
+                                autoFocus
+                            />
+                            {isLoading && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-amber" size={16} />}
+                        </div>
+
+                        <div className="max-h-[280px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+                            {suggestions.map((loc) => (
+                                <button
+                                    key={loc.iataCode}
+                                    onClick={() => {
+                                        onChange(`${loc.city} (${loc.iataCode})`);
+                                        setIsOpen(false);
+                                    }}
+                                    className="w-full text-left p-3 rounded-xl hover:bg-amber/5 group transition-colors flex items-center justify-between"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 group-hover:bg-amber group-hover:text-white transition-colors">
+                                            <MapPin size={14} />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-zinc-900">{loc.city}, {loc.country}</p>
+                                            <p className="text-[10px] text-zinc-400 font-medium">{loc.name}</p>
+                                        </div>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="p-4 text-center text-sm text-zinc-400">
-                                    No results found
+                                    <span className="text-xs font-black text-amber bg-amber/10 px-2 py-1 rounded-md">{loc.iataCode}</span>
+                                </button>
+                            ))}
+                            {keyword.length >= 2 && suggestions.length === 0 && !isLoading && (
+                                <div className="py-10 text-center">
+                                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">No matching gateways found</p>
+                                </div>
+                            )}
+                            {keyword.length < 2 && (
+                                <div className="p-4">
+                                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-4">Popular Local Hubs</p>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {['Lagos (LOS)', 'Abuja (ABV)', 'Port Harcourt (PHC)', 'Kano (KAN)'].map(hub => (
+                                            <button key={hub} onClick={() => {onChange(hub); setIsOpen(false);}} className="text-left text-xs font-bold text-zinc-600 hover:text-amber py-1 transition-colors flex items-center gap-2">
+                                                <Building2 size={12} /> {hub}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -144,69 +163,181 @@ const Dropdown = ({ options, selected, setSelected, label, icon, hasSearch }: Dr
                 )}
             </AnimatePresence>
         </div>
-    )
-}
+    );
+};
 
+// --- Travelers & Class Dropdown ---
+const TravelersDropdown = ({ value, onChange }: { value: Travelers; onChange: (v: Travelers) => void }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setIsOpen(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const updateCount = (type: 'adults' | 'children', delta: number) => {
+        const newVal = Math.max(type === 'adults' ? 1 : 0, value[type] + delta);
+        onChange({ ...value, [type]: newVal });
+    };
+
+    const classes = [
+        { id: 'ECONOMY', label: 'Economy' },
+        { id: 'PREMIUM_ECONOMY', label: 'Premium' },
+        { id: 'BUSINESS', label: 'Business' },
+        { id: 'FIRST', label: 'First Class' },
+    ];
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <div
+                onClick={() => setIsOpen(!isOpen)}
+                className={`group flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 cursor-pointer border border-transparent hover:border-zinc-200 hover:bg-white/80 ${isOpen ? 'bg-white shadow-md border-zinc-200' : ''}`}
+            >
+                <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 ${isOpen ? 'bg-amber text-white' : 'bg-zinc-50 text-zinc-400 group-hover:bg-amber group-hover:text-white'}`}>
+                    <Users size={18} strokeWidth={2.5} />
+                </div>
+                <div className="flex flex-col">
+                    <span className="text-[10px] uppercase tracking-[0.1em] text-zinc-400 font-bold mb-0.5">Travelers</span>
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-semibold text-zinc-900 whitespace-nowrap">
+                            {value.adults + value.children} Pax, {classes.find(c => c.id === value.cabinClass)?.label}
+                        </span>
+                        <ChevronDown size={12} className={`text-amber transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    </div>
+                </div>
+            </div>
+
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                        className="absolute top-full right-0 mt-3 w-[300px] bg-white rounded-3xl shadow-2xl border border-zinc-100 z-[100] p-6 space-y-8"
+                    >
+                        {/* Counts */}
+                        <div className="space-y-6">
+                            {[
+                                { id: 'adults', label: 'Adults', sub: 'Ages 12+' },
+                                { id: 'children', label: 'Children', sub: 'Ages 2-11' }
+                            ].map(item => (
+                                <div key={item.id} className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-bold text-zinc-900">{item.label}</p>
+                                        <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-widest">{item.sub}</p>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <button onClick={() => updateCount(item.id as any, -1)} className="w-8 h-8 rounded-full border border-zinc-100 flex items-center justify-center text-zinc-400 hover:text-amber hover:border-amber transition-all"><Minus size={14} /></button>
+                                        <span className="text-sm font-black text-zinc-900 w-4 text-center">{value[item.id as 'adults' | 'children']}</span>
+                                        <button onClick={() => updateCount(item.id as any, 1)} className="w-8 h-8 rounded-full border border-zinc-100 flex items-center justify-center text-zinc-400 hover:text-amber hover:border-amber transition-all"><Plus size={14} /></button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Class */}
+                        <div className="space-y-4">
+                            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.2em]">Travel Class</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                {classes.map(c => (
+                                    <button
+                                        key={c.id}
+                                        onClick={() => onChange({ ...value, cabinClass: c.id as any })}
+                                        className={`py-2.5 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                                            value.cabinClass === c.id 
+                                            ? 'bg-zinc-900 text-amber border-zinc-900 shadow-lg' 
+                                            : 'bg-zinc-50 text-zinc-400 border-transparent hover:bg-zinc-100'
+                                        }`}
+                                    >
+                                        {c.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={() => setIsOpen(false)}
+                            className="w-full bg-amber text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-amber/20 hover:scale-[1.02] active:scale-95 transition-all"
+                        >
+                            Confirm Selection
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+// --- Main SearchBar ---
 export default function SearchBar({ className, initialValues }: {
     className?: string;
     initialValues?: {
         from?: string;
         to?: string;
         departure?: string;
-        passengers?: string;
+        adults?: string;
+        children?: string;
+        travelClass?: string;
     }
 }) {
     const router = useRouter();
-    const [from, setFrom] = useState(initialValues?.from || locations[0]);
-    const [to, setTo] = useState(initialValues?.to || locations[1]);
+    const [from, setFrom] = useState(initialValues?.from || 'Lagos (LOS)');
+    const [to, setTo] = useState(initialValues?.to || 'London (LHR)');
     const [departureDate, setDepartureDate] = useState<Date | undefined>(
         initialValues?.departure ? new Date(initialValues.departure) : new Date()
     );
     const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
-    const [passengers, setPassengers] = useState(initialValues?.passengers || passengerOptions[0]);
+    const [travelers, setTravelers] = useState<Travelers>({
+        adults: parseInt(initialValues?.adults || '1'),
+        children: parseInt(initialValues?.children || '0'),
+        cabinClass: (initialValues?.travelClass as any) || 'ECONOMY'
+    });
 
     const handleSearch = () => {
         const params = new URLSearchParams({
-            from: from || '',
-            to: to || '',
+            from,
+            to,
             departure: departureDate?.toISOString() || '',
             return: returnDate?.toISOString() || '',
-            passengers: passengers || ''
+            adults: travelers.adults.toString(),
+            children: travelers.children.toString(),
+            travelClass: travelers.cabinClass
         });
         router.push(`/flights?${params.toString()}`);
     };
 
     return (
         <section className={className || "relative -mt-24 z-30 px-6 max-w-7xl mx-auto w-full"}>
-            <div className="bg-white/70 backdrop-blur-2xl rounded-[32px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-3 border border-white">
-                <div className="flex flex-wrap lg:flex-nowrap items-center gap-1">
-                    <Dropdown
-                        options={locations}
-                        selected={from}
-                        setSelected={setFrom}
+            <div className="bg-white/70 backdrop-blur-3xl rounded-[3rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] p-4 border border-white relative">
+                {/* Premium Accent */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-amber rounded-full opacity-50" />
+                
+                <div className="flex flex-wrap lg:flex-nowrap items-center gap-2">
+                    <AutocompleteDropdown
                         label="From"
                         icon={<PlaneTakeoff size={18} strokeWidth={2.5} />}
-                        hasSearch={true}
+                        value={from}
+                        onChange={setFrom}
                     />
 
                     <div className="hidden lg:flex items-center justify-center -mx-4 z-10">
-                        <div className="w-10 h-10 bg-white rounded-full border border-zinc-100 shadow-sm flex items-center justify-center text-zinc-400 hover:text-amber transition-colors cursor-pointer group">
+                        <div className="w-12 h-12 bg-white rounded-2xl border border-zinc-100 shadow-xl flex items-center justify-center text-zinc-400 hover:text-amber transition-all cursor-pointer group hover:scale-110 active:scale-95" onClick={() => {const f = from; setFrom(to); setTo(f);}}>
                             <motion.div whileHover={{ rotate: 180 }} transition={{ type: "spring", stiffness: 300 }}>
-                                <ChevronRight size={18} />
+                                <ChevronRight size={20} strokeWidth={3} />
                             </motion.div>
                         </div>
                     </div>
 
-                    <Dropdown
-                        options={locations}
-                        selected={to}
-                        setSelected={setTo}
+                    <AutocompleteDropdown
                         label="To"
                         icon={<PlaneLanding size={18} strokeWidth={2.5} />}
-                        hasSearch={true}
+                        value={to}
+                        onChange={setTo}
                     />
 
-                    <div className="w-[1px] h-12 bg-zinc-100 hidden lg:block mx-2" />
+                    <div className="w-[1px] h-12 bg-zinc-100 hidden lg:block mx-3" />
 
                     <CalendarDropdown
                         label="Departure"
@@ -220,22 +351,23 @@ export default function SearchBar({ className, initialValues }: {
                         onSelectDate={setReturnDate}
                     />
 
-                    <div className="w-[1px] h-12 bg-zinc-100 hidden lg:block mx-2" />
+                    <div className="w-[1px] h-12 bg-zinc-100 hidden lg:block mx-3" />
 
-                    <Dropdown
-                        options={passengerOptions}
-                        selected={passengers}
-                        setSelected={setPassengers}
-                        label="Passengers"
-                        icon={<Users size={18} strokeWidth={2.5} />}
-                    />
+                    <div className="flex-1 lg:flex-none">
+                        <TravelersDropdown 
+                            value={travelers}
+                            onChange={setTravelers}
+                        />
+                    </div>
 
-                    <button
-                        onClick={handleSearch}
-                        className="bg-amber text-white h-16 w-full lg:w-16 rounded-[22px] font-bold flex items-center justify-center transition-all shadow-lg shadow-amber/20 ml-2 cursor-pointer hover:bg-amber-dark hover:scale-105 active:scale-95"
-                    >
-                        <Search size={24} strokeWidth={3} />
-                    </button>
+                    <div className="pl-4 lg:pl-6 ml-auto lg:ml-0 w-full lg:w-auto mt-4 lg:mt-0">
+                        <button
+                            onClick={handleSearch}
+                            className="bg-zinc-900 text-amber h-16 w-full lg:w-24 rounded-3xl font-bold flex items-center justify-center transition-all shadow-2xl shadow-black/20 cursor-pointer hover:bg-black hover:scale-105 active:scale-95 group"
+                        >
+                            <Search size={24} strokeWidth={3} className="group-hover:scale-110 transition-transform" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>

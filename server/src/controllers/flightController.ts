@@ -3,6 +3,35 @@ import * as amadeusService from '../services/amadeusService.js';
 
 /**
  * @swagger
+ * /api/flights/locations:
+ *   get:
+ *     summary: Search for airports and cities
+ *     tags: [Flights]
+ *     parameters:
+ *       - in: query
+ *         name: keyword
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "Lagos"
+ *     responses:
+ *       200:
+ *         description: List of locations
+ */
+export const searchLocations = async (req: Request, res: Response) => {
+    try {
+        const { keyword } = req.query;
+        if (!keyword) return res.json([]);
+        const locations = await amadeusService.searchLocations(keyword as string);
+        res.json(locations);
+    } catch (error) {
+        console.error('Location search controller error:', error);
+        res.status(500).json({ message: 'Error searching locations' });
+    }
+};
+
+/**
+ * @swagger
  * /api/flights/search:
  *   get:
  *     summary: Search for flight offers
@@ -13,33 +42,35 @@ import * as amadeusService from '../services/amadeusService.js';
  *         required: true
  *         schema:
  *           type: string
- *         example: "London (LHR)"
  *       - in: query
  *         name: to
  *         required: true
  *         schema:
  *           type: string
- *         example: "New York (JFK)"
  *       - in: query
  *         name: departureDate
  *         required: true
  *         schema:
  *           type: string
- *         example: "2026-10-12"
  *       - in: query
- *         name: passengers
+ *         name: adults
  *         schema:
  *           type: string
- *         default: "1"
+ *       - in: query
+ *         name: children
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: travelClass
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: List of flight offers
- *       400:
- *         description: Missing required search parameters
  */
 export const searchFlights = async (req: Request, res: Response) => {
     try {
-        const { from, to, departureDate, passengers } = req.query;
+        const { from, to, departureDate, adults, children, travelClass } = req.query;
 
         if (!from || !to || !departureDate) {
             return res.status(400).json({
@@ -51,7 +82,9 @@ export const searchFlights = async (req: Request, res: Response) => {
             from: from as string,
             to: to as string,
             departureDate: departureDate as string,
-            passengers: passengers as string || '1'
+            adults: adults as string,
+            children: children as string,
+            travelClass: travelClass as string
         });
 
         return res.json({
