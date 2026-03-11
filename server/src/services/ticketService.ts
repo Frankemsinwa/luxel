@@ -48,11 +48,11 @@ export const generateTicketPdf = async (booking: any, passengerName: string, ema
     // 3. Generate PDF using Puppeteer Core + Chromium
     const browser = await puppeteer.launch({
         args: isVercel ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
-        defaultViewport: chromium.defaultViewport,
+        defaultViewport: (chromium as any).defaultViewport,
         executablePath: isVercel 
             ? await chromium.executablePath() 
             : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Fallback for your local Windows machine
-        headless: isVercel ? chromium.headless : true,
+        headless: isVercel ? (chromium as any).headless : true,
     });
 
     try {
