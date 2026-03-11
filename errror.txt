@@ -1,0 +1,20 @@
+04:08:46.032 Running build in Washington, D.C., USA (East) – iad1
+04:08:46.032 Build machine configuration: 2 cores, 8 GB
+04:08:46.153 Cloning github.com/Frankemsinwa/luxel (Branch: main, Commit: ddee5ef)
+04:08:48.016 Cloning completed: 1.861s
+04:08:48.109 Restored build cache from previous deployment (CsubQmRvFpyTZt26phhkcurKuxLe)
+04:08:48.741 Running "vercel build"
+04:08:49.470 Vercel CLI 50.28.0
+04:08:50.197 Installing dependencies...
+04:08:52.614 
+04:08:52.615 up to date in 2s
+04:08:52.616 
+04:08:52.616 41 packages are looking for funding
+04:08:52.616   run `npm fund` for details
+04:08:52.648 Running "npm run build"
+04:08:52.745 
+04:08:52.745 > luxel-server@1.0.0 build
+04:08:52.745 > tsc
+04:08:52.745 
+04:08:55.266 src/controllers/agentController.ts(139,13): error TS2353: Object literal may only specify known properties, and 'passengers' does not exist in type '{ from: string; to: string; departureDate: string; adults?: string | undefined; children?: string | undefined; travelClass?: string | undefined; }'.
+04:08:55.301 Error: Command "npm run build" exited with 2

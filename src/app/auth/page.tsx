@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, User, ArrowRight, Github, Chrome, ShieldCheck, Gem, Globe } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Github, Chrome, ShieldCheck, Gem, Globe, Eye, EyeOff } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import Image from 'next/image';
@@ -18,6 +18,7 @@ function AuthContent() {
     const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [fullName, setFullName] = useState("");
     const [error, setError] = useState<string | null>(null);
@@ -231,13 +232,20 @@ function AuthContent() {
                                         <Lock size={18} strokeWidth={1.5} />
                                     </div>
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
-                                        className="w-full bg-zinc-50 border border-transparent rounded-2xl py-4 pl-12 pr-6 text-sm font-medium text-zinc-900 focus:ring-2 focus:ring-amber/20 focus:bg-white focus:border-amber/10 transition-all outline-none"
+                                        className="w-full bg-zinc-50 border border-transparent rounded-2xl py-4 pl-12 pr-12 text-sm font-medium text-zinc-900 focus:ring-2 focus:ring-amber/20 focus:bg-white focus:border-amber/10 transition-all outline-none"
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-amber transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff size={18} strokeWidth={1.5} /> : <Eye size={18} strokeWidth={1.5} />}
+                                    </button>
                                 </div>
                             </div>
 
