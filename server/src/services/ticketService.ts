@@ -1,4 +1,5 @@
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import ejs from 'ejs';
 import path from 'path';
 import fs from 'fs';
@@ -6,6 +7,9 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Helper to determine if we're running on Vercel
+const isVercel = process.env.VERCEL || process.env.AWS_EXECUTION_ENV;
 
 export const generateTicketPdf = async (booking: any, passengerName: string, email: string): Promise<Buffer> => {
     // Read logo and convert to base64 for reliable PDF rendering
@@ -41,15 +45,14 @@ export const generateTicketPdf = async (booking: any, passengerName: string, ema
     const templatePath = path.join(__dirname, '../templates/ticket.ejs');
     const html = await ejs.renderFile(templatePath, templateData);
 
-    // 3. Generate PDF using Puppeteer
+    // 3. Generate PDF using Puppeteer Core + Chromium
     const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--allow-file-access-from-files',
-            '--disable-web-security'
-        ]
+        args: isVercel ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+        defaultViewport: chromium.defaultViewport,
+        executablePath: isVercel 
+            ? await chromium.executablePath() 
+            : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Fallback for your local Windows machine
+        headless: isVercel ? chromium.headless : true,
     });
 
     try {
