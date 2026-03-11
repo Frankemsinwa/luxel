@@ -296,19 +296,23 @@ function FlightsContent() {
                                         {/* Flight Info */}
                                         <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 items-center gap-8 md:gap-4">
                                             <div className="flex items-center gap-6">
-                                                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-3 border border-black/5 group-hover:bg-white transition-colors overflow-hidden">
-                                                    {flight.logo && flight.logo.startsWith('http') ? (
-                                                        <img
-                                                            src={flight.logo}
-                                                            alt={flight.airline}
-                                                            className="w-full h-full object-contain"
-                                                            onError={(e) => {
-                                                                (e.target as HTMLImageElement).parentElement!.innerHTML = `<span class="text-xs font-semibold uppercase">${flight.airline}</span>`;
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <div className="text-xs font-semibold">{flight.logo}</div>
-                                                    )}
+                                                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-3 border border-black/5 group-hover:bg-white transition-colors overflow-hidden relative">
+                                                    <img
+                                                        src={`/flight-logos/${flight.airline}.png`}
+                                                        alt={flight.airline}
+                                                        className="w-full h-full object-contain relative z-10"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.style.display = 'none';
+                                                            const fallback = target.nextElementSibling as HTMLElement;
+                                                            if (fallback) fallback.style.display = 'flex';
+                                                        }}
+                                                    />
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 text-zinc-400">
+                                                        <span className="text-[10px] font-black uppercase tracking-tighter">
+                                                            {flight.airline || 'Air'}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 <div>
                                                     <div className="text-2xl font-semibold text-black">{flight.departureTime}</div>

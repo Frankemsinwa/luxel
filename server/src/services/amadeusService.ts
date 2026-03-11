@@ -33,30 +33,90 @@ const EUR_TO_NGN_RATE = 1750; // Current estimated rate or configurable
 let searchCache: Map<string, any> = new Map();
 
 /**
+ * Searches for airports and cities
+ */
+export const searchLocations = async (keyword: string) => {
+    try {
+        const amadeus = getAmadeus();
+        if (!amadeus) throw new Error('Amadeus credentials missing');
+
+        const response = await amadeus.referenceData.locations.get({
+            keyword,
+            subType: Amadeus.location.any,
+            max: 10
+        });
+
+        return response.data.map((loc: any) => ({
+            name: loc.name,
+            iataCode: loc.iataCode,
+            city: loc.address.cityName,
+            country: loc.address.countryName,
+            type: loc.subType
+        }));
+    } catch (error: any) {
+        console.warn('Amadeus Location search failed, attempting global fallback:', error.message);
+        
+        try {
+            // Global Fallback using Travelpayouts (No Key Required)
+            const response = await fetch(`https://autocomplete.travelpayouts.com/places2?term=${keyword}&locale=en&types[]=city&types[]=airport`);
+            const data: any = await response.json();
+            
+            return data.map((item: any) => ({
+                name: item.name || item.main_airport_name,
+                iataCode: item.code,
+                city: item.city_name || item.name,
+                country: item.country_name,
+                type: item.type?.toUpperCase() || 'LOCATION'
+            }));
+        } catch (fallbackError) {
+            console.error('All location search methods failed');
+            // Hardcoded Nigerian fallback as last resort
+            const nigeriaCities = [
+                { name: 'Murtala Muhammed', iataCode: 'LOS', city: 'Lagos', country: 'Nigeria', type: 'AIRPORT' },
+                { name: 'Nnamdi Azikiwe', iataCode: 'ABV', city: 'Abuja', country: 'Nigeria', type: 'AIRPORT' },
+                { name: 'Port Harcourt', iataCode: 'PHC', city: 'Port Harcourt', country: 'Nigeria', type: 'AIRPORT' },
+                { name: 'Mallam Aminu Kano', iataCode: 'KAN', city: 'Kano', country: 'Nigeria', type: 'AIRPORT' },
+                { name: 'Akwa Ibom', iataCode: 'QUO', city: 'Uyo', country: 'Nigeria', type: 'AIRPORT' }
+            ];
+            return nigeriaCities.filter(c => 
+                c.city.toLowerCase().includes(keyword.toLowerCase()) || 
+                c.iataCode.toLowerCase().includes(keyword.toLowerCase())
+            );
+        }
+    }
+};
+
+/**
  * Searches for flight offers using Amadeus API
  */
 export const searchFlights = async (searchParams: {
     from: string;
     to: string;
     departureDate: string;
-    passengers: string;
+    adults?: string;
+    children?: string;
+    travelClass?: string;
 }) => {
-    const { from, to, departureDate, passengers } = searchParams;
+    const { from, to, departureDate, adults, children, travelClass } = searchParams;
     const originCode = getIataCode(from);
     const destinationCode = getIataCode(to);
-    const adults = parseInt(passengers) || 1;
 
     try {
         const amadeus = getAmadeus();
         if (!amadeus) throw new Error('Amadeus credentials missing');
 
-        const response = await amadeus.shopping.flightOffersSearch.get({
+        const query: any = {
             originLocationCode: originCode,
             destinationLocationCode: destinationCode,
             departureDate: departureDate.split('T')[0],
-            adults: adults.toString(),
+            adults: adults || '1',
             max: '20'
-        });
+        };
+
+        if (children && parseInt(children) > 0) query.children = children;
+        if (travelClass && travelClass !== 'ECONOMY') query.travelClass = travelClass;
+
+        const response = await amadeus.shopping.flightOffersSearch.get(query);
 
         const mappedFlights = response.data.map((offer: any) => {
             const rawPrice = parseFloat(offer.price.total);

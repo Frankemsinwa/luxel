@@ -1,0 +1,24 @@
+ry this
+
+Dynamically fetch airline logos for your flight booking app, you can use various methods. One common approach is to maintain a mapping between airline codes and their respective logos in your application.
+
+$airlineLogos = [
+    'AA' => 'american_airlines.png',
+    'DL' => 'delta_airlines.png',
+    // Add more entries for other airlines
+];
+Store the airline logos in a directory within your Laravel application (e.g., public/images/airline_logos/).
+
+foreach ($response['data'] as $flightOffer) {
+    $airline = $flightOffer['carrierCode'];
+
+    // Get the corresponding logo filename from the mapping
+    $logoFilename = $airlineLogos[$airline] ?? 'default_logo.png';
+
+    $flightList[] = [
+        'airline' => $airline,
+        'logo' => asset('images/airline_logos/' . $logoFilename),
+        // ... other details
+    ];
+}
+<img src="{{ $flight['logo'] }}" alt="{{ $flight['airline'] }} Logo">

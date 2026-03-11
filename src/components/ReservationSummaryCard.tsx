@@ -41,6 +41,8 @@ function ReservationSummaryContent() {
         toCode: searchParams.get('arrCode') || "JFK",
         depTime: searchParams.get('depTime') || "10:30 AM",
         arrTime: searchParams.get('arrTime') || "06:45 PM",
+        logo: searchParams.get('logo') || "",
+        airline: searchParams.get('airline') || "",
         departureDate: searchParams.get('departure') ? new Date(searchParams.get('departure')!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Oct 24, 2024',
         returnDate: searchParams.get('return') ? new Date(searchParams.get('return')!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Oct 31, 2024',
     };
@@ -51,9 +53,23 @@ function ReservationSummaryContent() {
     return (
         <div className="bg-flight-card rounded-[3rem] shadow-xl shadow-black/5 border border-black/5 overflow-hidden">
             <div className="p-8 border-b border-black/10 flex items-center justify-between">
-                <div>
-                    <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest block mb-1">Reference</span>
-                    <span className="text-xl font-bold text-black">{booking?.booking_reference || 'LX-PENDING'}</span>
+                <div className="flex items-center gap-4">
+                    {route.airline && (
+                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1.5 border border-black/5 overflow-hidden">
+                            <img 
+                                src={`https://cdn.jsdelivr.net/gh/besrourms/airline-logos/logos/${route.airline}.png`} 
+                                alt={route.airline} 
+                                className="w-full h-full object-contain" 
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                }}
+                            />
+                        </div>
+                    )}
+                    <div>
+                        <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest block mb-1">Reference</span>
+                        <span className="text-xl font-bold text-black">{booking?.booking_reference || 'LX-PENDING'}</span>
+                    </div>
                 </div>
                 <div className="text-right">
                     <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest block mb-1">{passengerCount} {passengerCount > 1 ? 'Passengers' : 'Passenger'}</span>

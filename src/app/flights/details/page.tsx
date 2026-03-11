@@ -140,19 +140,23 @@ function FlightDetailsContent() {
                                     <div key={idx} className="relative z-10">
                                         <div className="flex gap-8">
                                             <div className="flex flex-col items-center">
-                                                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center p-2 overflow-hidden">
-                                                    {segment.logo ? (
-                                                        <img
-                                                            src={segment.logo}
-                                                            alt={segment.carrierCode}
-                                                            className="w-full h-full object-contain"
-                                                            onError={(e) => {
-                                                                (e.target as HTMLImageElement).parentElement!.innerHTML = `<span class="text-xs font-semibold text-black uppercase">${segment.carrierCode}</span>`;
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <span className="text-xs font-semibold text-black uppercase">{segment.carrierCode}</span>
-                                                    )}
+                                                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center p-2 overflow-hidden relative">
+                                                    <img
+                                                        src={`/flight-logos/${segment.carrierCode}.png`}
+                                                        alt={segment.carrierCode}
+                                                        className="w-full h-full object-contain relative z-10"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.style.display = 'none';
+                                                            const fallback = target.nextElementSibling as HTMLElement;
+                                                            if (fallback) fallback.style.display = 'flex';
+                                                        }}
+                                                    />
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 text-zinc-400">
+                                                        <span className="text-[10px] font-black uppercase tracking-tighter">
+                                                            {segment.carrierCode || 'Air'}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 {idx < segments.length - 1 && (
                                                     <div className="w-[2px] flex-1 bg-white/10 my-4" />
