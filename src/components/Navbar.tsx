@@ -4,8 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Menu, X, LogOut, Briefcase, Settings } from 'lucide-react';
-import AuthModal from './AuthModal';
+import { User, Menu, X, LogOut, Briefcase, Settings, ChevronDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function Navbar() {
@@ -15,10 +14,6 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [authModal, setAuthModal] = useState<{ isOpen: boolean; mode: 'login' | 'signup' }>({
-    isOpen: false,
-    mode: 'login'
-  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -194,19 +189,19 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="hidden sm:flex items-center gap-6">
-                  <button
-                    onClick={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+                  <Link
+                    href="/auth?mode=signup"
                     className="text-[10px] font-semibold tracking-[0.2em] text-white/60 hover:text-white transition-colors uppercase"
                   >
                     Register
-                  </button>
-                  <button
-                    onClick={() => setAuthModal({ isOpen: true, mode: 'login' })}
+                  </Link>
+                  <Link
+                    href="/auth?mode=login"
                     className="bg-amber hover:bg-white text-white hover:text-black px-8 py-3 rounded-2xl text-[10px] font-medium tracking-[0.2em] transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-black/20 uppercase flex items-center gap-2"
                   >
                     <User size={14} strokeWidth={3} />
                     Login
-                  </button>
+                  </Link>
                 </div>
               )}
 
@@ -276,24 +271,20 @@ export default function Navbar() {
                     </button>
                   ) : (
                     <>
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          setAuthModal({ isOpen: true, mode: 'login' });
-                        }}
-                        className="w-full bg-white text-black py-4 rounded-2xl font-semibold text-xs tracking-widest"
+                      <Link
+                        href="/auth?mode=login"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="w-full bg-white text-black py-4 rounded-2xl font-semibold text-xs tracking-widest text-center"
                       >
                         LOGIN
-                      </button>
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          setAuthModal({ isOpen: true, mode: 'signup' });
-                        }}
-                        className="w-full border border-white/20 text-white py-4 rounded-2xl font-semibold text-xs tracking-widest"
+                      </Link>
+                      <Link
+                        href="/auth?mode=signup"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="w-full border border-white/20 text-white py-4 rounded-2xl font-semibold text-xs tracking-widest text-center"
                       >
                         REGISTER
-                      </button>
+                      </Link>
                     </>
                   )}
                 </div>
@@ -302,29 +293,6 @@ export default function Navbar() {
           )}
         </AnimatePresence>
       </nav>
-
-      <AuthModal
-        isOpen={authModal.isOpen}
-        onClose={() => setAuthModal(prev => ({ ...prev, isOpen: false }))}
-        initialMode={authModal.mode}
-      />
     </>
   );
 }
-
-const ChevronDown = ({ className, size }: { className?: string, size?: number }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size || 24}
-    height={size || 24}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="m6 9 6 6 6-6" />
-  </svg>
-)
