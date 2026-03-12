@@ -62,7 +62,7 @@ export default function AgentSignupPage() {
                 >
                     <CheckCircle2 size={48} strokeWidth={2.5} />
                 </motion.div>
-                <h1 className="text-4xl font-black text-white mb-4 italic">Welcome to the Desk, Agent.</h1>
+                <h1 className="text-heading-xl font-medium text-white mb-4 italic">Welcome to the Desk, Agent.</h1>
                 <p className="text-white/40 font-medium max-w-md mx-auto">
                     Your concierge credentials have been verified. Redirecting you to the portal...
                 </p>
@@ -86,22 +86,22 @@ export default function AgentSignupPage() {
                         <div className="w-16 h-16 rounded-2xl bg-amber flex items-center justify-center text-black mb-12 shadow-xl shadow-amber/20">
                             <ShieldCheck size={32} />
                         </div>
-                        <h1 className="text-6xl font-black text-white tracking-tighter leading-tight mb-8">
+                        <h1 className="text-display font-medium text-white tracking-tighter leading-tight mb-8">
                             Join the <span className="italic text-amber underline underline-offset-8">Concierge Elite.</span>
                         </h1>
-                        <p className="text-white/40 text-xl font-light max-w-xl leading-relaxed">
+                        <p className="text-white/40 text-body-lg font-normal max-w-xl leading-relaxed">
                             Luxel is expanding its global network. Apply to manage private aviation, luxury villas, and bespoke travel experiences for the world's most discerning travelers.
                         </p>
                     </div>
 
                     <div className="relative z-10 grid grid-cols-2 gap-12">
                         <div>
-                            <p className="text-amber font-black text-3xl mb-2 tracking-tighter">Verified</p>
-                            <p className="text-white/30 text-xs font-bold uppercase tracking-widest">Security Clearance Required</p>
+                            <p className="text-amber font-medium text-heading-lg mb-2 tracking-tighter">Verified</p>
+                            <p className="text-white/30 text-body-sm font-medium uppercase tracking-widest">Security Clearance Required</p>
                         </div>
                         <div>
-                            <p className="text-white font-black text-3xl mb-2 tracking-tighter">Full Access</p>
-                            <p className="text-white/30 text-xs font-bold uppercase tracking-widest">Global Logistics Dashboard</p>
+                            <p className="text-white font-medium text-heading-lg mb-2 tracking-tighter">Full Access</p>
+                            <p className="text-white/30 text-body-sm font-medium uppercase tracking-widest">Global Logistics Dashboard</p>
                         </div>
                     </div>
                 </div>
@@ -110,18 +110,18 @@ export default function AgentSignupPage() {
                 <div className="w-full lg:w-1/2 p-12 lg:p-24 flex flex-col justify-center bg-white relative">
                     <div className="max-w-[480px] mx-auto w-full">
                         <div className="mb-12">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 text-amber text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 text-amber text-caption font-medium uppercase tracking-[0.2em] mb-4">
                                 <Briefcase size={12} />
                                 Agent Registration
                             </div>
-                            <h2 className="text-4xl font-black text-zinc-900 tracking-tight mb-4">Create Agent Portal</h2>
+                            <h2 className="text-heading-xl font-medium text-zinc-900 tracking-tight mb-4">Create Agent Portal</h2>
                             <p className="text-zinc-500 font-medium">Please provide your professional credentials for verification.</p>
 
                             {error && (
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="mt-6 p-4 rounded-2xl bg-red-50 text-red-500 text-xs font-bold border border-red-100 flex items-center gap-3"
+                                    className="mt-6 p-4 rounded-2xl bg-red-50 text-red-500 text-body-sm font-medium border border-red-100 flex items-center gap-3"
                                 >
                                     <ShieldCheck size={16} />
                                     {error}
@@ -131,7 +131,7 @@ export default function AgentSignupPage() {
 
                         <form onSubmit={handleSignup} className="space-y-8">
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest pl-4">Professional Name</label>
+                                <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest pl-4">Professional Name</label>
                                 <div className="relative group">
                                     <div className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-amber transition-colors">
                                         <User size={18} />
@@ -142,13 +142,13 @@ export default function AgentSignupPage() {
                                         value={fullName}
                                         onChange={(e) => setFullName(e.target.value)}
                                         placeholder="Enter your full name"
-                                        className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-6 pl-14 pr-8 text-sm font-bold text-zinc-900 focus:ring-4 focus:ring-amber/10 transition-all outline-none"
+                                        className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-6 pl-14 pr-8 text-body font-medium text-zinc-900 focus:ring-4 focus:ring-amber/10 transition-all outline-none"
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest pl-4">Work Email Address</label>
+                                <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest pl-4">Work Email Address</label>
                                 <div className="relative group">
                                     <div className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-amber transition-colors">
                                         <Mail size={18} />
@@ -159,13 +159,13 @@ export default function AgentSignupPage() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="agent@luxel.travel"
-                                        className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-6 pl-14 pr-8 text-sm font-bold text-zinc-900 focus:ring-4 focus:ring-amber/10 transition-all outline-none"
+                                        className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-6 pl-14 pr-8 text-body font-medium text-zinc-900 focus:ring-4 focus:ring-amber/10 transition-all outline-none"
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest pl-4">Secure Password</label>
+                                <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest pl-4">Secure Password</label>
                                 <div className="relative group">
                                     <div className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-amber transition-colors">
                                         <Lock size={18} />
@@ -176,7 +176,7 @@ export default function AgentSignupPage() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
-                                        className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-6 pl-14 pr-8 text-sm font-bold text-zinc-900 focus:ring-4 focus:ring-amber/10 transition-all outline-none"
+                                        className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-6 pl-14 pr-8 text-body font-medium text-zinc-900 focus:ring-4 focus:ring-amber/10 transition-all outline-none"
                                     />
                                 </div>
                             </div>
@@ -184,7 +184,7 @@ export default function AgentSignupPage() {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-zinc-900 text-white p-6 rounded-[1.5rem] font-black text-xs tracking-[0.2em] uppercase flex items-center justify-center gap-4 group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-95 shadow-2xl shadow-zinc-200 disabled:opacity-50"
+                                className="w-full bg-zinc-900 text-white p-6 rounded-[1.5rem] font-medium text-body-sm tracking-[0.2em] uppercase flex items-center justify-center gap-4 group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-95 shadow-2xl shadow-zinc-200 disabled:opacity-50"
                             >
                                 <div className="absolute inset-0 bg-amber -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
                                 <span className="relative z-10 group-hover:text-black transition-colors">
@@ -194,8 +194,8 @@ export default function AgentSignupPage() {
                             </button>
                         </form>
 
-                        <p className="mt-12 text-center text-zinc-400 text-xs font-medium">
-                            Already have access? <button onClick={() => router.push('/')} className="text-amber font-black uppercase tracking-widest hover:underline ml-2">Login Here</button>
+                        <p className="mt-12 text-center text-zinc-400 text-body-sm font-medium">
+                            Already have access? <button onClick={() => router.push('/')} className="text-amber font-medium uppercase tracking-widest hover:underline ml-2">Login Here</button>
                         </p>
                     </div>
 
@@ -205,8 +205,8 @@ export default function AgentSignupPage() {
                             <Lock size={16} />
                         </div>
                         <div className="text-right">
-                            <p className="text-[8px] font-black text-zinc-300 uppercase tracking-widest">Military Grade Encryption</p>
-                            <p className="text-[8px] font-black text-zinc-300 uppercase tracking-widest">TLS 1.3 Certified</p>
+                            <p className="text-caption font-medium text-zinc-300 uppercase tracking-widest">Military Grade Encryption</p>
+                            <p className="text-caption font-medium text-zinc-300 uppercase tracking-widest">TLS 1.3 Certified</p>
                         </div>
                     </div>
                 </div>

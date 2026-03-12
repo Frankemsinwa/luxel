@@ -112,7 +112,7 @@ export default function BookingStatusHeader({ currentStep }: BookingStatusHeader
 
                                 {/* Step Label */}
                                 <div className="mt-6 flex flex-col items-center">
-                                    <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-500 ${isActive ? 'text-black' : 'text-black/50'
+                                    <span className={`text-caption font-medium uppercase tracking-[0.2em] transition-colors duration-500 ${isActive ? 'text-black' : 'text-black/50'
                                         }`}>
                                         {isActive ? step.activeLabel : isCompleted ? step.completedLabel : step.label}
                                     </span>
@@ -125,7 +125,7 @@ export default function BookingStatusHeader({ currentStep }: BookingStatusHeader
                                 </div>
 
                                 {/* Hover Tooltip */}
-                                <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-amber text-black text-[9px] font-bold py-2 px-4 rounded-xl pointer-events-none whitespace-nowrap tracking-widest uppercase">
+                                <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-amber text-black text-caption font-medium py-2 px-4 rounded-xl pointer-events-none whitespace-nowrap tracking-widest uppercase">
                                     Step {step.id}: {step.label}
                                 </div>
                             </div>

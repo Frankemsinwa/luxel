@@ -52,8 +52,8 @@ export default function TourDetailsPage() {
         router.push(`/tour/${tour.slug}/booking?guests=${guests}&date=${selectedDate}`);
     };
 
-    if (isLoading) return <div className="min-h-screen bg-white flex items-center justify-center font-bold text-zinc-300">Synchronizing your elite itinerary...</div>;
-    if (!tour) return <div className="min-h-screen bg-white flex items-center justify-center font-bold text-zinc-300">Experience not found.</div>;
+    if (isLoading) return <div className="min-h-screen bg-white flex items-center justify-center text-body font-medium text-zinc-300">Synchronizing your elite itinerary...</div>;
+    if (!tour) return <div className="min-h-screen bg-white flex items-center justify-center text-body font-medium text-zinc-300">Experience not found.</div>;
 
     return (
         <div className="bg-white min-h-screen">
@@ -76,7 +76,7 @@ export default function TourDetailsPage() {
                         className="flex flex-wrap gap-4 mb-6"
                     >
                         {(tour.tags || []).map((tag: any) => (
-                            <span key={tag} className="bg-amber text-black text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
+                            <span key={tag} className="bg-amber text-black text-caption font-medium uppercase tracking-widest px-4 py-1.5 rounded-full">
                                 {tag}
                             </span>
                         ))}
@@ -87,7 +87,7 @@ export default function TourDetailsPage() {
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="text-5xl md:text-7xl font-serif text-white max-w-2xl leading-tight"
+                            className="text-display text-white max-w-2xl leading-tight"
                         >
                             {tour.title}
                         </motion.h1>
@@ -98,8 +98,8 @@ export default function TourDetailsPage() {
                             transition={{ delay: 0.4 }}
                             className="text-right"
                         >
-                            <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Starting From</p>
-                            <p className="text-4xl font-black text-amber">₦{Number(tour.price).toLocaleString()} <span className="text-sm text-white/40 font-medium">/ guest</span></p>
+                            <p className="text-white/60 text-caption font-medium uppercase tracking-widest mb-1">Starting From</p>
+                            <p className="text-heading-xl font-medium text-amber">₦{Number(tour.price).toLocaleString()} <span className="text-body-sm text-white/40 font-medium">/ guest</span></p>
                         </motion.div>
                     </div>
                 </div>
@@ -114,15 +114,15 @@ export default function TourDetailsPage() {
 
                         {/* Description */}
                         <div className="space-y-6">
-                            <h2 className="text-3xl font-serif text-zinc-900">A Curated Journey through History</h2>
-                            <p className="text-zinc-500 text-lg font-light leading-relaxed">
+                            <h2 className="text-heading-xl text-zinc-900">A Curated Journey through History</h2>
+                            <p className="text-body-lg text-zinc-500 leading-relaxed">
                                 "{tour.description}"
                             </p>
                         </div>
 
                         {/* Daily Itinerary */}
                         <div className="space-y-10">
-                            <div className="flex items-center gap-4 text-amber font-black uppercase tracking-[0.2em] text-sm">
+                            <div className="flex items-center gap-4 text-amber text-body font-medium uppercase tracking-[0.2em]">
                                 <Clock size={20} />
                                 Daily Itinerary
                             </div>
@@ -138,15 +138,15 @@ export default function TourDetailsPage() {
                                         viewport={{ once: true }}
                                         className="relative"
                                     >
-                                        <div className="absolute -left-11 w-8 h-8 rounded-full bg-white border-2 border-amber flex items-center justify-center text-xs font-black text-amber z-10 shadow-sm">
+                                        <div className="absolute -left-11 w-8 h-8 rounded-full bg-white border-2 border-amber flex items-center justify-center text-caption font-medium text-amber z-10 shadow-sm">
                                             {i + 1 || item.day}
                                         </div>
 
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between">
                                                 <div>
-                                                    <h3 className="text-xl font-bold text-zinc-900 leading-tight">{item.title}</h3>
-                                                    <p className="text-amber font-bold text-[10px] uppercase tracking-widest mt-1">{item.subtitle}</p>
+                                                    <h3 className="text-heading-sm font-medium text-zinc-900 leading-tight">{item.title}</h3>
+                                                    <p className="text-caption font-medium text-amber uppercase tracking-widest mt-1">{item.subtitle}</p>
                                                 </div>
                                                 <ChevronDown className="text-zinc-300" />
                                             </div>
@@ -174,14 +174,14 @@ export default function TourDetailsPage() {
 
                         {/* Included */}
                         <div className="bg-zinc-50 rounded-[3rem] p-12 border border-zinc-100">
-                            <h3 className="text-center text-xl font-serif text-zinc-900 mb-10">What's Included</h3>
+                            <h3 className="text-center text-heading-md text-zinc-900 mb-10">What's Included</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                                 {(tour.included || []).map((item: any, i: any) => (
                                     <div key={i} className="flex flex-col items-center gap-4 text-center">
                                         <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-amber shadow-sm">
                                             <ShieldCheck size={24} />
                                         </div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{item.label}</span>
+                                        <span className="text-caption font-medium uppercase tracking-widest text-zinc-400">{item.label}</span>
                                     </div>
                                 ))}
                             </div>
@@ -193,53 +193,53 @@ export default function TourDetailsPage() {
 
                         {/* Booking Card */}
                         <div className="bg-white rounded-[3rem] border border-zinc-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)] p-10 sticky top-28">
-                            <h3 className="text-2xl font-serif text-zinc-900 mb-8">Reserve Your Spot</h3>
+                            <h3 className="text-heading-lg text-zinc-900 mb-8">Reserve Your Spot</h3>
 
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Select Start Date</label>
-                                    <div className="w-full bg-zinc-50 border-none rounded-2xl py-4 px-6 flex items-center justify-between text-sm font-bold text-zinc-900 cursor-pointer">
+                                    <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Select Start Date</label>
+                                    <div className="w-full bg-zinc-50 border-none rounded-2xl py-4 px-6 flex items-center justify-between text-body font-medium text-zinc-900 cursor-pointer">
                                         {selectedDate}
                                         <Calendar size={18} className="text-amber" />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Number of Guests</label>
+                                    <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Number of Guests</label>
                                     <div className="flex items-center justify-between bg-zinc-50 rounded-2xl p-2 border border-zinc-50">
                                         <button
                                             onClick={() => setGuests(Math.max(1, guests - 1))}
-                                            className="w-10 h-10 rounded-xl bg-white text-zinc-400 flex items-center justify-center hover:text-zinc-900 transition-all font-bold"
+                                            className="w-10 h-10 rounded-xl bg-white text-zinc-400 flex items-center justify-center hover:text-zinc-900 transition-all text-body font-medium"
                                         >-</button>
-                                        <span className="font-black text-zinc-900">{guests} Guests</span>
+                                        <span className="text-body font-medium text-zinc-900">{guests} Guests</span>
                                         <button
                                             onClick={() => setGuests(guests + 1)}
-                                            className="w-10 h-10 rounded-xl bg-white text-zinc-400 flex items-center justify-center hover:text-zinc-900 transition-all font-bold"
+                                            className="w-10 h-10 rounded-xl bg-white text-zinc-400 flex items-center justify-center hover:text-zinc-900 transition-all text-body font-medium"
                                         >+</button>
                                     </div>
                                 </div>
 
                                 <div className="pt-6 border-t border-zinc-50 flex items-center justify-between">
                                     <div className="space-y-1">
-                                        <p className="text-lg font-black text-zinc-900">Subtotal</p>
-                                        <p className="text-xs text-zinc-400 font-medium whitespace-nowrap">Tax & fees included</p>
+                                        <p className="text-heading-sm text-zinc-900">Subtotal</p>
+                                        <p className="text-caption font-medium text-zinc-400 whitespace-nowrap">Tax & fees included</p>
                                     </div>
-                                    <p className="text-2xl font-black text-zinc-900">₦{(tour.price * guests).toLocaleString()}</p>
+                                    <p className="text-heading-md font-medium text-zinc-900">₦{(tour.price * guests).toLocaleString()}</p>
                                 </div>
 
                                 <button
                                     onClick={handleBooking}
-                                    className="w-full bg-amber hover:bg-amber-dark text-black py-5 rounded-2xl font-bold shadow-xl shadow-amber/10 transition-all transform active:scale-95"
+                                    className="w-full bg-amber hover:bg-amber-dark text-black py-5 rounded-2xl text-body-sm font-medium shadow-xl shadow-amber/10 transition-all transform active:scale-95"
                                 >
                                     Reserve Your Spot
                                 </button>
-                                <p className="text-[10px] text-center text-zinc-400 font-medium">You won't be charged yet. Our concierge will contact you to finalize details.</p>
+                                <p className="text-caption text-center text-zinc-400 font-medium">You won't be charged yet. Our concierge will contact you to finalize details.</p>
                             </div>
                         </div>
 
                         {/* Guides */}
                         <div className="p-10 bg-white rounded-[3rem] border border-zinc-100 shadow-sm">
-                            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-8">Your Expert Guides</h4>
+                            <h4 className="text-caption font-medium uppercase tracking-widest text-zinc-400 mb-8">Your Expert Guides</h4>
                             <div className="space-y-6">
                                 {tour.guides.map((guide: any, i: any) => (
                                     <div key={i} className="flex items-center gap-4">
@@ -247,13 +247,13 @@ export default function TourDetailsPage() {
                                             <Image src={guide.image} alt={guide.name} fill className="object-cover" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-black text-zinc-900">{guide.name}</p>
-                                            <p className="text-[10px] font-bold text-zinc-400 mt-0.5">{guide.role}</p>
+                                            <p className="text-body font-medium text-zinc-900">{guide.name}</p>
+                                            <p className="text-caption font-medium text-zinc-400 mt-0.5">{guide.role}</p>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                            <button className="w-full mt-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-amber border-t border-zinc-50 hover:bg-zinc-50 transition-all rounded-b-3xl">
+                            <button className="w-full mt-8 py-4 text-caption font-medium uppercase tracking-[0.2em] text-amber border-t border-zinc-50 hover:bg-zinc-50 transition-all rounded-b-3xl">
                                 Meet The Team
                             </button>
                         </div>

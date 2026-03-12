@@ -67,13 +67,13 @@ function ReservationSummaryContent() {
                         </div>
                     )}
                     <div>
-                        <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest block mb-1">Reference</span>
-                        <span className="text-xl font-bold text-black">{booking?.booking_reference || 'LX-PENDING'}</span>
+                        <span className="text-caption font-medium text-black/50 uppercase tracking-widest block mb-1">Reference</span>
+                        <span className="text-heading-sm text-black">{booking?.booking_reference || 'LX-PENDING'}</span>
                     </div>
                 </div>
                 <div className="text-right">
-                    <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest block mb-1">{passengerCount} {passengerCount > 1 ? 'Passengers' : 'Passenger'}</span>
-                    <span className="px-4 py-1.5 rounded-full bg-black/10 text-black text-[10px] font-bold uppercase tracking-widest">{cabinClass}</span>
+                    <span className="text-caption font-medium text-black/50 uppercase tracking-widest block mb-1">{passengerCount} {passengerCount > 1 ? 'Passengers' : 'Passenger'}</span>
+                    <span className="px-4 py-1.5 rounded-full bg-black/10 text-black text-caption font-medium uppercase tracking-widest">{cabinClass}</span>
                 </div>
             </div>
 
@@ -81,19 +81,19 @@ function ReservationSummaryContent() {
                 <div className="flex items-center gap-12">
                     <div className="flex-1">
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest flex items-center gap-2 mb-4">
+                            <span className="text-caption font-medium text-black/50 uppercase tracking-widest flex items-center gap-2 mb-4">
                                 <PlaneTakeoff size={14} className="text-black" /> Outbound
                             </span>
                             <div className="flex items-baseline gap-2 mb-1">
-                                <span className="text-2xl font-black text-black">{route.fromCode}</span>
+                                <span className="text-heading-lg text-black">{route.fromCode}</span>
                                 <div className="flex-1 h-px bg-black/10 mx-4" />
-                                <span className="text-2xl font-black text-black">{route.toCode}</span>
+                                <span className="text-heading-lg text-black">{route.toCode}</span>
                             </div>
-                            <div className="flex justify-between text-[10px] font-bold text-black/50 uppercase tracking-widest mb-6">
+                            <div className="flex justify-between text-caption font-medium text-black/50 uppercase tracking-widest mb-6">
                                 <span>{route.from}</span>
                                 <span>{route.to}</span>
                             </div>
-                            <div className="text-[10px] font-bold text-black bg-black/5 py-2 px-4 rounded-full w-fit">
+                            <div className="text-caption font-medium text-black bg-black/5 py-2 px-4 rounded-full w-fit">
                                 {route.departureDate} • {route.depTime}
                             </div>
                         </div>
@@ -104,13 +104,13 @@ function ReservationSummaryContent() {
 
             <div className="bg-black p-8 flex items-center justify-between">
                 {loading ? (
-                    <div className="w-full text-center text-white/50 animate-pulse text-sm">Validating Record...</div>
+                    <div className="w-full text-center text-white/50 animate-pulse text-body">Validating Record...</div>
                 ) : (
                     <>
-                        <span className="text-sm font-medium text-white/60">Total Due</span>
+                        <span className="text-body text-white/60">Total Due</span>
                         <div className="text-right">
-                            <div className="text-2xl font-bold text-flight-card">₦{displayPrice.toLocaleString()}</div>
-                            <div className="text-[8px] font-black text-flight-card uppercase tracking-[0.2em] mt-1">
+                            <div className="text-heading-lg text-flight-card">₦{displayPrice.toLocaleString()}</div>
+                            <div className="text-caption font-medium text-flight-card uppercase tracking-[0.2em] mt-1">
                                 {isConfirmed ? 'Confirmed Rate' : 'Estimated Total'}
                             </div>
                         </div>

@@ -25,7 +25,8 @@ export const generateTicketPdf = async (booking: any, passengerName: string, ema
     // 1. Prepare Template Data
     const templateData = {
         logoPath: logoDataUrl,
-        pnr: booking.booking_reference || booking.id.split('-')[0].toUpperCase(),
+        // Prefer airline PNR when available, fallback to Luxel internal reference.
+        pnr: booking.airline_booking_reference || booking.booking_reference || booking.id.split('-')[0].toUpperCase(),
         passengerName: passengerDisplayName,
         email: email || booking.flight_data?.contact?.email || 'passenger@luxel.travel',
         flight: {

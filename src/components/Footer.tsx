@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
           <div className="space-y-6">
             <Image src="/logo.png" alt="Luxel Logo" width={140} height={40} />
-            <p className="text-zinc-500 text-sm font-light leading-relaxed max-w-xs">
+            <p className="text-body text-zinc-500 leading-relaxed max-w-xs">
               Your premium partner for worldwide travel. We make luxury accessible and booking seamless.
             </p>
             <div className="flex gap-4">
@@ -19,8 +19,8 @@ export default function Footer() {
             </div>
           </div>
           <div>
-            <h4 className="text-lg font-bold mb-8">Resources</h4>
-            <ul className="space-y-4 text-sm text-zinc-500 font-light">
+            <h4 className="text-heading-sm mb-8">Resources</h4>
+            <ul className="space-y-4 text-body text-zinc-500">
               <li className="hover:text-amber cursor-pointer">About Us</li>
               <li className="hover:text-amber cursor-pointer">Contact Us</li>
               <li className="hover:text-amber cursor-pointer">Book your stay</li>
@@ -29,8 +29,8 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-bold mb-8">Support</h4>
-            <ul className="space-y-4 text-sm text-zinc-500 font-light">
+            <h4 className="text-heading-sm mb-8">Support</h4>
+            <ul className="space-y-4 text-body text-zinc-500">
               <li className="hover:text-amber cursor-pointer">Help Center</li>
               <li className="hover:text-amber cursor-pointer">Safety Information</li>
               <li className="hover:text-amber cursor-pointer">Cancellation Option</li>
@@ -38,15 +38,15 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-bold mb-8">Contact</h4>
-            <ul className="space-y-4 text-sm text-zinc-500 font-light">
+            <h4 className="text-heading-sm mb-8">Contact</h4>
+            <ul className="space-y-4 text-body text-zinc-500">
               <li>+923041234567</li>
               <li>luxel@gmail.com</li>
               <li>Glassplace, Near<br />Cool Avenue, Boson</li>
             </ul>
           </div>
         </div>
-        <div className="pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
+        <div className="pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-caption font-medium text-zinc-600 uppercase tracking-widest">
           <div className="flex gap-8">
             <span className="hover:text-zinc-400 cursor-pointer">Privacy Policy</span>
             <span className="hover:text-zinc-400 cursor-pointer">Terms of Use</span>

@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { supabase, supabaseAdmin } from '../config/supabase.js';
 import * as paymentService from '../services/paymentService.js';
+import { getAgentNotificationEmails, sendAgentFlightNotification } from '../services/emailService.js';
+import crypto from 'crypto';
 
 /**
  * @swagger
@@ -41,22 +43,40 @@ import * as paymentService from '../services/paymentService.js';
  */
 export const createBooking = async (req: any, res: Response) => {
     try {
-        const { flightData, totalPrice, passengers, contactInfo } = req.body;
-        const userId = req.user?.id; // From auth middleware
+        const { flightData, totalPrice, passengers, contactInfo, tripDetails, pricing } = req.body;
+        const userId = req.user?.id || null; // optional (guest allowed)
 
         if (!flightData || !totalPrice || !passengers) {
             return res.status(400).json({ message: 'Missing booking details' });
         }
+
+        // Never persist passport numbers (privacy). If older clients still send it, strip it here.
+        const safePassengers = Array.isArray(passengers)
+            ? passengers.map((p: any) => {
+                if (!p || typeof p !== 'object') return p;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { passportNumber, ...rest } = p;
+                return rest;
+            })
+            : passengers;
+
+        // Guest tracking token: used for resuming status without logging in.
+        const guestToken = userId
+            ? null
+            : crypto.randomBytes(24).toString('base64url'); // URL-safe token
 
         // 1. Create Booking record
         const { data: booking, error: bookingError } = await supabaseAdmin
             .from('bookings')
             .insert({
                 user_id: userId,
+                guest_access_token: guestToken,
                 flight_data: {
                     ...flightData,
-                    passengers: passengers,
-                    contact: contactInfo
+                    passengers: safePassengers,
+                    contact: contactInfo,
+                    trip_details: tripDetails,
+                    pricing
                 },
                 total_price: totalPrice,
                 status: 'PENDING',
@@ -75,10 +95,14 @@ export const createBooking = async (req: any, res: Response) => {
                 service_type: 'FLIGHT',
                 details: {
                     booking_id: booking.id,
-                    passengers: passengers,
+                    passengers: safePassengers,
                     contact: contactInfo,
-                    itinerary: `${flightData.departureCode} → ${flightData.arrivalCode}`,
-                    flight_id: flightData.id
+                    itinerary: `${flightData.departureCode} -> ${flightData.arrivalCode}`,
+                    flight_id: flightData.id,
+                    flight_data: flightData,
+                    trip_details: tripDetails,
+                    pricing,
+                    guest_access_token: guestToken
                 },
                 status: 'OPEN',
                 priority: 'NORMAL'
@@ -88,11 +112,37 @@ export const createBooking = async (req: any, res: Response) => {
 
         if (requestError) throw requestError;
 
+        // 3. Notify agents via email (do not fail booking creation if email fails)
+        try {
+            const recipients = await getAgentNotificationEmails();
+
+            if (recipients.length > 0) {
+                const origin = (req.headers.origin as string) || (req.headers.referer as string) || '';
+                await Promise.allSettled(
+                    recipients.map((email) =>
+                        sendAgentFlightNotification(email, {
+                            requestId: request.id,
+                            bookingRef: booking.booking_reference,
+                            itinerary: `${flightData.departureCode} -> ${flightData.arrivalCode}`,
+                            totalPrice,
+                            contact: contactInfo,
+                            passengers: safePassengers,
+                            tripDetails,
+                            agentLink: origin ? `${origin.replace(/\/$/, '')}/agent/requests/${request.id}` : undefined
+                        })
+                    )
+                );
+            }
+        } catch (notifyErr) {
+            console.error('Agent flight notification failed:', notifyErr);
+        }
+
         return res.status(201).json({
             message: 'Booking request received. Our agents are verifying availability.',
             bookingId: booking.id,
             bookingRef: booking.booking_reference,
-            requestId: request.id
+            requestId: request.id,
+            guestToken: guestToken
         });
 
     } catch (error: any) {
@@ -215,6 +265,8 @@ import { sendETicketEmail } from '../services/emailService.js';
 export const verifyPayment = async (req: any, res: Response) => {
     try {
         const { reference } = req.params;
+        const userId = req.user?.id || null;
+        const guestToken = (req.headers['x-guest-token'] as string | undefined) || (req.query.guestToken as string | undefined);
 
         // 1. Verify with Paystack
         const verification = await paymentService.verifyTransaction(reference);
@@ -222,12 +274,26 @@ export const verifyPayment = async (req: any, res: Response) => {
         if (verification.data.status === 'success') {
             const bookingId = verification.data.metadata.booking_id;
 
-            // Optional: Check current status to prevent duplicate emails
-            const { data: existingBooking } = await supabaseAdmin
+            // Fetch booking and authorize either the logged-in owner or the guest token holder.
+            const { data: existingBooking, error: existingErr } = await supabaseAdmin
                 .from('bookings')
-                .select('status')
+                .select('id, status, user_id, guest_access_token, booking_reference, flight_data')
                 .eq('id', bookingId)
                 .single();
+
+            if (existingErr || !existingBooking) {
+                return res.status(404).json({ message: 'Booking not found' });
+            }
+
+            if (existingBooking.user_id) {
+                if (!userId || existingBooking.user_id !== userId) {
+                    return res.status(403).json({ message: 'Forbidden' });
+                }
+            } else {
+                if (!guestToken || existingBooking.guest_access_token !== guestToken) {
+                    return res.status(403).json({ message: 'Forbidden' });
+                }
+            }
 
             const isAlreadyConfirmed = existingBooking?.status === 'CONFIRMED';
 
@@ -247,7 +313,10 @@ export const verifyPayment = async (req: any, res: Response) => {
             // 3. Dispatch E-Ticket Email if this is the first time confirming
             if (!isAlreadyConfirmed) {
                 try {
-                    const email = req.user?.email || 'passenger@luxel.travel';
+                    const email =
+                        req.user?.email ||
+                        existingBooking?.flight_data?.contact?.email ||
+                        'passenger@luxel.travel';
                     const passengerName = email.split('@')[0].toUpperCase();
 
                     // Generate PDF Buffer secretly in background
@@ -296,18 +365,28 @@ export const verifyPayment = async (req: any, res: Response) => {
 export const confirmPayment = async (req: any, res: Response) => {
     try {
         const { id } = req.params;
-        const userId = req.user?.id;
+        const userId = req.user?.id || null;
+        const guestToken = (req.headers['x-guest-token'] as string | undefined) || (req.query.guestToken as string | undefined);
 
-        // 1. Verify the booking exists and belongs to this user
+        // 1. Fetch booking and authorize either the logged-in owner or the guest token holder.
         const { data: booking, error: fetchError } = await supabaseAdmin
             .from('bookings')
             .select('*')
             .eq('id', id)
-            .eq('user_id', userId)
             .single();
 
         if (fetchError || !booking) {
             return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        if (booking.user_id) {
+            if (!userId || booking.user_id !== userId) {
+                return res.status(403).json({ message: 'Forbidden' });
+            }
+        } else {
+            if (!guestToken || booking.guest_access_token !== guestToken) {
+                return res.status(403).json({ message: 'Forbidden' });
+            }
         }
 
         // 2. Update booking to CONFIRMED with a payment reference
@@ -327,7 +406,10 @@ export const confirmPayment = async (req: any, res: Response) => {
         if (error) throw error;
 
         try {
-            const email = req.user?.email || 'passenger@luxel.travel';
+            const email =
+                req.user?.email ||
+                booking?.flight_data?.contact?.email ||
+                'passenger@luxel.travel';
             const passengerName = email.split('@')[0].toUpperCase();
 
             // Generate PDF Buffer
@@ -372,10 +454,12 @@ export const confirmPayment = async (req: any, res: Response) => {
 export const getBookingStatus = async (req: any, res: Response) => {
     try {
         const { id } = req.params;
+        const userId = req.user?.id || null;
+        const guestToken = (req.headers['x-guest-token'] as string | undefined) || (req.query.guestToken as string | undefined);
 
         const { data, error } = await supabaseAdmin
             .from('bookings')
-            .select('id, status, booking_reference, payment_reference, total_price, confirmed_price, updated_at')
+            .select('id, status, booking_reference, airline_booking_reference, payment_reference, total_price, confirmed_price, updated_at, user_id, guest_access_token')
             .eq('id', id)
             .single();
 
@@ -383,8 +467,88 @@ export const getBookingStatus = async (req: any, res: Response) => {
             return res.status(404).json({ message: 'Booking not found' });
         }
 
-        return res.json(data);
+        // Authz: either logged-in owner, or guest token match when booking is guest.
+        if (data.user_id) {
+            if (!userId || data.user_id !== userId) {
+                return res.status(403).json({ message: 'Forbidden' });
+            }
+        } else {
+            if (!guestToken || data.guest_access_token !== guestToken) {
+                return res.status(403).json({ message: 'Forbidden' });
+            }
+        }
+
+        return res.json({
+            id: data.id,
+            status: data.status,
+            booking_reference: data.booking_reference,
+            airline_booking_reference: data.airline_booking_reference,
+            payment_reference: data.payment_reference,
+            total_price: data.total_price,
+            confirmed_price: data.confirmed_price,
+            updated_at: data.updated_at
+        });
     } catch (error: any) {
         return res.status(500).json({ message: 'Error fetching booking status', error: error.message });
+    }
+};
+
+/**
+ * Public request status endpoint used for guest tracking flows.
+ * Authz: request owner (logged-in) OR guest token match via linked booking.
+ */
+export const getRequestStatus = async (req: any, res: Response) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user?.id || null;
+        const guestToken = (req.headers['x-guest-token'] as string | undefined) || (req.query.guestToken as string | undefined);
+
+        const { data: request, error } = await supabaseAdmin
+            .from('requests')
+            .select('id, status, priority, updated_at, user_id, details')
+            .eq('id', id)
+            .single();
+
+        if (error || !request) {
+            return res.status(404).json({ message: 'Request not found' });
+        }
+
+        // Logged in owner can read it.
+        if (request.user_id) {
+            if (!userId || request.user_id !== userId) {
+                return res.status(403).json({ message: 'Forbidden' });
+            }
+            return res.json({
+                id: request.id,
+                status: request.status,
+                priority: request.priority,
+                updated_at: request.updated_at
+            });
+        }
+
+        // Guest: must validate guest token against linked booking.
+        const bookingId = request.details?.booking_id;
+        if (!bookingId) {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+
+        const { data: booking } = await supabaseAdmin
+            .from('bookings')
+            .select('id, guest_access_token')
+            .eq('id', bookingId)
+            .single();
+
+        if (!booking || !guestToken || booking.guest_access_token !== guestToken) {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+
+        return res.json({
+            id: request.id,
+            status: request.status,
+            priority: request.priority,
+            updated_at: request.updated_at
+        });
+    } catch (error: any) {
+        return res.status(500).json({ message: 'Error fetching request status', error: error.message });
     }
 };

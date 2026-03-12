@@ -99,14 +99,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                                     key={mode}
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="inline-block px-4 py-1.5 rounded-full bg-amber/10 text-amber text-[10px] font-black uppercase tracking-[0.2em] mb-4"
+                                    className="inline-block px-4 py-1.5 rounded-full bg-amber/10 text-amber text-caption font-medium uppercase tracking-[0.2em] mb-4"
                                 >
                                     {mode === 'login' ? 'Welcome Back' : 'Join the Elite'}
                                 </motion.div>
-                                <h2 className="text-4xl font-bold text-zinc-900 mb-2">
+                                <h2 className="text-display text-zinc-900 mb-2">
                                     {mode === 'login' ? 'Private Portal' : 'Create Account'}
                                 </h2>
-                                <p className="text-zinc-500 font-light">
+                                <p className="text-body text-zinc-500">
                                     {mode === 'login'
                                         ? 'Access your luxury travel concierge.'
                                         : 'Unlock exclusive rates and priority handling.'}
@@ -116,7 +116,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        className={`mt-4 p-4 rounded-2xl text-[11px] font-bold text-center ${error.includes('Account created') ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-500 border border-red-100'}`}
+                                        className={`mt-4 p-4 rounded-2xl text-body font-medium text-center ${error.includes('Account created') ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-500 border border-red-100'}`}
                                     >
                                         {error}
                                     </motion.div>
@@ -127,7 +127,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {mode === 'signup' && (
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-4">Full Name</label>
+                                        <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest pl-4">Full Name</label>
                                         <div className="relative group">
                                             <div className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-amber transition-colors">
                                                 <User size={18} />
@@ -138,14 +138,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                                                 value={fullName}
                                                 onChange={(e) => setFullName(e.target.value)}
                                                 placeholder="Enter your name"
-                                                className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/20 transition-all"
+                                                className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-5 pl-14 pr-6 text-body font-medium text-zinc-900 focus:ring-2 focus:ring-amber/20 transition-all"
                                             />
                                         </div>
                                     </div>
                                 )}
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-4">Email Address</label>
+                                    <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest pl-4">Email Address</label>
                                     <div className="relative group">
                                         <div className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-amber transition-colors">
                                             <Mail size={18} />
@@ -156,16 +156,16 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             placeholder="you@luxury.com"
-                                            className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/20 transition-all"
+                                            className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-5 pl-14 pr-6 text-body font-medium text-zinc-900 focus:ring-2 focus:ring-amber/20 transition-all"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
                                     <div className="flex justify-between px-4">
-                                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Password</label>
+                                        <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Password</label>
                                         {mode === 'login' && (
-                                            <button type="button" className="text-[10px] font-bold text-amber hover:underline uppercase tracking-widest">Forgot?</button>
+                                            <button type="button" className="text-caption font-medium text-amber hover:underline uppercase tracking-widest">Forgot?</button>
                                         )}
                                     </div>
                                     <div className="relative group">
@@ -178,7 +178,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             placeholder="••••••••"
-                                            className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-5 pl-14 pr-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/20 transition-all"
+                                            className="w-full bg-zinc-50 border-none rounded-[1.5rem] py-5 pl-14 pr-6 text-body font-medium text-zinc-900 focus:ring-2 focus:ring-amber/20 transition-all"
                                         />
                                     </div>
                                 </div>
@@ -186,7 +186,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-zinc-900 text-white py-5 rounded-[1.5rem] font-bold text-sm flex items-center justify-center gap-3 group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-zinc-900 text-white py-5 rounded-[1.5rem] text-body-sm font-medium flex items-center justify-center gap-3 group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <div className="absolute inset-0 bg-amber -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
                                     <span className="relative z-10 group-hover:text-black transition-colors">
@@ -199,7 +199,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                             {/* Divider */}
                             <div className="my-10 flex items-center gap-4">
                                 <div className="flex-1 h-px bg-zinc-100" />
-                                <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Premium SSO</span>
+                                <span className="text-caption font-medium text-zinc-300 uppercase tracking-widest">Premium SSO</span>
                                 <div className="flex-1 h-px bg-zinc-100" />
                             </div>
 
@@ -207,20 +207,20 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                             <div className="grid grid-cols-2 gap-4">
                                 <button className="flex items-center justify-center gap-3 py-4 rounded-2xl border border-zinc-100 hover:bg-zinc-50 transition-colors group">
                                     <Chrome size={18} className="text-zinc-400 group-hover:text-amber transition-colors" />
-                                    <span className="text-xs font-bold text-zinc-600">Google</span>
+                                    <span className="text-body-sm font-medium text-zinc-600">Google</span>
                                 </button>
                                 <button className="flex items-center justify-center gap-3 py-4 rounded-2xl border border-zinc-100 hover:bg-zinc-50 transition-colors group">
                                     <Github size={18} className="text-zinc-400 group-hover:text-amber transition-colors" />
-                                    <span className="text-xs font-bold text-zinc-600">Apple</span>
+                                    <span className="text-body-sm font-medium text-zinc-600">Apple</span>
                                 </button>
                             </div>
 
                             <div className="mt-10 text-center">
-                                <p className="text-sm font-medium text-zinc-500">
+                                <p className="text-body text-zinc-500">
                                     {mode === 'login' ? "Don't have an account? " : "Already a member? "}
                                     <button
                                         onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-                                        className="text-amber font-bold hover:underline"
+                                        className="text-amber font-medium hover:underline"
                                     >
                                         {mode === 'login' ? 'Join Luxel' : 'Login'}
                                     </button>
@@ -231,15 +231,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                         {/* Footer Accent */}
                         <div className="bg-zinc-900 p-8 flex items-center justify-center gap-8">
                             <div className="flex flex-col items-center">
-                                <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">SECURE</span>
+                                <span className="text-caption font-medium text-white/30 uppercase tracking-[0.3em]">SECURE</span>
                                 <div className="w-1 h-1 rounded-full bg-amber mt-1" />
                             </div>
                             <div className="flex flex-col items-center">
-                                <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">ENCRYPTED</span>
+                                <span className="text-caption font-medium text-white/30 uppercase tracking-[0.3em]">ENCRYPTED</span>
                                 <div className="w-1 h-1 rounded-full bg-amber mt-1" />
                             </div>
                             <div className="flex flex-col items-center">
-                                <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">VERIFIED</span>
+                                <span className="text-caption font-medium text-white/30 uppercase tracking-[0.3em]">VERIFIED</span>
                                 <div className="w-1 h-1 rounded-full bg-amber mt-1" />
                             </div>
                         </div>

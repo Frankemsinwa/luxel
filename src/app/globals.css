@@ -18,9 +18,9 @@
   --color-amber-dark: var(--amber-dark);
   --color-black: var(--black);
   --color-flight-card: var(--flight-card);
-  --font-sans: var(--font-plus-jakarta), system-ui, sans-serif;
+  --font-sans: var(--font-satoshi), system-ui, sans-serif;
   --font-newton: var(--font-newton-scient), serif;
-  --font-satoshi: var(--font-satoshi), sans-serif;
+  --font-satoshi: var(--font-satoshi-font), system-ui, sans-serif;
 }
 
 * {
@@ -31,7 +31,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  font-weight: 300;
+  font-weight: 400;
+  font-synthesis: none;
 }
 
 ::selection {
@@ -42,6 +43,61 @@ body {
 @layer utilities {
   .animate-spin-slow {
     animation: spin 8s linear infinite;
+  }
+
+  /* Design-system typography utilities (tag-agnostic) */
+  .text-display {
+    font-size: clamp(2.25rem, 3vw + 1.25rem, 3rem);
+    line-height: clamp(2.75rem, 3vw + 1.5rem, 3.5rem);
+    font-weight: 500;
+  }
+
+  .text-heading-xl {
+    font-size: clamp(1.75rem, 2vw + 1.1rem, 2rem);
+    line-height: clamp(2.25rem, 2vw + 1.25rem, 2.5rem);
+    font-weight: 500;
+  }
+
+  .text-heading-lg {
+    font-size: 1.5rem; /* 24px */
+    line-height: 2rem; /* 32px */
+    font-weight: 500;
+  }
+
+  .text-heading-md {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.75rem; /* 28px */
+    font-weight: 500;
+  }
+
+  .text-heading-sm {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.5rem; /* 24px */
+    font-weight: 500;
+  }
+
+  .text-body-lg {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5rem; /* 24px */
+    font-weight: 400;
+  }
+
+  .text-body {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem; /* 20px */
+    font-weight: 400;
+  }
+
+  .text-body-sm {
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.125rem; /* 18px */
+    font-weight: 400;
+  }
+
+  .text-caption {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1rem; /* 16px */
+    font-weight: 400;
   }
 }
 

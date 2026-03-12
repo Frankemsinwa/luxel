@@ -84,8 +84,8 @@ function TourSearchContent() {
             <div className="bg-white border-b border-zinc-100 py-6 px-6 pt-24 relative z-10">
                 <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-6">
                     <div>
-                        <h1 className="text-2xl font-black text-zinc-900 tracking-tight">Search Results</h1>
-                        <p className="text-zinc-500 font-medium mt-1">
+                        <h1 className="text-heading-md text-zinc-900 tracking-tight">Search Results</h1>
+                        <p className="text-body text-zinc-500 mt-1">
                             {isLoading ? 'Searching...' : `${results.length} exclusive experiences found`}
                         </p>
                     </div>
@@ -93,17 +93,17 @@ function TourSearchContent() {
                     <div className="flex bg-zinc-50 rounded-2xl p-2 border border-zinc-100 gap-4 md:gap-8 px-6 py-3">
                         <div className="flex items-center gap-2">
                             <MapPin size={16} className="text-amber" />
-                            <span className="text-sm font-bold text-zinc-900">{searchData.dest || 'Any Destination'}</span>
+                            <span className="text-body font-medium text-zinc-900">{searchData.dest || 'Any Destination'}</span>
                         </div>
                         <div className="w-px h-5 bg-zinc-200" />
                         <div className="flex items-center gap-2">
                             <Calendar size={16} className="text-amber" />
-                            <span className="text-sm font-bold text-zinc-900">{formatDate(searchData.date)}</span>
+                            <span className="text-body font-medium text-zinc-900">{formatDate(searchData.date)}</span>
                         </div>
                         <div className="w-px h-5 bg-zinc-200 hidden md:block" />
                         <div className="hidden md:flex items-center gap-2">
                             <Users size={16} className="text-amber" />
-                            <span className="text-sm font-bold text-zinc-900">{searchData.travelers}</span>
+                            <span className="text-body font-medium text-zinc-900">{searchData.travelers}</span>
                         </div>
                     </div>
                 </div>
@@ -114,13 +114,13 @@ function TourSearchContent() {
                 <aside className="w-full lg:w-80 flex flex-col gap-8">
                     <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-zinc-100 sticky top-28">
                         <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-xl font-bold text-zinc-900">Filters</h2>
+                            <h2 className="text-heading-sm text-zinc-900">Filters</h2>
                             <button
                                 onClick={() => {
                                     setPriceRange(10000000);
                                     setSelectedThemes([]);
                                 }}
-                                className="text-[10px] font-black text-amber uppercase tracking-widest hover:opacity-80 transition-opacity"
+                                className="text-caption font-medium text-amber uppercase tracking-widest hover:opacity-80 transition-opacity"
                             >
                                 Reset All
                             </button>
@@ -132,7 +132,7 @@ function TourSearchContent() {
                                 <div className="w-10 h-10 rounded-xl bg-amber/10 flex items-center justify-center text-amber">
                                     <Filter size={18} />
                                 </div>
-                                <h3 className="font-bold text-zinc-900 tracking-tight">Price Range</h3>
+                                <h3 className="text-heading-sm text-zinc-900 tracking-tight">Price Range</h3>
                             </div>
                             <input
                                 type="range"
@@ -143,7 +143,7 @@ function TourSearchContent() {
                                 onChange={(e) => setPriceRange(parseInt(e.target.value))}
                                 className="w-full h-1.5 bg-zinc-100 rounded-lg appearance-none cursor-pointer accent-amber mb-4"
                             />
-                            <div className="flex justify-between text-xs font-bold text-zinc-400">
+                            <div className="flex justify-between text-caption font-medium text-zinc-400">
                                 <span>₦1,000,000</span>
                                 <span className="text-amber">₦{priceRange.toLocaleString()}</span>
                             </div>
@@ -155,7 +155,7 @@ function TourSearchContent() {
                                 <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400">
                                     <MapPin size={18} />
                                 </div>
-                                <h3 className="font-bold text-zinc-900 tracking-tight">Travel Styles</h3>
+                                <h3 className="text-heading-sm text-zinc-900 tracking-tight">Travel Styles</h3>
                             </div>
                             <div className="space-y-4">
                                 {[
@@ -172,7 +172,7 @@ function TourSearchContent() {
                                             >
                                                 {selectedThemes.includes(theme) && <div className="w-2 h-2 rounded-full bg-white" />}
                                             </div>
-                                            <span className="text-sm font-bold text-zinc-600 group-hover:text-zinc-900">{theme}</span>
+                                            <span className="text-body font-medium text-zinc-600 group-hover:text-zinc-900">{theme}</span>
                                         </div>
                                     </label>
                                 ))}
@@ -184,7 +184,7 @@ function TourSearchContent() {
                 {/* Results Area */}
                 <div className="flex-1">
                     <div className="flex items-center justify-end mb-8">
-                        <select className="bg-transparent text-sm font-black text-zinc-400 uppercase tracking-widest focus:outline-none cursor-pointer">
+                        <select className="bg-transparent text-body-sm font-medium text-zinc-400 uppercase tracking-widest focus:outline-none cursor-pointer">
                             <option>Recommended</option>
                             <option>Price: Low to High</option>
                             <option>Price: High to Low</option>
@@ -197,7 +197,7 @@ function TourSearchContent() {
                             {isLoading ? (
                                 <div className="col-span-full py-20 flex flex-col items-center justify-center gap-4">
                                     <Loader2 className="w-10 h-10 text-amber animate-spin" />
-                                    <p className="text-zinc-400 font-bold uppercase tracking-widest text-[10px]">Curating Experiences...</p>
+                                    <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Curating Experiences...</p>
                                 </div>
                             ) : results.length > 0 ? results.map((tour, index) => (
                                 <motion.div
@@ -217,14 +217,14 @@ function TourSearchContent() {
                                                 fill
                                                 className="object-cover group-hover:scale-110 transition-transform duration-700"
                                             />
-                                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-900 flex items-center gap-1.5">
+                                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-caption font-medium uppercase tracking-widest text-zinc-900 flex items-center gap-1.5">
                                                 <Clock size={12} className="text-amber" /> {tour.duration}
                                             </div>
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
                                         <div className="p-8">
                                             <div className="flex items-center justify-between mb-3">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-amber">
+                                                <span className="text-caption font-medium uppercase tracking-widest text-amber">
                                                     {(tour.themes && tour.themes[0]) || 'Curated Tour'}
                                                 </span>
                                                 <div className="flex gap-0.5">
@@ -234,20 +234,20 @@ function TourSearchContent() {
                                                 </div>
                                             </div>
 
-                                            <h3 className="text-xl font-black text-zinc-900 mb-2 truncate">{tour.title}</h3>
+                                            <h3 className="text-heading-sm text-zinc-900 mb-2 truncate">{tour.title}</h3>
                                             <div className="flex items-center gap-2 text-zinc-400 mb-4">
                                                 <MapPin size={14} />
-                                                <span className="text-xs font-bold">{tour.location}</span>
+                                                <span className="text-body-sm font-medium">{tour.location}</span>
                                             </div>
 
-                                            <p className="text-zinc-500 font-medium text-sm line-clamp-2 leading-relaxed mb-6">
+                                            <p className="text-body text-zinc-500 line-clamp-2 leading-relaxed mb-6">
                                                 {tour.description}
                                             </p>
 
                                             <div className="flex items-center justify-between pt-6 border-t border-zinc-50">
                                                 <div>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 block mb-1">Price From</span>
-                                                    <span className="text-xl font-black text-zinc-900">₦{Number(tour.price).toLocaleString()}</span>
+                                                    <span className="text-caption font-medium uppercase tracking-widest text-zinc-400 block mb-1">Price From</span>
+                                                    <span className="text-heading-sm font-medium text-zinc-900">₦{Number(tour.price).toLocaleString()}</span>
                                                 </div>
                                                 <div className="w-10 h-10 rounded-full bg-amber/10 flex items-center justify-center group-hover:bg-amber transition-colors">
                                                     <ChevronDown size={16} className="text-amber group-hover:text-black -rotate-90 transition-colors" />
@@ -265,8 +265,8 @@ function TourSearchContent() {
                                     <div className="w-20 h-20 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-300 mx-auto mb-6">
                                         <Search size={32} />
                                     </div>
-                                    <h3 className="text-xl font-black text-zinc-900 mb-2">No tailored tours found</h3>
-                                    <p className="text-zinc-400 font-medium">Adjust your filters or destination to discover more experiences.</p>
+                                    <h3 className="text-heading-sm text-zinc-900 mb-2">No tailored tours found</h3>
+                                    <p className="text-body text-zinc-400">Adjust your filters or destination to discover more experiences.</p>
                                 </motion.div>
                             )}
                         </AnimatePresence>

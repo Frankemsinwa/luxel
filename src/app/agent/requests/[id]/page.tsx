@@ -33,6 +33,7 @@ export default function RequestDetailsPage() {
     const [request, setRequest] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isActing, setIsActing] = useState(false);
+    const [airlineBookingReference, setAirlineBookingReference] = useState('');
 
     // Verification Modal State
     const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -46,6 +47,11 @@ export default function RequestDetailsPage() {
             try {
                 const response = await api.get(`/agent/requests/${id}`);
                 setRequest(response.data);
+                setAirlineBookingReference(
+                    response.data?.booking?.airline_booking_reference ||
+                    response.data?.details?.airline_booking_reference ||
+                    ''
+                );
             } catch (error: any) {
                 console.error('Error fetching request details:', error);
                 if (error.response?.status === 401) {
@@ -59,6 +65,21 @@ export default function RequestDetailsPage() {
         fetchRequest();
     }, [id, router]);
 
+    const handleSaveAirlineReference = async () => {
+        if (!airlineBookingReference.trim()) return;
+        setIsActing(true);
+        try {
+            const response = await api.patch(`/agent/requests/${id}`, {
+                airlineBookingReference: airlineBookingReference.trim()
+            });
+            setRequest(response.data);
+        } catch (error) {
+            console.error('Error saving airline booking reference:', error);
+        } finally {
+            setIsActing(false);
+        }
+    };
+
     // Verify flight price through Amadeus API
     const handleVerifyPrice = async () => {
         setVerifyLoading(true);
@@ -66,9 +87,9 @@ export default function RequestDetailsPage() {
 
         try {
             const itinerary = request.details?.itinerary || '';
-            const codes = itinerary.split(' → ');
-            const depCode = codes[0] || request.details?.flight_data?.departureCode || 'LHR';
-            const arrCode = codes[1] || request.details?.flight_data?.arrivalCode || 'JFK';
+            const codeMatch = itinerary.match(/([A-Z]{3}).*([A-Z]{3})/);
+            const depCode = request.details?.flight_data?.departureCode || codeMatch?.[1] || 'LHR';
+            const arrCode = request.details?.flight_data?.arrivalCode || codeMatch?.[2] || 'JFK';
 
             const response = await api.post('/agent/verify-price', {
                 from: depCode,
@@ -143,6 +164,14 @@ export default function RequestDetailsPage() {
     const contact = request.details?.contact || {};
     const itinerary = request.details?.itinerary || 'Dynamic Route';
     const bookingPrice = request.booking?.total_price;
+    const tripDetails = request.details?.trip_details || request.booking?.flight_data?.trip_details || {};
+    const pricing = request.details?.pricing || request.booking?.flight_data?.pricing || {};
+    const formatNGN = (value: any) =>
+        new Intl.NumberFormat('en-NG', {
+            style: 'currency',
+            currency: 'NGN',
+            maximumFractionDigits: 0
+        }).format(Number(value || 0));
 
     return (
         <>
@@ -193,7 +222,7 @@ export default function RequestDetailsPage() {
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Quoted Price</p>
-                                    <p className="text-2xl font-black text-zinc-900">₦{Number(bookingPrice || 0).toLocaleString()}</p>
+                                    <p className="text-2xl font-black text-zinc-900">{formatNGN(bookingPrice || 0)}</p>
                                 </div>
                             </div>
 
@@ -222,6 +251,54 @@ export default function RequestDetailsPage() {
                             </div>
                         </div>
 
+                        {/* Trip Details */}
+                        <div className="bg-white rounded-[3rem] p-10 border border-zinc-100 shadow-sm">
+                            <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-8">Trip Details</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Departure</p>
+                                    <p className="text-sm font-bold text-zinc-900">
+                                        {tripDetails.departure ? new Date(tripDetails.departure).toLocaleDateString() : '-'}
+                                    </p>
+                                </div>
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Return</p>
+                                    <p className="text-sm font-bold text-zinc-900">
+                                        {tripDetails.return ? new Date(tripDetails.return).toLocaleDateString() : '-'}
+                                    </p>
+                                </div>
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Cabin</p>
+                                    <p className="text-sm font-bold text-zinc-900">{tripDetails.travelClass || '-'}</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Passengers</p>
+                                    <p className="text-sm font-bold text-zinc-900">
+                                        {tripDetails.passengerCount || passengers.length || 1}
+                                        {typeof tripDetails.adults !== 'undefined' || typeof tripDetails.children !== 'undefined'
+                                            ? ` (Adults: ${tripDetails.adults || 0}, Children: ${tripDetails.children || 0})`
+                                            : ''}
+                                    </p>
+                                </div>
+                            </div>
+                            {pricing && (pricing.unitPrice || pricing.totalPrice) && (
+                                <div className="mt-10 pt-8 border-t border-zinc-50 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Unit Price</p>
+                                        <p className="text-sm font-bold text-zinc-900">{formatNGN(pricing.unitPrice || 0)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Taxes</p>
+                                        <p className="text-sm font-bold text-zinc-900">{formatNGN(pricing.taxes || 0)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Total</p>
+                                        <p className="text-sm font-bold text-zinc-900">{formatNGN(pricing.totalPrice || 0)}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         {/* Passenger Details */}
                         {passengers.length > 0 && (
                             <div className="bg-white rounded-[3rem] p-10 border border-zinc-100 shadow-sm">
@@ -235,10 +312,13 @@ export default function RequestDetailsPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-bold text-zinc-900 text-sm">
-                                                        {p.title} {p.firstName || '—'} {p.lastName || '—'}
+                                                        {p.title} {p.firstName || '-'} {p.lastName || '-'}
                                                     </p>
                                                     <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-                                                        {p.gender || '—'} • {p.nationality || '—'}
+                                                        {p.gender || '-'} - {p.nationality || '-'}
+                                                    </p>
+                                                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1">
+                                                        DOB: {p.dobDay || '-'} {p.dobMonth || '-'} {p.dobYear || '-'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -248,7 +328,7 @@ export default function RequestDetailsPage() {
                             </div>
                         )}
 
-                        {/* Action Panel — only show if OPEN */}
+                        {/* Action Panel - only show if OPEN */}
                         {request.status === 'OPEN' && (
                             <div className="grid grid-cols-2 gap-8">
                                 <div
@@ -294,7 +374,7 @@ export default function RequestDetailsPage() {
                                 <div>
                                     <h4 className="font-black text-emerald-900 text-lg mb-1">Confirmed & Resolved</h4>
                                     <p className="text-xs text-emerald-700/60 font-medium">
-                                        Confirmed at ₦{Number(request.booking?.confirmed_price || request.booking?.total_price || 0).toLocaleString()}
+                                        Confirmed at {formatNGN(request.booking?.confirmed_price || request.booking?.total_price || 0)}
                                     </p>
                                 </div>
                             </div>
@@ -331,13 +411,13 @@ export default function RequestDetailsPage() {
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold text-zinc-400 flex items-center gap-2"><Mail size={12} /> Email</span>
                                     <button onClick={() => copyToClipboard(contact.email || '')} className="text-xs font-black text-zinc-900 flex items-center gap-2 hover:text-amber transition-colors">
-                                        {contact.email || "—"}
+                                        {contact.email || "-"}
                                         <Copy size={12} />
                                     </button>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold text-zinc-400 flex items-center gap-2"><Phone size={12} /> Phone</span>
-                                    <span className="text-xs font-black text-zinc-900">{contact.phone || request.profiles?.phone || "—"}</span>
+                                    <span className="text-xs font-black text-zinc-900">{contact.phone || request.profiles?.phone || "-"}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold text-zinc-400 flex items-center gap-2"><Clock size={12} /> Request Time</span>
@@ -352,17 +432,44 @@ export default function RequestDetailsPage() {
                                 <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-8">Booking Details</h3>
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-zinc-400">Reference</span>
+                                        <span className="text-xs font-bold text-zinc-400">Luxel Reference</span>
                                         <span className="text-xs font-black text-zinc-900">{request.booking.booking_reference}</span>
+                                    </div>
+                                    <div className="pt-4 mt-2 border-t border-zinc-50 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-bold text-zinc-400">Airline Reference (PNR)</span>
+                                            <span className="text-xs font-black text-zinc-900">
+                                                {request.booking.airline_booking_reference || request.details?.airline_booking_reference || '-'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                value={airlineBookingReference}
+                                                onChange={(e) => setAirlineBookingReference(e.target.value)}
+                                                placeholder="Enter airline PNR (e.g. ABC123)"
+                                                className="flex-1 bg-zinc-50 border border-zinc-100 rounded-xl px-4 py-3 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/20 outline-none"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleSaveAirlineReference}
+                                                disabled={isActing || !airlineBookingReference.trim()}
+                                                className="px-5 py-3 rounded-xl bg-zinc-900 text-amber text-xs font-black uppercase tracking-widest disabled:opacity-50"
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                        <p className="text-[10px] text-zinc-400 font-medium">
+                                            This is the airline-provided booking reference. Add it after you book the traveler with the airline.
+                                        </p>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-bold text-zinc-400">Quoted Price</span>
-                                        <span className="text-xs font-black text-zinc-900">₦{Number(request.booking.total_price).toLocaleString()}</span>
+                                        <span className="text-xs font-black text-zinc-900">{formatNGN(request.booking.total_price)}</span>
                                     </div>
                                     {request.booking.confirmed_price && (
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs font-bold text-emerald-600">Confirmed Price</span>
-                                            <span className="text-xs font-black text-emerald-600">₦{Number(request.booking.confirmed_price).toLocaleString()}</span>
+                                            <span className="text-xs font-black text-emerald-600">{formatNGN(request.booking.confirmed_price)}</span>
                                         </div>
                                     )}
                                     <div className="flex items-center justify-between">
@@ -452,17 +559,19 @@ export default function RequestDetailsPage() {
                                                             </div>
                                                             <div>
                                                                 <p className="text-sm font-bold text-zinc-900">
-                                                                    {flight.departureTime} → {flight.arrivalTime}
+                                                                    {flight.departureTime} {'->'} {flight.arrivalTime}
                                                                 </p>
                                                                 <p className="text-[10px] text-zinc-400 font-medium">
-                                                                    {flight.departureCode} → {flight.arrivalCode} • {flight.duration} • {flight.stops}
+                                                                    {flight.departureCode} {'->'} {flight.arrivalCode} - {flight.duration} - {flight.stops}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                         <div className="text-right">
-                                                            <p className="font-black text-zinc-900">₦{Number(flight.price).toLocaleString()}</p>
+                                                            <p className="font-black text-zinc-900">{formatNGN(flight.price)}</p>
                                                             {flight.originalPrice && (
-                                                                <p className="text-[10px] text-zinc-400">€{flight.originalPrice}</p>
+                                                                <p className="text-[10px] text-zinc-400">
+                                                                    {flight.originalCurrency || 'EUR'} {flight.originalPrice}
+                                                                </p>
                                                             )}
                                                         </div>
                                                     </div>
@@ -480,7 +589,7 @@ export default function RequestDetailsPage() {
 
                                 {/* Agent Price Input */}
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Confirmed Price (₦ NGN)</label>
+                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Confirmed Price (NGN)</label>
                                     <div className="relative">
                                         <DollarSign size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" />
                                         <input
@@ -511,7 +620,7 @@ export default function RequestDetailsPage() {
                                     {isActing ? (
                                         <><Loader2 size={16} className="animate-spin" /> Confirming...</>
                                     ) : (
-                                        <><CheckCircle2 size={16} /> Confirm at ₦{Number(confirmedPrice || 0).toLocaleString()}</>
+                                        <><CheckCircle2 size={16} /> Confirm at {formatNGN(confirmedPrice || 0)}</>
                                     )}
                                 </button>
                             </div>

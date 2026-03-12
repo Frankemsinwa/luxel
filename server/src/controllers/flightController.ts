@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as amadeusService from '../services/amadeusService.js';
+import crypto from 'crypto';
 
 /**
  * @swagger
@@ -47,15 +48,24 @@ export const searchLocations = async (req: Request, res: Response) => {
  *         required: true
  *         schema:
  *           type: string
- *       - in: query
- *         name: departureDate
- *         required: true
- *         schema:
- *           type: string
- *       - in: query
- *         name: adults
- *         schema:
- *           type: string
+  *       - in: query
+  *         name: departureDate
+  *         required: true
+  *         schema:
+  *           type: string
+  *       - in: query
+  *         name: tripType
+  *         schema:
+  *           type: string
+  *           enum: [ONE_WAY, ROUND_TRIP]
+  *       - in: query
+  *         name: returnDate
+  *         schema:
+  *           type: string
+  *       - in: query
+  *         name: adults
+  *         schema:
+  *           type: string
  *       - in: query
  *         name: children
  *         schema:
@@ -71,6 +81,8 @@ export const searchLocations = async (req: Request, res: Response) => {
 export const searchFlights = async (req: Request, res: Response) => {
     try {
         const { from, to, departureDate, adults, children, travelClass } = req.query;
+        const rawTripType = (req.query.tripType as string | undefined) || undefined;
+        const rawReturnDate = (req.query.returnDate as string | undefined) || (req.query.return as string | undefined) || undefined;
 
         if (!from || !to || !departureDate) {
             return res.status(400).json({
@@ -78,22 +90,53 @@ export const searchFlights = async (req: Request, res: Response) => {
             });
         }
 
-        const flights = await amadeusService.searchFlights({
+        const tripType = (rawTripType || (rawReturnDate ? 'ROUND_TRIP' : 'ONE_WAY')).toString().toUpperCase();
+        if (tripType === 'ROUND_TRIP' && !rawReturnDate) {
+            return res.status(400).json({
+                message: 'Missing required search parameters for round-trip. Needs returnDate'
+            });
+        }
+
+        const result = await amadeusService.searchFlights({
             from: from as string,
             to: to as string,
-            departureDate: departureDate as string,
+            // Normalize date format for providers (Amadeus expects YYYY-MM-DD)
+            departureDate: (departureDate as string).split('T')[0],
+            tripType: tripType as any,
+            returnDate: rawReturnDate ? rawReturnDate.split('T')[0] : undefined,
             adults: adults as string,
             children: children as string,
             travelClass: travelClass as string
         });
 
         return res.json({
-            count: flights.length,
-            flights: flights
+            count: result.flights.length,
+            flights: result.flights,
+            meta: result.meta
         });
 
-    } catch (error) {
-        console.error('Search controller error:', error);
+    } catch (error: any) {
+        const correlationId = crypto.randomBytes(10).toString('hex');
+        console.error('Search controller error:', {
+            correlationId,
+            message: error?.message,
+            name: error?.name,
+            provider: error?.provider,
+            code: error?.code,
+            details: error?.details
+        });
+
+        // Provider outage / intermittent failures should be handled as a temporary unavailability (no mock data).
+        if (error?.name === 'ProviderUnavailableError' || error?.code === 'PROVIDER_UNAVAILABLE') {
+            res.setHeader('x-correlation-id', correlationId);
+            res.setHeader('Retry-After', '30');
+            return res.status(503).json({
+                message: "We couldn't fetch live flight offers right now. Please try again in a moment.",
+                code: 'FLIGHTS_PROVIDER_UNAVAILABLE',
+                correlationId
+            });
+        }
+
         return res.status(500).json({ message: 'Internal server error while searching flights' });
     }
 };

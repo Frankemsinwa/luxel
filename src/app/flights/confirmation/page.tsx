@@ -57,10 +57,10 @@ function ConfirmationContent() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <h1 className="text-4xl md:text-5xl font-semibold text-zinc-900 tracking-tight mb-6">
+                    <h1 className="text-display text-zinc-900 tracking-tight mb-6">
                         Request Received
                     </h1>
-                    <p className="text-zinc-500 text-lg font-medium max-w-xl mx-auto mb-12 leading-relaxed">
+                    <p className="text-body-lg text-zinc-500 max-w-xl mx-auto mb-12">
                         Your private travel inquiry has been transmitted to our VIP Concierge Desk. An elite agent is currently verifying aircraft availability and seat assignments.
                     </p>
                 </motion.div>
@@ -82,20 +82,20 @@ function ConfirmationContent() {
                                 <Plane size={28} />
                             </div>
                             <div className="text-left">
-                                <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1">Reference Number</p>
-                                <h3 className="text-xl font-semibold text-zinc-900">#{ref}</h3>
+                                <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Reference Number</p>
+                                <h3 className="text-heading-sm text-zinc-900">#{ref}</h3>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-4">
                             <div className="text-right">
-                                <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1">Itinerary</p>
+                                <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Itinerary</p>
                                 <p className="text-sm font-semibold text-zinc-900">{depCode} → {arrCode}</p>
                             </div>
                             <div className="w-px h-8 bg-zinc-100" />
                             <div className="text-left">
-                                <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1">Date</p>
-                                <p className="text-sm font-semibold text-zinc-900 underline decoration-amber decoration-2 underline-offset-4">{date}</p>
+                                <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Date</p>
+                                <p className="text-body text-zinc-900 underline decoration-amber decoration-2 underline-offset-4">{date}</p>
                             </div>
                         </div>
                     </div>
@@ -110,14 +110,14 @@ function ConfirmationContent() {
                 >
                     <button
                         onClick={handleTrackReservation}
-                        className="flex-1 bg-zinc-900 text-white px-10 py-6 rounded-3xl flex items-center justify-center gap-4 font-semibold text-xs tracking-widest uppercase shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all group"
+                        className="flex-1 bg-zinc-900 text-white px-10 py-6 rounded-3xl flex items-center justify-center gap-4 text-body-sm font-medium tracking-widest uppercase shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all group"
                     >
                         Track Reservation
                         <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                     </button>
                     <button
                         onClick={() => router.push('/')}
-                        className="px-8 py-6 rounded-3xl border border-zinc-100 text-zinc-400 font-semibold text-xs tracking-widest uppercase hover:bg-zinc-50 transition-all active:scale-95"
+                        className="px-8 py-6 rounded-3xl border border-zinc-100 text-zinc-400 text-body-sm font-medium tracking-widest uppercase hover:bg-zinc-50 transition-all active:scale-95"
                     >
                         Return Home
                     </button>
@@ -132,11 +132,11 @@ function ConfirmationContent() {
                 >
                     <div className="flex items-center gap-2 text-zinc-400">
                         <Clock size={16} />
-                        <span className="text-[10px] font-semibold uppercase tracking-widest">Verification: ~10 Mins</span>
+                        <span className="text-caption font-medium uppercase tracking-widest">Verification: ~10 Mins</span>
                     </div>
                     <div className="flex items-center gap-2 text-zinc-400">
                         <ShieldCheck size={16} className="text-emerald-500" />
-                        <span className="text-[10px] font-semibold uppercase tracking-widest">Secure Concierge</span>
+                        <span className="text-caption font-medium uppercase tracking-widest">Secure Concierge</span>
                     </div>
                 </motion.div>
 

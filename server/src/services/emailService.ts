@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { supabaseAdmin } from '../config/supabase.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,68 @@ const transporter = nodemailer.createTransport({
         pass: process.env.SMTP_PASS || 'password',
     },
 });
+
+const AGENT_EMAIL_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+let agentEmailCache: { emails: string[]; cachedAt: number } = { emails: [], cachedAt: 0 };
+
+const parseEnvEmails = () => {
+    const rawRecipients = process.env.AGENT_NOTIFICATION_EMAILS || process.env.AGENT_NOTIFICATION_EMAIL || '';
+    return rawRecipients
+        .split(',')
+        .map((e) => e.trim())
+        .filter(Boolean);
+};
+
+/**
+ * Resolve agent notification recipients.
+ * Priority:
+ * 1) Supabase profiles with role AGENT/ADMIN (resolved to auth.users emails via admin API)
+ * 2) Fallback to env AGENT_NOTIFICATION_EMAILS / AGENT_NOTIFICATION_EMAIL
+ */
+export const getAgentNotificationEmails = async () => {
+    const envEmails = parseEnvEmails();
+
+    // Use cache for Supabase lookup to avoid repeated admin calls.
+    const now = Date.now();
+    if (agentEmailCache.emails.length > 0 && now - agentEmailCache.cachedAt <= AGENT_EMAIL_CACHE_TTL_MS) {
+        return Array.from(new Set([...agentEmailCache.emails, ...envEmails]));
+    }
+
+    try {
+        const { data: agents, error } = await supabaseAdmin
+            .from('profiles')
+            .select('id, role')
+            .in('role', ['AGENT', 'ADMIN']);
+
+        if (error) throw error;
+
+        const ids = (agents || []).map((a: any) => a.id).filter(Boolean);
+        if (ids.length === 0) {
+            return envEmails;
+        }
+
+        const emails: string[] = [];
+        for (const id of ids) {
+            try {
+                // Service role client required for admin endpoints.
+                // @ts-ignore
+                const { data, error: userErr } = await supabaseAdmin.auth.admin.getUserById(id);
+                if (!userErr && data?.user?.email) {
+                    emails.push(data.user.email);
+                }
+            } catch {
+                // ignore individual failures
+            }
+        }
+
+        const unique = Array.from(new Set([...emails, ...envEmails])).filter(Boolean);
+        agentEmailCache = { emails: unique, cachedAt: now };
+        return unique;
+    } catch (err) {
+        // If Supabase lookup fails (missing service key, etc.), fall back to env.
+        return envEmails;
+    }
+};
 
 export const sendETicketEmail = async (
     recipientEmail: string,
@@ -124,5 +187,72 @@ export const sendAgentTourNotification = async (agentEmail: string, tourTitle: s
         return await transporter.sendMail(mailOptions);
     } catch (error) {
         console.error('Agent notification error:', error);
+    }
+};
+
+/**
+ * Notify Agent about an incoming flight booking request.
+ */
+export const sendAgentFlightNotification = async (
+    agentEmail: string,
+    payload: {
+        requestId: string;
+        bookingRef: string;
+        itinerary: string;
+        totalPrice: number;
+        contact?: { email?: string; phone?: string };
+        passengers?: any[];
+        tripDetails?: any;
+        agentLink?: string;
+    }
+) => {
+    try {
+        const passengersCount = Array.isArray(payload.passengers) ? payload.passengers.length : 0;
+        const contactEmail = payload.contact?.email || 'N/A';
+        const contactPhone = payload.contact?.phone || 'N/A';
+
+        const mailOptions = {
+            from: process.env.SMTP_FROM || '"Luxel System" <system@luxel.travel>',
+            to: agentEmail,
+            subject: `New Flight Request (${payload.itinerary}) - Ref ${payload.bookingRef}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 680px; margin: auto; padding: 24px; border: 1px solid #eee; border-radius: 16px;">
+                    <h2 style="margin: 0 0 16px 0; color: #111;">New Flight Booking Request</h2>
+                    <p style="margin: 0 0 16px 0; color: #444; line-height: 1.6;">
+                        A traveler has submitted a flight reservation request. Please review the full passenger and trip details in the agent dashboard.
+                    </p>
+
+                    <div style="background:#fafafa; border:1px solid #f0f0f0; padding:16px; border-radius:12px; margin: 16px 0;">
+                        <p style="margin:0; font-size:12px; color:#777; text-transform:uppercase; letter-spacing:0.08em;">Booking Reference</p>
+                        <p style="margin:6px 0 0 0; font-size:18px; font-weight:600; color:#111;">${payload.bookingRef}</p>
+                        <p style="margin:10px 0 0 0; font-size:14px; color:#444;"><strong>Route:</strong> ${payload.itinerary}</p>
+                        <p style="margin:6px 0 0 0; font-size:14px; color:#444;"><strong>Passengers:</strong> ${passengersCount}</p>
+                        <p style="margin:6px 0 0 0; font-size:14px; color:#444;"><strong>Total Price:</strong> NGN ${Number(payload.totalPrice || 0).toLocaleString()}</p>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <p style="margin:0; font-size:12px; color:#777; text-transform:uppercase; letter-spacing:0.08em;">Traveler Contact</p>
+                        <p style="margin:6px 0 0 0; font-size:14px; color:#444;"><strong>Email:</strong> ${contactEmail}</p>
+                        <p style="margin:6px 0 0 0; font-size:14px; color:#444;"><strong>Phone:</strong> ${contactPhone}</p>
+                    </div>
+
+                    ${payload.agentLink ? `
+                        <div style="margin-top: 18px;">
+                            <a href="${payload.agentLink}" style="display:inline-block; background:#111; color:#fbbf24; text-decoration:none; padding:12px 16px; border-radius:12px; font-weight:600;">
+                                Open Request in Dashboard
+                            </a>
+                        </div>
+                    ` : ''}
+
+                    <p style="margin: 18px 0 0 0; font-size: 12px; color: #888;">
+                        Request ID: ${payload.requestId}
+                    </p>
+                </div>
+            `
+        };
+
+        return await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Agent flight notification error:', error);
     }
 };

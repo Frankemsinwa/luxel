@@ -1,7 +1,7 @@
 'use client'
 
 import api from '@/lib/api';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -26,13 +26,19 @@ function FlightsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
+    const [fetchError, setFetchError] = useState<{ title: string; detail: string; correlationId?: string } | null>(null);
 
     // Search states
     const [searchData, setSearchData] = useState({
         from: searchParams.get('from') || 'London (LHR)',
         to: searchParams.get('to') || 'New York (JFK)',
         departure: searchParams.get('departure') || '',
-        passengers: searchParams.get('passengers') || '1 Passenger'
+        return: searchParams.get('return') || '',
+        tripType: (searchParams.get('tripType') as any) || '',
+        adults: searchParams.get('adults') || '1',
+        children: searchParams.get('children') || '0',
+        travelClass: searchParams.get('travelClass') || 'ECONOMY',
+        passengers: `${Number(searchParams.get('adults') || 1) + Number(searchParams.get('children') || 0)} Passenger${(Number(searchParams.get('adults') || 1) + Number(searchParams.get('children') || 0)) > 1 ? 's' : ''}`
     });
 
     // Update searchData when URL params change
@@ -41,7 +47,12 @@ function FlightsContent() {
             from: searchParams.get('from') || 'London (LHR)',
             to: searchParams.get('to') || 'New York (JFK)',
             departure: searchParams.get('departure') || '',
-            passengers: searchParams.get('passengers') || '1 Passenger'
+            return: searchParams.get('return') || '',
+            tripType: (searchParams.get('tripType') as any) || '',
+            adults: searchParams.get('adults') || '1',
+            children: searchParams.get('children') || '0',
+            travelClass: searchParams.get('travelClass') || 'ECONOMY',
+            passengers: `${Number(searchParams.get('adults') || 1) + Number(searchParams.get('children') || 0)} Passenger${(Number(searchParams.get('adults') || 1) + Number(searchParams.get('children') || 0)) > 1 ? 's' : ''}`
         });
         // Collapse search bar after updating
         setIsModifyingSearch(false);
@@ -49,22 +60,62 @@ function FlightsContent() {
 
     // Filter states
     const [isModifyingSearch, setIsModifyingSearch] = useState(false);
-    const [priceRange, setPriceRange] = useState(1500);
-    const [selectedAirlines, setSelectedAirlines] = useState<string[]>(["British Airways", "Virgin Atlantic", "American Airlines"]);
+    const [priceRange, setPriceRange] = useState(3500000);
+    const [selectedAirlines, setSelectedAirlines] = useState<string[]>([]);
     const [results, setResults] = useState(initialFlightResults);
+
+    const availableAirlines = useMemo(() => {
+        const uniques = new Set<string>();
+        for (const f of results as any[]) {
+            const a = (f?.airline || '').toString().trim();
+            if (a) uniques.add(a);
+        }
+        return Array.from(uniques).sort((a, b) => a.localeCompare(b));
+    }, [results]);
+
+    const airlineCounts = useMemo(() => {
+        const map = new Map<string, number>();
+        for (const f of results as any[]) {
+            const a = (f?.airline || '').toString().trim();
+            if (!a) continue;
+            map.set(a, (map.get(a) || 0) + 1);
+        }
+        return map;
+    }, [results]);
+
+    // On a fresh result set, default to "all airlines selected" so filters match what's on screen.
+    useEffect(() => {
+        setSelectedAirlines(availableAirlines);
+    }, [availableAirlines]);
+
+    const filteredResults = useMemo(() => {
+        return (results as any[]).filter((f) => {
+            const airline = (f?.airline || '').toString().trim();
+            const inAirlines = selectedAirlines.length === 0
+                ? availableAirlines.length === 0
+                : selectedAirlines.includes(airline);
+            const inPrice = typeof f?.price === 'number' ? f.price <= priceRange : true;
+            return inAirlines && inPrice;
+        });
+    }, [results, selectedAirlines, priceRange, availableAirlines.length]);
 
     // Fetch from Backend Express API
     useEffect(() => {
         const fetchFlights = async () => {
             setIsLoading(true);
             setResults([]); // Clear previous results while loading
+            setFetchError(null);
             try {
                 const response = await api.get('/flights/search', {
                     params: {
                         from: searchData.from,
                         to: searchData.to,
                         departureDate: searchData.departure || new Date().toISOString(),
-                        passengers: searchData.passengers
+                        returnDate: searchData.return || undefined,
+                        tripType: (searchData.tripType || (searchData.return ? 'ROUND_TRIP' : 'ONE_WAY')),
+                        adults: searchData.adults,
+                        children: searchData.children,
+                        travelClass: searchData.travelClass
                     }
                 });
 
@@ -73,9 +124,23 @@ function FlightsContent() {
                 } else {
                     setResults([]);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Error fetching flights:', error);
                 setResults([]);
+
+                const status = error?.response?.status;
+                if (status === 503) {
+                    setFetchError({
+                        title: 'Live flight search is temporarily unavailable',
+                        detail: "We're having trouble retrieving live fares right now. Please try again in a moment.",
+                        correlationId: error?.response?.data?.correlationId
+                    });
+                } else {
+                    setFetchError({
+                        title: 'Could not load flights',
+                        detail: 'Please check your connection and try again.'
+                    });
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -112,22 +177,22 @@ function FlightsContent() {
                     <div className="flex flex-wrap items-center justify-between gap-10">
                         <div className="flex flex-wrap items-center gap-12">
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Flight Route</span>
-                                <span className="text-sm font-bold text-zinc-900">{searchData.from} to {searchData.to}</span>
+                                <span className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Flight Route</span>
+                                <span className="text-body font-medium text-zinc-900">{searchData.from} to {searchData.to}</span>
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Dates</span>
-                                <span className="text-sm font-bold text-zinc-900">{formatDate(searchData.departure)}</span>
+                                <span className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Dates</span>
+                                <span className="text-body font-medium text-zinc-900">{formatDate(searchData.departure)}</span>
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Travelers</span>
-                                <span className="text-sm font-bold text-zinc-900">{searchData.passengers}</span>
+                                <span className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Travelers</span>
+                                <span className="text-body font-medium text-zinc-900">{searchData.passengers}</span>
                             </div>
                         </div>
 
                         <button
                             onClick={() => setIsModifyingSearch(!isModifyingSearch)}
-                            className="flex items-center gap-2 text-amber font-bold text-sm hover:opacity-80 transition-opacity"
+                            className="flex items-center gap-2 text-amber text-body-sm font-medium hover:opacity-80 transition-opacity"
                         >
                             <span>{isModifyingSearch ? 'Close' : 'Modify Search'}</span>
                             <div className={`w-8 h-8 rounded-full bg-amber/10 flex items-center justify-center transition-transform ${isModifyingSearch ? 'rotate-180' : ''}`}>
@@ -158,21 +223,53 @@ function FlightsContent() {
             </div>
 
             {/* Main Content */}
+            {fetchError && !isLoading && (
+                <div className="max-w-7xl mx-auto w-full px-6 pb-6">
+                    <div className="rounded-[2.5rem] border border-black/10 bg-white p-8 shadow-sm">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                            <div>
+                                <h2 className="text-heading-md text-zinc-900">{fetchError.title}</h2>
+                                <p className="text-body text-zinc-600 mt-2 max-w-2xl">{fetchError.detail}</p>
+                                {fetchError.correlationId && (
+                                    <p className="text-caption text-zinc-400 mt-3">
+                                        Reference ID: <span className="font-medium text-zinc-600">{fetchError.correlationId}</span>
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setSearchData((prev) => ({ ...prev }))}
+                                    className="px-6 py-3 rounded-2xl bg-zinc-900 text-white text-body-sm font-medium tracking-widest uppercase hover:bg-zinc-800 transition-colors"
+                                >
+                                    Try again
+                                </button>
+                                <button
+                                    onClick={() => router.push('/auth?mode=login')}
+                                    className="px-6 py-3 rounded-2xl border border-zinc-200 bg-white text-zinc-900 text-body-sm font-medium tracking-widest uppercase hover:bg-zinc-50 transition-colors"
+                                >
+                                    Login to chat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12 flex flex-col lg:flex-row gap-10">
 
                 {/* Filters Sidebar */}
                 <aside className="w-full lg:w-80 flex flex-col gap-8">
                     <div className="bg-black p-8 rounded-[2.5rem] shadow-sm border border-white/10">
                         <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-xl font-bold text-white">Filters</h2>
+                            <h2 className="text-heading-sm text-white">Filters</h2>
                             <button
-                                onClick={() => {
-                                    setPriceRange(3500000);
-                                    setSelectedAirlines(["British Airways", "Virgin Atlantic", "American Airlines"]);
-                                }}
-                                className="text-xs font-bold text-white/60 hover:underline uppercase tracking-widest"
-                            >
-                                Reset
+                                 onClick={() => {
+                                     setPriceRange(3500000);
+                                     setSelectedAirlines(availableAirlines);
+                                 }}
+                                 className="text-caption font-medium text-white/60 hover:underline uppercase tracking-widest"
+                             >
+                                 Reset
                             </button>
                         </div>
 
@@ -182,7 +279,7 @@ function FlightsContent() {
                                 <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
                                     <Filter size={18} />
                                 </div>
-                                <h3 className="font-bold text-white">Price Range</h3>
+                                <h3 className="text-heading-sm text-white">Price Range</h3>
                             </div>
                             <input
                                 type="range"
@@ -206,14 +303,10 @@ function FlightsContent() {
                                 <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
                                     <Plane size={18} />
                                 </div>
-                                <h3 className="font-bold text-white">Airlines</h3>
+                                <h3 className="text-heading-sm text-white">Airlines</h3>
                             </div>
-                            <div className="space-y-4">
-                                {[
-                                    "British Airways",
-                                    "Virgin Atlantic",
-                                    "American Airlines"
-                                ].map((airline, i) => (
+                             <div className="space-y-4">
+                                {availableAirlines.length > 0 ? availableAirlines.map((airline, i) => (
                                     <label key={i} className="flex items-center justify-between group cursor-pointer">
                                         <div className="flex items-center gap-3">
                                             <div
@@ -222,22 +315,27 @@ function FlightsContent() {
                                             >
                                                 {selectedAirlines.includes(airline) && <div className="w-2 h-2 rounded-full bg-black" />}
                                             </div>
-                                            <span className="text-sm font-medium text-white/70 group-hover:text-white">{airline}</span>
+                                            <span className="text-body-sm text-white/70 group-hover:text-white">
+                                                {airline}
+                                                <span className="text-white/40 ml-2">({airlineCounts.get(airline) || 0})</span>
+                                            </span>
                                         </div>
                                     </label>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </aside>
+                                )) : (
+                                    <p className="text-body-sm font-medium text-white/50">No airlines yet</p>
+                                )}
+                             </div>
+                         </div>
+                     </div>
+                 </aside>
 
                 {/* Results Area */}
                 <div className="flex-1">
                     <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-lg font-bold text-black">{results.length} results found for your search</h2>
+                        <h2 className="text-heading-sm text-black">{filteredResults.length} results found for your search</h2>
                         <div className="flex items-center gap-4">
-                            <span className="text-xs font-bold text-black/50 uppercase tracking-widest">Sort by:</span>
-                            <select className="bg-transparent text-sm font-bold text-black focus:outline-none cursor-pointer">
+                            <span className="text-caption font-medium text-black/50 uppercase tracking-widest">Sort by:</span>
+                            <select className="bg-transparent text-body-sm font-medium text-black focus:outline-none cursor-pointer">
                                 <option>Recommended</option>
                                 <option>Cheapest</option>
                                 <option>Fastest</option>
@@ -284,7 +382,7 @@ function FlightsContent() {
                             </motion.div>
                         ) : (
                             <AnimatePresence mode="popLayout">
-                                {results.length > 0 ? results.map((flight) => (
+                                {filteredResults.length > 0 ? filteredResults.map((flight) => (
                                     <motion.div
                                         key={flight.id}
                                         initial={{ opacity: 0, y: 20 }}
@@ -377,8 +475,27 @@ function FlightsContent() {
                                         <div className="w-20 h-20 rounded-full bg-black/10 flex items-center justify-center text-black/30 mx-auto mb-6">
                                             <Search size={32} />
                                         </div>
-                                        <h3 className="text-xl font-bold text-black mb-2">No flights found</h3>
-                                        <p className="text-black/50 font-light">Try adjusting your filters to find more options.</p>
+                                        {results.length === 0 ? (
+                                            <>
+                                                <h3 className="text-heading-sm text-black mb-2">No flights found</h3>
+                                                <p className="text-body-sm font-medium text-black/50">Try adjusting your search to find more options.</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <h3 className="text-heading-sm text-black mb-2">No flights match your filters</h3>
+                                                <p className="text-body-sm font-medium text-black/50 mb-6">Try widening the price range or selecting more airlines.</p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setPriceRange(3500000);
+                                                        setSelectedAirlines(availableAirlines);
+                                                    }}
+                                                    className="text-caption font-medium text-amber uppercase tracking-widest hover:underline"
+                                                >
+                                                    Reset filters
+                                                </button>
+                                            </>
+                                        )}
                                     </motion.div>
                                 )}
                             </AnimatePresence>

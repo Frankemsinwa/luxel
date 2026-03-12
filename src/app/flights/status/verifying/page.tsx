@@ -79,20 +79,20 @@ function VerifyingContent() {
                             </div>
 
                             <div className="relative z-10">
-                                <span className="px-4 py-1.5 rounded-full bg-flight-card text-black text-[10px] font-black uppercase tracking-[0.2em] mb-8 inline-block shadow-lg shadow-black/5">
+                                <span className="px-4 py-1.5 rounded-full bg-flight-card text-black text-caption font-medium uppercase tracking-[0.2em] mb-8 inline-block shadow-lg shadow-black/5">
                                     Processing
                                 </span>
 
-                                <h2 className="text-4xl font-bold text-white mb-6 leading-tight max-w-xl">
+                                <h2 className="text-heading-xl text-white mb-6 leading-tight max-w-xl">
                                     Payment Verification in Progress
                                 </h2>
-                                <p className="text-zinc-400 leading-relaxed font-light mb-12 max-w-xl text-lg">
+                                <p className="text-body-lg text-zinc-400 leading-relaxed mb-12 max-w-xl">
                                     We have received your proof of payment. Our finance team is currently verifying the transaction. You will be notified as soon as your tickets are issued.
                                 </p>
 
                                 {error && (
                                     <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 mb-8">
-                                        <p className="text-red-400 text-sm font-bold">{error}</p>
+                                        <p className="text-body text-red-400 font-medium">{error}</p>
                                     </div>
                                 )}
 
@@ -103,19 +103,19 @@ function VerifyingContent() {
                                                 <FileText size={32} />
                                             </div>
                                             <div>
-                                                <div className="text-sm font-bold text-white mb-1">receipt_LX492781.pdf</div>
+                                                <div className="text-body font-medium text-white mb-1">receipt_LX492781.pdf</div>
                                                 <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Uploaded just now • 1.2 MB</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Verified</span>
+                                            <span className="text-caption font-medium text-emerald-500 uppercase tracking-widest">Verified</span>
                                         </div>
                                     </div>
 
                                     {/* Verification Progress */}
                                     <div className="space-y-3">
-                                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
+                                        <div className="flex items-center justify-between text-caption font-medium uppercase tracking-widest">
                                             <span className="text-zinc-500">System Verification</span>
                                             <span className="text-flight-card">{Math.round(progress)}%</span>
                                         </div>
@@ -137,7 +137,7 @@ function VerifyingContent() {
                     {/* Activity Log Sidebar */}
                     <aside className="space-y-8">
                         <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-zinc-100">
-                            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-[0.2em] mb-12">Activity Log</h3>
+                            <h3 className="text-caption font-medium text-zinc-400 uppercase tracking-[0.2em] mb-12">Activity Log</h3>
 
                             <div className="space-y-12 relative overflow-hidden">
                                 <div className="absolute top-0 left-[1.125rem] w-[1px] h-full bg-zinc-50" />
@@ -147,9 +147,9 @@ function VerifyingContent() {
                                         <Loader2 size={16} className="text-flight-card animate-spin" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-bold text-flight-card uppercase tracking-widest mb-1">Now</div>
-                                        <h4 className="font-bold text-zinc-900 text-sm mb-1">Finance team verifying payment</h4>
-                                        <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">Transaction ID validation in process.</p>
+                                        <div className="text-caption font-medium text-flight-card uppercase tracking-widest mb-1">Now</div>
+                                        <h4 className="text-body font-medium text-zinc-900 mb-1">Finance team verifying payment</h4>
+                                        <p className="text-caption text-zinc-400 leading-relaxed">Transaction ID validation in process.</p>
                                     </div>
                                 </div>
 
@@ -158,9 +158,9 @@ function VerifyingContent() {
                                         <div className="w-2.5 h-2.5 rounded-full bg-zinc-300" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Just Now</div>
-                                        <h4 className="font-bold text-zinc-700 text-sm mb-1">Proof of payment uploaded</h4>
-                                        <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">Document successfully stored in system.</p>
+                                        <div className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Just Now</div>
+                                        <h4 className="text-body font-medium text-zinc-700 mb-1">Proof of payment uploaded</h4>
+                                        <p className="text-caption text-zinc-400 leading-relaxed">Document successfully stored in system.</p>
                                     </div>
                                 </div>
                             </div>

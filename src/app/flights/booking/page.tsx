@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { supabase } from '@/lib/supabase';
+import { writeTracker } from '@/lib/bookingTracker';
 import {
     User,
     Check,
@@ -33,9 +34,14 @@ function PassengerDetailsContent() {
 
     const [flightDetails, setFlightDetails] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [authChoice, setAuthChoice] = useState<'undecided' | 'guest' | 'login'>('undecided');
+    const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
-    const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
-    const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
+    const adults = Number(searchParams.get('adults') || 1);
+    const children = Number(searchParams.get('children') || 0);
+    const passengerCountFromSplit = parseInt((searchParams.get('passengers') || '').split(' ')[0]) || 0;
+    const passengerCount = (adults + children) || passengerCountFromSplit || 1;
     const taxes = 45000;
 
     const [passengerData, setPassengerData] = useState<any[]>([]);
@@ -48,6 +54,7 @@ function PassengerDetailsContent() {
     useEffect(() => {
         const fetchUser = async () => {
             const { data: { session } } = await supabase.auth.getSession();
+            setIsLoggedIn(Boolean(session?.user));
             if (session?.user?.email) {
                 setContactEmail(session.user.email);
             }
@@ -86,7 +93,6 @@ function PassengerDetailsContent() {
                 dobDay: '',
                 dobMonth: '',
                 dobYear: '',
-                passportNumber: ''
             }))
         );
     }, [passengerCount]);
@@ -100,8 +106,7 @@ function PassengerDetailsContent() {
             p.lastName.trim() !== '' &&
             p.dobDay !== '' &&
             p.dobMonth !== '' &&
-            p.dobYear !== '' &&
-            p.passportNumber.trim() !== ''
+            p.dobYear !== ''
         );
         const contactValid = contactEmail.trim() !== '' && contactPhone.trim() !== '';
         return passengersValid && contactValid;
@@ -121,9 +126,10 @@ function PassengerDetailsContent() {
         try {
             const { data: { session } } = await supabase.auth.getSession();
 
-            if (!session) {
-                alert('Please sign in to make a reservation');
+            if (!session && authChoice !== 'guest') {
+                setShowAuthPrompt(true);
                 setIsSubmitting(false);
+                setSubmitStep(0);
                 return;
             }
 
@@ -137,13 +143,37 @@ function PassengerDetailsContent() {
                     departureCode: flightDetails?.departureCode || searchParams.get('depCode'),
                     arrivalCode: flightDetails?.arrivalCode || searchParams.get('arrCode'),
                     airline: flightDetails?.airline || searchParams.get('airline'),
-                    price: totalPrice
+                    price: totalPrice,
+                    departureTime: flightDetails?.departureTime || searchParams.get('depTime'),
+                    arrivalTime: flightDetails?.arrivalTime || searchParams.get('arrTime'),
+                    duration: flightDetails?.duration || searchParams.get('duration'),
+                    stops: flightDetails?.stops || searchParams.get('stops'),
+                    // Store the raw flight offer when available (helps agents re-book accurately).
+                    raw: flightDetails?.raw
                 },
                 totalPrice: totalPrice * passengerCount,
                 passengers: passengerData,
                 contactInfo: {
                     email: contactEmail,
                     phone: contactPhone
+                },
+                tripDetails: {
+                    from: searchParams.get('from') || '',
+                    to: searchParams.get('to') || '',
+                    departure: searchParams.get('departure') || '',
+                    return: searchParams.get('return') || '',
+                    tripType: searchParams.get('tripType') || '',
+                    travelClass: searchParams.get('travelClass') || '',
+                    adults,
+                    children,
+                    passengerCount
+                },
+                pricing: {
+                    unitPrice: totalPrice,
+                    taxes,
+                    baseFare,
+                    totalPassengers: passengerCount,
+                    totalPrice: totalPrice * passengerCount
                 }
             };
 
@@ -153,6 +183,22 @@ function PassengerDetailsContent() {
                 const data = response.data;
                 setSubmitStep(3);
                 await new Promise(r => setTimeout(r, 800));
+
+                // Store a local tracker so they can resume without losing their booking (guest-safe).
+                try {
+                    writeTracker({
+                        bookingId: data.bookingId,
+                        requestId: data.requestId,
+                        bookingRef: data.bookingRef,
+                        guestToken: data.guestToken ?? null,
+                        createdAt: Date.now(),
+                        contextQuery: searchParams.toString(),
+                        lastKnownRequestStatus: 'OPEN',
+                        lastKnownBookingStatus: 'PENDING',
+                        lastSyncedAt: Date.now()
+                    });
+                } catch { }
+
                 router.push(`/flights/confirmation?ref=${data.bookingRef}&id=${data.bookingId}&reqId=${data.requestId}&${searchParams.toString()}`);
             } else {
                 alert(`Error: ${response.data.message}`);
@@ -173,7 +219,7 @@ function PassengerDetailsContent() {
         return (
             <div className="min-h-screen bg-amber/5 flex flex-col items-center justify-center">
                 <Loader2 size={40} className="text-amber animate-spin mb-4" />
-                <p className="text-zinc-500 font-semibold text-sm">Preparing your reservation suite...</p>
+                <p className="text-body text-zinc-500">Preparing your reservation suite...</p>
             </div>
         );
     }
@@ -182,11 +228,70 @@ function PassengerDetailsContent() {
         <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
+            {showAuthPrompt && (
+                <div className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6">
+                    <div className="w-full max-w-xl rounded-[2.5rem] bg-white border border-black/10 shadow-[0_30px_90px_rgba(0,0,0,0.25)] p-7 md:p-9">
+                        <div className="text-heading-md font-medium text-black">Continue as guest or login</div>
+                        <div className="text-body text-black/60 mt-2">
+                            You can request a reservation without logging in. Logging in helps you keep your trips synced across devices and access your history anytime.
+                        </div>
+
+                        <div className="mt-6 rounded-2xl bg-black/[0.03] border border-black/10 p-5">
+                            <div className="text-body-sm font-medium text-black">Why login?</div>
+                            <ul className="mt-2 space-y-1 text-body-sm text-black/70 list-disc pl-5">
+                                <li>See all requests in one place (My Trips)</li>
+                                <li>Resume on any device</li>
+                                <li>Faster checkout next time</li>
+                            </ul>
+                        </div>
+
+                        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={() => {
+                                    setAuthChoice('guest');
+                                    setShowAuthPrompt(false);
+                                    setTimeout(() => handleRequestReservation(), 0);
+                                }}
+                                className="flex-1 px-5 py-3 rounded-2xl border border-black/10 bg-white hover:bg-black/5 text-body-sm font-medium text-black transition-colors"
+                            >
+                                Continue without login
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setAuthChoice('login');
+                                    setShowAuthPrompt(false);
+                                    const redirect = encodeURIComponent(`/flights/booking?${searchParams.toString()}`);
+                                    router.push(`/auth?mode=login&redirect=${redirect}`);
+                                }}
+                                className="flex-1 px-5 py-3 rounded-2xl bg-black text-white hover:bg-black/90 text-body-sm font-medium transition-colors"
+                            >
+                                Login
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => setShowAuthPrompt(false)}
+                            className="mt-4 w-full px-5 py-3 rounded-2xl bg-black/5 hover:bg-black/10 text-body-sm font-medium text-black transition-colors"
+                        >
+                            Not now
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12 pt-28">
                 <div className="flex flex-col lg:flex-row gap-10">
 
                     {/* Left Column - Forms */}
                     <div className="flex-1 space-y-12">
+                        {!isLoggedIn && authChoice === 'guest' && (
+                            <div className="rounded-[2rem] border border-black/10 bg-white/70 backdrop-blur p-5">
+                                <div className="text-body font-medium text-black">Booking as guest</div>
+                                <div className="text-body-sm text-black/60 mt-1">
+                                    We’ll keep your booking status on this device (if you accepted cookies). You can also login anytime to sync across devices.
+                                </div>
+                            </div>
+                        )}
                         {passengerData.map((p, index) => (
                             <motion.div
                                 key={p.id}
@@ -199,7 +304,7 @@ function PassengerDetailsContent() {
                                     <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center text-black">
                                         <User size={24} />
                                     </div>
-                                    <h2 className="text-2xl font-semibold text-black">Passenger {p.id}</h2>
+                                    <h2 className="text-heading-md text-black">Passenger {p.id}</h2>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -297,16 +402,6 @@ function PassengerDetailsContent() {
                                             <Globe size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-black/30" />
                                         </div>
                                     </div>
-                                    <div className="flex flex-col gap-2 lg:col-span-2">
-                                        <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">Passport Number</label>
-                                        <input
-                                            type="text"
-                                            value={p.passportNumber}
-                                            onChange={(e) => updatePassenger(p.id, 'passportNumber', e.target.value)}
-                                            placeholder="Letter & digits"
-                                            className={`bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black placeholder:text-black/30 focus:ring-2 focus:ring-black/20 ${showErrors && !p.passportNumber ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
-                                        />
-                                    </div>
                                 </div>
                             </motion.div>
                         ))}
@@ -318,8 +413,8 @@ function PassengerDetailsContent() {
                                     <Contact size={24} />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold text-black">Contact Information</h2>
-                                    <p className="text-xs text-black/50 font-medium tracking-tight">Booking confirmation will be sent here</p>
+                                    <h2 className="text-heading-md text-black">Contact Information</h2>
+                                    <p className="text-body-sm text-black/50 tracking-tight">Booking confirmation will be sent here</p>
                                 </div>
                             </div>
 
@@ -359,7 +454,7 @@ function PassengerDetailsContent() {
                     {/* Right Column - Summary */}
                     <div className="w-full lg:w-96 flex flex-col gap-8">
                         <div className="bg-flight-card p-10 rounded-[3rem] shadow-xl shadow-black/5 border border-black/5">
-                            <h3 className="text-xs font-bold text-black/50 uppercase tracking-widest mb-8">Price Summary</h3>
+                            <h3 className="text-caption font-medium text-black/50 uppercase tracking-widest mb-8">Price Summary</h3>
                             <div className="space-y-5 mb-8 pb-8 border-b border-black/10">
                                 <div className="flex justify-between">
                                     <span className="text-black/60 font-medium">Base Fare ({passengerCount} Passengers)</span>
@@ -406,12 +501,12 @@ function PassengerDetailsContent() {
                             </div>
                         </div>
 
-                        <h3 className="text-2xl font-bold text-zinc-900 mb-2">
+                        <h3 className="text-heading-md text-zinc-900 mb-2">
                             {submitStep === 1 && "Verifying Routing"}
                             {submitStep === 2 && "Securing Private Rate"}
                             {submitStep === 3 && "Request Dispatched"}
                         </h3>
-                        <p className="text-zinc-500 text-sm font-medium leading-relaxed">
+                        <p className="text-body text-zinc-500 leading-relaxed">
                             {submitStep === 1 && "Confirming real-time availability with our Global GDS network..."}
                             {submitStep === 2 && "Locking in your exclusive elite fare for the next 2 hours..."}
                             {submitStep === 3 && "Your VIP concierge desk has received the request successfully."}

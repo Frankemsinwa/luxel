@@ -206,26 +206,26 @@ function PaymentContent() {
                         <div className="bg-white rounded-[3rem] shadow-xl shadow-black/5 border border-black/5 overflow-hidden">
                             <div className="bg-black/5 px-10 py-6 border-b border-black/10 flex items-center gap-4">
                                 <Building2 size={20} className="text-black/60" />
-                                <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Secure Checkout</h2>
+                                <h2 className="text-caption font-medium text-zinc-900 uppercase tracking-widest">Secure Checkout</h2>
                             </div>
 
                             <div className="p-10 flex flex-col justify-center items-center text-center space-y-8 min-h-[400px]">
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Paystack_Logo.png/1200px-Paystack_Logo.png" alt="Paystack" className="h-10 object-contain mx-auto" />
 
                                 <div>
-                                    <h3 className="text-2xl font-black text-zinc-900 tracking-tight mb-2">Finalize Your Private Charter</h3>
-                                    <p className="text-sm font-medium text-zinc-500 max-w-sm mx-auto">
+                                    <h3 className="text-heading-lg text-zinc-900 tracking-tight mb-2">Finalize Your Private Charter</h3>
+                                    <p className="text-body text-zinc-500 max-w-sm mx-auto">
                                         You will be redirected to Paystack to securely enter your payment details and finalize your booking.
                                     </p>
                                 </div>
 
                                 <div className="w-full max-w-md bg-zinc-50 border border-zinc-100 rounded-3xl p-6 mb-4">
                                     <div className="flex items-center justify-between mb-4">
-                                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Amount Due</span>
+                                        <span className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Amount Due</span>
                                         <span className="text-lg font-black text-zinc-900">₦{priceToPay.toLocaleString()}</span>
                                     </div>
                                     <div className="w-full h-px bg-zinc-200 mb-4" />
-                                    <div className="flex items-center gap-3 text-xs font-bold text-emerald-600 justify-center">
+                                    <div className="flex items-center gap-3 text-body-sm font-medium text-emerald-600 justify-center">
                                         <Check size={14} /> Price verified by agent
                                     </div>
                                 </div>
@@ -233,7 +233,7 @@ function PaymentContent() {
                                 <button
                                     onClick={handlePaystackPayment}
                                     disabled={loading || isInitializing}
-                                    className="w-full max-w-md bg-black text-flight-card py-6 rounded-3xl font-bold flex items-center justify-center gap-4 shadow-2xl shadow-black/20 hover:scale-[1.02] transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                                    className="w-full max-w-md bg-black text-flight-card py-6 rounded-3xl text-body-sm font-medium flex items-center justify-center gap-4 shadow-2xl shadow-black/20 hover:scale-[1.02] transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
                                 >
                                     {isInitializing ? (
                                         "INITIALIZING PAYMENT..."
@@ -245,7 +245,7 @@ function PaymentContent() {
                                     )}
                                 </button>
 
-                                <p className="text-[10px] text-zinc-400 font-bold tracking-widest flex items-center justify-center gap-2">
+                                <p className="text-caption font-medium text-zinc-400 tracking-widest flex items-center justify-center gap-2">
                                     <ShieldCheck size={14} /> Securely processed via PCI-DSS compliant infrastructure
                                 </p>
                             </div>

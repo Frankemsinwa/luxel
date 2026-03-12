@@ -63,15 +63,15 @@ function AgentConfirmedContent() {
                         <div className="space-y-8">
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                 <div>
-                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest mb-4">
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-caption font-medium uppercase tracking-widest mb-4">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                                         Availability Confirmed
                                     </div>
-                                    <h1 className="text-4xl font-bold text-zinc-900 tracking-tight mb-2">Price & Routing Verified</h1>
-                                    <p className="text-zinc-500 font-medium">Your private rate has been locked. Please complete payment to issue your tickets.</p>
+                                    <h1 className="text-heading-xl text-zinc-900 tracking-tight mb-2">Price & Routing Verified</h1>
+                                    <p className="text-body text-zinc-500">Your private rate has been locked. Please complete payment to issue your tickets.</p>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Total Confirmed Price</div>
+                                    <div className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Total Confirmed Price</div>
                                     {loading ? (
                                         <Loader2 size={24} className="text-amber animate-spin ml-auto" />
                                     ) : (
@@ -88,14 +88,14 @@ function AgentConfirmedContent() {
                                         <Wallet size={24} className="relative z-10" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-zinc-900">Payment Instructions</h3>
-                                        <p className="text-xs text-zinc-400 font-medium">Secure private jet rates for next 2 hours</p>
+                                        <h3 className="text-heading-sm text-zinc-900">Payment Instructions</h3>
+                                        <p className="text-body-sm text-zinc-400">Secure private jet rates for next 2 hours</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4 w-full md:w-auto">
                                     <button
                                         onClick={() => router.push(`/flights/status/payment?${searchParams.toString()}`)}
-                                        className="flex-1 md:flex-none bg-amber text-white px-10 py-5 rounded-2xl font-bold text-sm shadow-xl shadow-amber/20 hover:bg-amber-dark transition-all active:scale-95 whitespace-nowrap"
+                                        className="flex-1 md:flex-none bg-amber text-white px-10 py-5 rounded-2xl text-body-sm font-medium shadow-xl shadow-amber/20 hover:bg-amber-dark transition-all active:scale-95 whitespace-nowrap"
                                     >
                                         Proceed to Payment
                                     </button>
@@ -108,7 +108,7 @@ function AgentConfirmedContent() {
 
                         {/* Activity Log */}
                         <div className="space-y-6">
-                            <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] pl-1">Live Updates</h3>
+                            <h3 className="text-caption font-medium text-zinc-400 uppercase tracking-[0.3em] pl-1">Live Updates</h3>
                             <div className="space-y-4">
                                 <motion.div
                                     initial={{ x: -20, opacity: 0 }}
@@ -121,16 +121,16 @@ function AgentConfirmedContent() {
                                         </div>
                                         <p className="text-sm font-bold text-zinc-900">Price confirmed at ₦{displayPrice.toLocaleString()}</p>
                                     </div>
-                                    <span className="text-[10px] font-black text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-md">NOW</span>
+                                    <span className="text-caption font-medium text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-md">NOW</span>
                                 </motion.div>
                                 <div className="bg-white p-6 rounded-2xl border border-zinc-100 flex items-center justify-between">
                                     <div className="flex items-center gap-4">
                                         <div className="w-8 h-8 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 border border-zinc-100">
                                             <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                                         </div>
-                                        <p className="text-sm font-medium text-zinc-500">Routing verification complete</p>
+                                        <p className="text-body text-zinc-500">Routing verification complete</p>
                                     </div>
-                                    <span className="text-[10px] font-medium text-zinc-400">3 min ago</span>
+                                    <span className="text-caption text-zinc-400">3 min ago</span>
                                 </div>
                             </div>
                         </div>
@@ -141,7 +141,7 @@ function AgentConfirmedContent() {
                         <div className="sticky top-32">
                             <div className="flex items-center gap-3 mb-6 pl-4">
                                 <div className="w-2 h-2 rounded-full bg-zinc-900 shadow-[0_0_8px_rgba(0,0,0,0.5)]" />
-                                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-900">Final Itinerary</h2>
+                                <h2 className="text-caption font-medium uppercase tracking-[0.2em] text-zinc-900">Final Itinerary</h2>
                             </div>
                             <Suspense fallback={<div>Loading Summary...</div>}>
                                 <ReservationSummaryCard />
@@ -153,7 +153,7 @@ function AgentConfirmedContent() {
                                     <ShieldCheck size={24} />
                                 </div>
                                 <div>
-                                    <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Protected Request</h4>
+                                    <h4 className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Protected Request</h4>
                                     <p className="text-xs font-bold text-zinc-700">Secured by Luxel Shield™</p>
                                 </div>
                             </div>
