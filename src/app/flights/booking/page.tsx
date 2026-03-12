@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { supabase } from '@/lib/supabase';
+import { writeTracker } from '@/lib/bookingTracker';
 import {
     User,
     Check,
@@ -33,6 +34,9 @@ function PassengerDetailsContent() {
 
     const [flightDetails, setFlightDetails] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [authChoice, setAuthChoice] = useState<'undecided' | 'guest' | 'login'>('undecided');
+    const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
     const adults = Number(searchParams.get('adults') || 1);
     const children = Number(searchParams.get('children') || 0);
@@ -50,6 +54,7 @@ function PassengerDetailsContent() {
     useEffect(() => {
         const fetchUser = async () => {
             const { data: { session } } = await supabase.auth.getSession();
+            setIsLoggedIn(Boolean(session?.user));
             if (session?.user?.email) {
                 setContactEmail(session.user.email);
             }
@@ -121,9 +126,10 @@ function PassengerDetailsContent() {
         try {
             const { data: { session } } = await supabase.auth.getSession();
 
-            if (!session) {
-                alert('Please sign in to make a reservation');
+            if (!session && authChoice !== 'guest') {
+                setShowAuthPrompt(true);
                 setIsSubmitting(false);
+                setSubmitStep(0);
                 return;
             }
 
@@ -177,6 +183,22 @@ function PassengerDetailsContent() {
                 const data = response.data;
                 setSubmitStep(3);
                 await new Promise(r => setTimeout(r, 800));
+
+                // Store a local tracker so they can resume without losing their booking (guest-safe).
+                try {
+                    writeTracker({
+                        bookingId: data.bookingId,
+                        requestId: data.requestId,
+                        bookingRef: data.bookingRef,
+                        guestToken: data.guestToken ?? null,
+                        createdAt: Date.now(),
+                        contextQuery: searchParams.toString(),
+                        lastKnownRequestStatus: 'OPEN',
+                        lastKnownBookingStatus: 'PENDING',
+                        lastSyncedAt: Date.now()
+                    });
+                } catch { }
+
                 router.push(`/flights/confirmation?ref=${data.bookingRef}&id=${data.bookingId}&reqId=${data.requestId}&${searchParams.toString()}`);
             } else {
                 alert(`Error: ${response.data.message}`);
@@ -206,11 +228,70 @@ function PassengerDetailsContent() {
         <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
+            {showAuthPrompt && (
+                <div className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6">
+                    <div className="w-full max-w-xl rounded-[2.5rem] bg-white border border-black/10 shadow-[0_30px_90px_rgba(0,0,0,0.25)] p-7 md:p-9">
+                        <div className="text-heading-md font-medium text-black">Continue as guest or login</div>
+                        <div className="text-body text-black/60 mt-2">
+                            You can request a reservation without logging in. Logging in helps you keep your trips synced across devices and access your history anytime.
+                        </div>
+
+                        <div className="mt-6 rounded-2xl bg-black/[0.03] border border-black/10 p-5">
+                            <div className="text-body-sm font-medium text-black">Why login?</div>
+                            <ul className="mt-2 space-y-1 text-body-sm text-black/70 list-disc pl-5">
+                                <li>See all requests in one place (My Trips)</li>
+                                <li>Resume on any device</li>
+                                <li>Faster checkout next time</li>
+                            </ul>
+                        </div>
+
+                        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={() => {
+                                    setAuthChoice('guest');
+                                    setShowAuthPrompt(false);
+                                    setTimeout(() => handleRequestReservation(), 0);
+                                }}
+                                className="flex-1 px-5 py-3 rounded-2xl border border-black/10 bg-white hover:bg-black/5 text-body-sm font-medium text-black transition-colors"
+                            >
+                                Continue without login
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setAuthChoice('login');
+                                    setShowAuthPrompt(false);
+                                    const redirect = encodeURIComponent(`/flights/booking?${searchParams.toString()}`);
+                                    router.push(`/auth?mode=login&redirect=${redirect}`);
+                                }}
+                                className="flex-1 px-5 py-3 rounded-2xl bg-black text-white hover:bg-black/90 text-body-sm font-medium transition-colors"
+                            >
+                                Login
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => setShowAuthPrompt(false)}
+                            className="mt-4 w-full px-5 py-3 rounded-2xl bg-black/5 hover:bg-black/10 text-body-sm font-medium text-black transition-colors"
+                        >
+                            Not now
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12 pt-28">
                 <div className="flex flex-col lg:flex-row gap-10">
 
                     {/* Left Column - Forms */}
                     <div className="flex-1 space-y-12">
+                        {!isLoggedIn && authChoice === 'guest' && (
+                            <div className="rounded-[2rem] border border-black/10 bg-white/70 backdrop-blur p-5">
+                                <div className="text-body font-medium text-black">Booking as guest</div>
+                                <div className="text-body-sm text-black/60 mt-1">
+                                    We’ll keep your booking status on this device (if you accepted cookies). You can also login anytime to sync across devices.
+                                </div>
+                            </div>
+                        )}
                         {passengerData.map((p, index) => (
                             <motion.div
                                 key={p.id}

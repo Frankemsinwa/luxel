@@ -29,6 +29,30 @@ export const authenticate = async (req: any, res: Response, next: NextFunction) 
 };
 
 /**
+ * Optional auth: if a Bearer token is present, validate it and attach `req.user`.
+ * If it's missing, proceed unauthenticated.
+ */
+export const authenticateOptional = async (req: any, _res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        req.user = null;
+        return next();
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    try {
+        const { data: { user }, error } = await supabase.auth.getUser(token);
+        req.user = (!error && user) ? user : null;
+        return next();
+    } catch {
+        req.user = null;
+        return next();
+    }
+};
+
+/**
  * Middleware to restrict access based on roles
  */
 export const authorize = (roles: string[]) => {

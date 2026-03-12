@@ -33,6 +33,7 @@ export default function RequestDetailsPage() {
     const [request, setRequest] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isActing, setIsActing] = useState(false);
+    const [airlineBookingReference, setAirlineBookingReference] = useState('');
 
     // Verification Modal State
     const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -46,6 +47,11 @@ export default function RequestDetailsPage() {
             try {
                 const response = await api.get(`/agent/requests/${id}`);
                 setRequest(response.data);
+                setAirlineBookingReference(
+                    response.data?.booking?.airline_booking_reference ||
+                    response.data?.details?.airline_booking_reference ||
+                    ''
+                );
             } catch (error: any) {
                 console.error('Error fetching request details:', error);
                 if (error.response?.status === 401) {
@@ -58,6 +64,21 @@ export default function RequestDetailsPage() {
 
         fetchRequest();
     }, [id, router]);
+
+    const handleSaveAirlineReference = async () => {
+        if (!airlineBookingReference.trim()) return;
+        setIsActing(true);
+        try {
+            const response = await api.patch(`/agent/requests/${id}`, {
+                airlineBookingReference: airlineBookingReference.trim()
+            });
+            setRequest(response.data);
+        } catch (error) {
+            console.error('Error saving airline booking reference:', error);
+        } finally {
+            setIsActing(false);
+        }
+    };
 
     // Verify flight price through Amadeus API
     const handleVerifyPrice = async () => {
@@ -411,8 +432,35 @@ export default function RequestDetailsPage() {
                                 <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-8">Booking Details</h3>
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-zinc-400">Reference</span>
+                                        <span className="text-xs font-bold text-zinc-400">Luxel Reference</span>
                                         <span className="text-xs font-black text-zinc-900">{request.booking.booking_reference}</span>
+                                    </div>
+                                    <div className="pt-4 mt-2 border-t border-zinc-50 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-bold text-zinc-400">Airline Reference (PNR)</span>
+                                            <span className="text-xs font-black text-zinc-900">
+                                                {request.booking.airline_booking_reference || request.details?.airline_booking_reference || '-'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                value={airlineBookingReference}
+                                                onChange={(e) => setAirlineBookingReference(e.target.value)}
+                                                placeholder="Enter airline PNR (e.g. ABC123)"
+                                                className="flex-1 bg-zinc-50 border border-zinc-100 rounded-xl px-4 py-3 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/20 outline-none"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleSaveAirlineReference}
+                                                disabled={isActing || !airlineBookingReference.trim()}
+                                                className="px-5 py-3 rounded-xl bg-zinc-900 text-amber text-xs font-black uppercase tracking-widest disabled:opacity-50"
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                        <p className="text-[10px] text-zinc-400 font-medium">
+                                            This is the airline-provided booking reference. Add it after you book the traveler with the airline.
+                                        </p>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-bold text-zinc-400">Quoted Price</span>

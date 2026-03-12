@@ -281,15 +281,15 @@ export default function Home() {
               transition={{ duration: 1, ease: [0.21, 1, 0.36, 1] }}
               className="flex-1"
             >
-              <p className="text-amber font-normal tracking-[0.3em] text-[10px] mb-6 uppercase flex items-center gap-3">
+              <p className="text-caption text-amber tracking-[0.3em] mb-6 uppercase flex items-center gap-3">
                 <span className="w-8 h-[1px] bg-amber" />
                 Core Values
               </p>
-              <h2 className="text-5xl md:text-7xl font-normal mb-8 text-zinc-900 leading-tight tracking-tighter">
+              <h2 className="text-display mb-8 text-zinc-900 tracking-tighter">
                 <span className="font-medium">Why</span> <span className="italic font-newton text-amber">Luxel?</span>
               </h2>
 
-              <p className="text-zinc-500 mb-12 leading-relaxed max-w-md font-light text-lg">
+              <p className="text-body-lg text-zinc-500 mb-12 max-w-md">
                 We don't just book tickets; we curate experiences. Luxel provides a seamless, high-touch journey powered by elite technology.
               </p>
 
@@ -314,9 +314,9 @@ export default function Home() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full bg-amber" />
-                      <h4 className="text-lg font-normal text-zinc-900 group-hover:text-amber transition-colors">{benefit.title}</h4>
+                      <h4 className="text-heading-sm text-zinc-900 group-hover:text-amber transition-colors">{benefit.title}</h4>
                     </div>
-                    <p className="text-zinc-500 text-sm font-light max-w-sm leading-relaxed pl-5 border-l-2 border-zinc-100 group-hover:border-amber transition-colors">
+                    <p className="text-body-sm text-zinc-500 max-w-sm pl-5 border-l-2 border-zinc-100 group-hover:border-amber transition-colors">
                       {benefit.desc}
                     </p>
                   </motion.div>
@@ -335,17 +335,17 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
               >
-                <h2 className="text-5xl md:text-7xl font-normal text-zinc-900 tracking-tighter">
+                <h2 className="text-display text-zinc-900 tracking-tighter">
                   <span className="font-medium">Destinations</span> <br />
                   <span className="text-amber italic font-newton tracking-[-0.05em]">fordiscovery</span>
                 </h2>
-                <p className="text-zinc-500 font-light text-lg">Curated recommendations for the global elite.</p>
+                <p className="text-body-lg text-zinc-500">Curated recommendations for the global elite.</p>
               </motion.div>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="group flex items-center gap-3 text-sm font-normal tracking-widest uppercase hover:text-amber transition-colors"
+                className="group flex items-center gap-3 text-caption tracking-widest uppercase hover:text-amber transition-colors"
               >
                 View all places
                 <div className="w-10 h-10 rounded-full border border-zinc-200 flex items-center justify-center group-hover:border-amber transition-colors">
@@ -380,12 +380,12 @@ export default function Home() {
                   >
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-3xl font-bold">{card.name}</h3>
+                        <h3 className="text-heading-md">{card.name}</h3>
                         <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <PlaneLanding size={14} className="text-white" />
                         </div>
                       </div>
-                      <p className="text-[12px] font-light leading-relaxed mb-6 line-clamp-3 opacity-90">
+                      <p className="text-body-sm leading-relaxed mb-6 line-clamp-3 opacity-90">
                         {card.desc}
                       </p>
                     </div>

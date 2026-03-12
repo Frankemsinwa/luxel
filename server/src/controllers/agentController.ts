@@ -75,12 +75,29 @@ export const getRequestById = async (req: any, res: Response) => {
 export const updateRequestStatus = async (req: any, res: Response) => {
     try {
         const { id } = req.params;
-        const { status, priority, confirmedPrice } = req.body;
+        const { status, priority, confirmedPrice, airlineBookingReference } = req.body;
+
+        // Fetch existing request so we can safely merge details JSON when needed.
+        const { data: existingRequest, error: existingErr } = await supabaseAdmin
+            .from('requests')
+            .select('id, details')
+            .eq('id', id)
+            .single();
+        if (existingErr) throw existingErr;
+
+        const mergedDetails = airlineBookingReference
+            ? { ...(existingRequest?.details || {}), airline_booking_reference: airlineBookingReference }
+            : undefined;
+
+        const updateFields: any = { updated_at: new Date() };
+        if (typeof status !== 'undefined') updateFields.status = status;
+        if (typeof priority !== 'undefined') updateFields.priority = priority;
+        if (mergedDetails) updateFields.details = mergedDetails;
 
         // 1. Update the request status
         const { data: request, error } = await supabaseAdmin
             .from('requests')
-            .update({ status, priority, updated_at: new Date() })
+            .update(updateFields)
             .eq('id', id)
             .select()
             .single();
@@ -101,6 +118,11 @@ export const updateRequestStatus = async (req: any, res: Response) => {
                 updateData.status = 'CANCELLED';
             }
 
+            if (airlineBookingReference) {
+                updateData.airline_booking_reference = airlineBookingReference;
+                updateData.airline_booking_confirmed_at = new Date();
+            }
+
             const { error: bookingError } = await supabaseAdmin
                 .from('bookings')
                 .update(updateData)
@@ -111,7 +133,18 @@ export const updateRequestStatus = async (req: any, res: Response) => {
             }
         }
 
-        return res.json(request);
+        // Return the same shape as GET /agent/requests/:id (include booking).
+        let booking = null;
+        if (bookingId) {
+            const { data: bookingData } = await supabaseAdmin
+                .from('bookings')
+                .select('*')
+                .eq('id', bookingId)
+                .single();
+            booking = bookingData;
+        }
+
+        return res.json({ ...request, booking });
     } catch (error: any) {
         return res.status(500).json({ message: 'Error updating request', error: error.message });
     }

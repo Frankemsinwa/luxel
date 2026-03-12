@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
+import CookieConsentBanner from "@/components/CookieConsentBanner";
+import BookingTrackerWidget from "@/components/BookingTrackerWidget";
+import ConciergeChatFab from "@/components/ConciergeChatFab";
 
 const newtonScient = localFont({
   src: "../../public/fonts/NewtonScient.ttf",
@@ -37,9 +33,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${plusJakartaSans.variable} ${newtonScient.variable} ${satoshi.variable} antialiased`}
+        className={`${newtonScient.variable} ${satoshi.variable} antialiased`}
       >
         {children}
+        <CookieConsentBanner />
+        <BookingTrackerWidget />
+        <ConciergeChatFab />
       </body>
     </html>
   );
