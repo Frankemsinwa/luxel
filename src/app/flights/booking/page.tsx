@@ -34,8 +34,10 @@ function PassengerDetailsContent() {
     const [flightDetails, setFlightDetails] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
-    const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
+    const adults = Number(searchParams.get('adults') || 1);
+    const children = Number(searchParams.get('children') || 0);
+    const passengerCountFromSplit = parseInt((searchParams.get('passengers') || '').split(' ')[0]) || 0;
+    const passengerCount = (adults + children) || passengerCountFromSplit || 1;
     const taxes = 45000;
 
     const [passengerData, setPassengerData] = useState<any[]>([]);
@@ -86,7 +88,6 @@ function PassengerDetailsContent() {
                 dobDay: '',
                 dobMonth: '',
                 dobYear: '',
-                passportNumber: ''
             }))
         );
     }, [passengerCount]);
@@ -100,8 +101,7 @@ function PassengerDetailsContent() {
             p.lastName.trim() !== '' &&
             p.dobDay !== '' &&
             p.dobMonth !== '' &&
-            p.dobYear !== '' &&
-            p.passportNumber.trim() !== ''
+            p.dobYear !== ''
         );
         const contactValid = contactEmail.trim() !== '' && contactPhone.trim() !== '';
         return passengersValid && contactValid;
@@ -137,13 +137,37 @@ function PassengerDetailsContent() {
                     departureCode: flightDetails?.departureCode || searchParams.get('depCode'),
                     arrivalCode: flightDetails?.arrivalCode || searchParams.get('arrCode'),
                     airline: flightDetails?.airline || searchParams.get('airline'),
-                    price: totalPrice
+                    price: totalPrice,
+                    departureTime: flightDetails?.departureTime || searchParams.get('depTime'),
+                    arrivalTime: flightDetails?.arrivalTime || searchParams.get('arrTime'),
+                    duration: flightDetails?.duration || searchParams.get('duration'),
+                    stops: flightDetails?.stops || searchParams.get('stops'),
+                    // Store the raw flight offer when available (helps agents re-book accurately).
+                    raw: flightDetails?.raw
                 },
                 totalPrice: totalPrice * passengerCount,
                 passengers: passengerData,
                 contactInfo: {
                     email: contactEmail,
                     phone: contactPhone
+                },
+                tripDetails: {
+                    from: searchParams.get('from') || '',
+                    to: searchParams.get('to') || '',
+                    departure: searchParams.get('departure') || '',
+                    return: searchParams.get('return') || '',
+                    tripType: searchParams.get('tripType') || '',
+                    travelClass: searchParams.get('travelClass') || '',
+                    adults,
+                    children,
+                    passengerCount
+                },
+                pricing: {
+                    unitPrice: totalPrice,
+                    taxes,
+                    baseFare,
+                    totalPassengers: passengerCount,
+                    totalPrice: totalPrice * passengerCount
                 }
             };
 
@@ -173,7 +197,7 @@ function PassengerDetailsContent() {
         return (
             <div className="min-h-screen bg-amber/5 flex flex-col items-center justify-center">
                 <Loader2 size={40} className="text-amber animate-spin mb-4" />
-                <p className="text-zinc-500 font-semibold text-sm">Preparing your reservation suite...</p>
+                <p className="text-body text-zinc-500">Preparing your reservation suite...</p>
             </div>
         );
     }
@@ -199,7 +223,7 @@ function PassengerDetailsContent() {
                                     <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center text-black">
                                         <User size={24} />
                                     </div>
-                                    <h2 className="text-2xl font-semibold text-black">Passenger {p.id}</h2>
+                                    <h2 className="text-heading-md text-black">Passenger {p.id}</h2>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -297,16 +321,6 @@ function PassengerDetailsContent() {
                                             <Globe size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-black/30" />
                                         </div>
                                     </div>
-                                    <div className="flex flex-col gap-2 lg:col-span-2">
-                                        <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">Passport Number</label>
-                                        <input
-                                            type="text"
-                                            value={p.passportNumber}
-                                            onChange={(e) => updatePassenger(p.id, 'passportNumber', e.target.value)}
-                                            placeholder="Letter & digits"
-                                            className={`bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black placeholder:text-black/30 focus:ring-2 focus:ring-black/20 ${showErrors && !p.passportNumber ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
-                                        />
-                                    </div>
                                 </div>
                             </motion.div>
                         ))}
@@ -318,8 +332,8 @@ function PassengerDetailsContent() {
                                     <Contact size={24} />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold text-black">Contact Information</h2>
-                                    <p className="text-xs text-black/50 font-medium tracking-tight">Booking confirmation will be sent here</p>
+                                    <h2 className="text-heading-md text-black">Contact Information</h2>
+                                    <p className="text-body-sm text-black/50 tracking-tight">Booking confirmation will be sent here</p>
                                 </div>
                             </div>
 
@@ -359,7 +373,7 @@ function PassengerDetailsContent() {
                     {/* Right Column - Summary */}
                     <div className="w-full lg:w-96 flex flex-col gap-8">
                         <div className="bg-flight-card p-10 rounded-[3rem] shadow-xl shadow-black/5 border border-black/5">
-                            <h3 className="text-xs font-bold text-black/50 uppercase tracking-widest mb-8">Price Summary</h3>
+                            <h3 className="text-caption font-medium text-black/50 uppercase tracking-widest mb-8">Price Summary</h3>
                             <div className="space-y-5 mb-8 pb-8 border-b border-black/10">
                                 <div className="flex justify-between">
                                     <span className="text-black/60 font-medium">Base Fare ({passengerCount} Passengers)</span>
@@ -406,12 +420,12 @@ function PassengerDetailsContent() {
                             </div>
                         </div>
 
-                        <h3 className="text-2xl font-bold text-zinc-900 mb-2">
+                        <h3 className="text-heading-md text-zinc-900 mb-2">
                             {submitStep === 1 && "Verifying Routing"}
                             {submitStep === 2 && "Securing Private Rate"}
                             {submitStep === 3 && "Request Dispatched"}
                         </h3>
-                        <p className="text-zinc-500 text-sm font-medium leading-relaxed">
+                        <p className="text-body text-zinc-500 leading-relaxed">
                             {submitStep === 1 && "Confirming real-time availability with our Global GDS network..."}
                             {submitStep === 2 && "Locking in your exclusive elite fare for the next 2 hours..."}
                             {submitStep === 3 && "Your VIP concierge desk has received the request successfully."}

@@ -126,3 +126,70 @@ export const sendAgentTourNotification = async (agentEmail: string, tourTitle: s
         console.error('Agent notification error:', error);
     }
 };
+
+/**
+ * Notify Agent about an incoming flight booking request.
+ */
+export const sendAgentFlightNotification = async (
+    agentEmail: string,
+    payload: {
+        requestId: string;
+        bookingRef: string;
+        itinerary: string;
+        totalPrice: number;
+        contact?: { email?: string; phone?: string };
+        passengers?: any[];
+        tripDetails?: any;
+        agentLink?: string;
+    }
+) => {
+    try {
+        const passengersCount = Array.isArray(payload.passengers) ? payload.passengers.length : 0;
+        const contactEmail = payload.contact?.email || 'N/A';
+        const contactPhone = payload.contact?.phone || 'N/A';
+
+        const mailOptions = {
+            from: process.env.SMTP_FROM || '"Luxel System" <system@luxel.travel>',
+            to: agentEmail,
+            subject: `New Flight Request (${payload.itinerary}) - Ref ${payload.bookingRef}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 680px; margin: auto; padding: 24px; border: 1px solid #eee; border-radius: 16px;">
+                    <h2 style="margin: 0 0 16px 0; color: #111;">New Flight Booking Request</h2>
+                    <p style="margin: 0 0 16px 0; color: #444; line-height: 1.6;">
+                        A traveler has submitted a flight reservation request. Please review the full passenger and trip details in the agent dashboard.
+                    </p>
+
+                    <div style="background:#fafafa; border:1px solid #f0f0f0; padding:16px; border-radius:12px; margin: 16px 0;">
+                        <p style="margin:0; font-size:12px; color:#777; text-transform:uppercase; letter-spacing:0.08em;">Booking Reference</p>
+                        <p style="margin:6px 0 0 0; font-size:18px; font-weight:600; color:#111;">${payload.bookingRef}</p>
+                        <p style="margin:10px 0 0 0; font-size:14px; color:#444;"><strong>Route:</strong> ${payload.itinerary}</p>
+                        <p style="margin:6px 0 0 0; font-size:14px; color:#444;"><strong>Passengers:</strong> ${passengersCount}</p>
+                        <p style="margin:6px 0 0 0; font-size:14px; color:#444;"><strong>Total Price:</strong> NGN ${Number(payload.totalPrice || 0).toLocaleString()}</p>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <p style="margin:0; font-size:12px; color:#777; text-transform:uppercase; letter-spacing:0.08em;">Traveler Contact</p>
+                        <p style="margin:6px 0 0 0; font-size:14px; color:#444;"><strong>Email:</strong> ${contactEmail}</p>
+                        <p style="margin:6px 0 0 0; font-size:14px; color:#444;"><strong>Phone:</strong> ${contactPhone}</p>
+                    </div>
+
+                    ${payload.agentLink ? `
+                        <div style="margin-top: 18px;">
+                            <a href="${payload.agentLink}" style="display:inline-block; background:#111; color:#fbbf24; text-decoration:none; padding:12px 16px; border-radius:12px; font-weight:600;">
+                                Open Request in Dashboard
+                            </a>
+                        </div>
+                    ` : ''}
+
+                    <p style="margin: 18px 0 0 0; font-size: 12px; color: #888;">
+                        Request ID: ${payload.requestId}
+                    </p>
+                </div>
+            `
+        };
+
+        return await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Agent flight notification error:', error);
+    }
+};

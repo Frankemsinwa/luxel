@@ -55,8 +55,8 @@ function SuccessContent() {
                 {isVerifying ? (
                     <div className="space-y-6 py-12">
                         <div className="w-20 h-20 border-4 border-amber border-t-transparent rounded-full animate-spin mx-auto" />
-                        <h2 className="text-white text-2xl font-black tracking-tight">Authenticating Transaction...</h2>
-                        <p className="text-white/50 font-medium">Securing your luxury itinerary with the global clearing house.</p>
+                        <h2 className="text-heading-lg text-white tracking-tight">Authenticating Transaction...</h2>
+                        <p className="text-body text-white/50">Securing your luxury itinerary with the global clearing house.</p>
                     </div>
                 ) : isSuccess ? (
                     <>
@@ -69,13 +69,13 @@ function SuccessContent() {
                             <CheckCircle2 size={48} className="text-white" />
                         </motion.div>
 
-                        <h1 className="text-white text-4xl font-black tracking-tight mb-4">Itinerary Secured</h1>
-                        <p className="text-white/60 font-medium mb-12 text-lg">Your reservation {bookingRef} has been verified. Welcome to the Luxel elite.</p>
+                        <h1 className="text-heading-xl text-white tracking-tight mb-4">Itinerary Secured</h1>
+                        <p className="text-body-lg text-white/60 mb-12">Your reservation {bookingRef} has been verified. Welcome to the Luxel elite.</p>
 
                         <div className="grid grid-cols-1 gap-4">
                             <button
                                 onClick={() => router.push('/agent/dashboard')} // Agent for now, or profile
-                                className="w-full bg-white text-black py-6 rounded-3xl font-black text-sm flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
+                                className="w-full bg-white text-black py-6 rounded-3xl text-body-sm font-medium flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
                             >
                                 <Ticket size={18} />
                                 VIEW E-TICKETS
@@ -83,7 +83,7 @@ function SuccessContent() {
                             </button>
                             <button
                                 onClick={() => router.push('/')}
-                                className="w-full bg-white/10 text-white py-6 rounded-3xl font-black text-sm flex items-center justify-center gap-3 hover:bg-white/20 transition-all border border-white/10"
+                                className="w-full bg-white/10 text-white py-6 rounded-3xl text-body-sm font-medium flex items-center justify-center gap-3 hover:bg-white/20 transition-all border border-white/10"
                             >
                                 <Home size={18} />
                                 RETURN HOME
@@ -93,13 +93,13 @@ function SuccessContent() {
                 ) : (
                     <div className="py-12">
                         <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
-                            <span className="text-red-500 text-4xl font-black">!</span>
+                            <span className="text-heading-xl text-red-500">!</span>
                         </div>
-                        <h2 className="text-white text-2xl font-black mb-4 tracking-tight">Handshake Interrupted</h2>
-                        <p className="text-white/50 font-medium mb-10">We couldn't verify your payment instantly. Please check your dashboard or contact concierge.</p>
+                        <h2 className="text-heading-lg text-white mb-4 tracking-tight">Handshake Interrupted</h2>
+                        <p className="text-body text-white/50 mb-10">We couldn't verify your payment instantly. Please check your dashboard or contact concierge.</p>
                         <button
                             onClick={() => router.push('/')}
-                            className="bg-white text-black px-10 py-5 rounded-2xl font-black text-sm"
+                            className="bg-white text-black px-10 py-5 rounded-2xl text-body-sm font-medium"
                         >
                             RETURN TO LUXEL
                         </button>

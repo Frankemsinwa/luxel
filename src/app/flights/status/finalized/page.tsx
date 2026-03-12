@@ -83,7 +83,7 @@ function FinalizedContent() {
         return (
             <div className="min-h-screen bg-amber/5 flex flex-col items-center justify-center">
                 <Loader2 size={40} className="text-amber animate-spin mb-4" />
-                <p className="text-zinc-500 font-bold text-sm">Verifying your booking...</p>
+                <p className="text-body text-zinc-500">Verifying your booking...</p>
             </div>
         );
     }
@@ -114,7 +114,7 @@ function FinalizedContent() {
                                     <Star size={40} fill="currentColor" />
                                 </motion.div>
 
-                                <h2 className="text-5xl font-bold text-flight-card mb-6 leading-tight">
+                                <h2 className="text-display text-flight-card mb-6 leading-tight">
                                     Your trip is ready.
                                 </h2>
 
@@ -122,13 +122,13 @@ function FinalizedContent() {
                                     <div className="flex items-center gap-6">
                                         <QrCode size={48} className="text-flight-card" />
                                         <div className="text-left">
-                                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-1">Booking Reference (PNR)</span>
-                                            <span className="text-3xl font-black text-white tracking-widest">{booking?.booking_reference || bookingId?.split('-')[0].toUpperCase() || 'LX-592849'}</span>
+                                            <span className="text-caption font-medium text-white/50 uppercase tracking-widest block mb-1">Booking Reference (PNR)</span>
+                                            <span className="text-heading-xl text-white tracking-widest">{booking?.booking_reference || bookingId?.split('-')[0].toUpperCase() || 'LX-592849'}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <p className="text-white/60 leading-relaxed font-light mb-12 text-base max-w-lg mx-auto">
+                                <p className="text-body-lg text-white/60 leading-relaxed mb-12 max-w-lg mx-auto">
                                     Your ticket has been issued and securely sent to your email. You may now download your priority access passes or add them to your mobile wallet.
                                 </p>
 
@@ -136,7 +136,7 @@ function FinalizedContent() {
                                     <button
                                         onClick={handleDownloadTicket}
                                         disabled={isDownloading}
-                                        className="flex-1 max-w-[200px] bg-flight-card text-black px-6 py-4 rounded-xl flex items-center justify-center gap-4 font-bold text-sm shadow-xl shadow-black/20 hover:scale-[1.02] transition-all active:scale-95 group disabled:opacity-75 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                        className="flex-1 max-w-[200px] bg-flight-card text-black px-6 py-4 rounded-xl flex items-center justify-center gap-4 text-body-sm font-medium shadow-xl shadow-black/20 hover:scale-[1.02] transition-all active:scale-95 group disabled:opacity-75 disabled:cursor-not-allowed disabled:hover:scale-100"
                                     >
                                         {isDownloading ? (
                                             <Loader2 size={24} className="animate-spin" />
@@ -145,15 +145,15 @@ function FinalizedContent() {
                                         )}
                                         <div className="leading-tight">
                                             <span>{isDownloading ? 'Generating...' : 'Download'}</span>
-                                            <span className="block text-[10px] font-bold text-black/60 uppercase tracking-wider mt-0.5">E-Ticket (PDF)</span>
+                                            <span className="block text-caption font-medium text-black/60 uppercase tracking-wider mt-0.5">E-Ticket (PDF)</span>
                                         </div>
                                     </button>
 
-                                    <button className="flex-1 max-w-[200px] bg-white/5 text-white border border-white/20 px-6 py-4 rounded-xl flex items-center justify-center gap-4 font-bold text-sm shadow-xl hover:bg-white/10 hover:scale-[1.02] transition-all active:scale-95 group">
+                                    <button className="flex-1 max-w-[200px] bg-white/5 text-white border border-white/20 px-6 py-4 rounded-xl flex items-center justify-center gap-4 text-body-sm font-medium shadow-xl hover:bg-white/10 hover:scale-[1.02] transition-all active:scale-95 group">
                                         <Smartphone size={24} className="group-hover:-translate-y-1 transition-transform" />
                                         <div className="leading-tight">
                                             <span>Add to Wallet</span>
-                                            <span className="block text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Apple / Google</span>
+                                            <span className="block text-caption font-medium text-white/50 uppercase tracking-wider mt-0.5">Apple / Google</span>
                                         </div>
                                     </button>
                                 </div>
@@ -170,7 +170,7 @@ function FinalizedContent() {
                     {/* Activity Log Sidebar */}
                     <aside className="space-y-8">
                         <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-zinc-100">
-                            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-[0.2em] mb-12">Activity Log</h3>
+                            <h3 className="text-caption font-medium text-zinc-400 uppercase tracking-[0.2em] mb-12">Activity Log</h3>
 
                             <div className="space-y-12 relative overflow-hidden">
                                 <div className="absolute top-0 left-[1.125rem] w-[1px] h-full bg-zinc-50" />
@@ -180,9 +180,9 @@ function FinalizedContent() {
                                         <CheckCircle2 size={18} className="text-white" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">Now</div>
-                                        <h4 className="font-bold text-zinc-900 text-sm mb-1">Booking Finalized</h4>
-                                        <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">Tickets issued and sent via priority channels.</p>
+                                        <div className="text-caption font-medium text-emerald-500 uppercase tracking-widest mb-1">Now</div>
+                                        <h4 className="text-body font-medium text-zinc-900 mb-1">Booking Finalized</h4>
+                                        <p className="text-caption text-zinc-400 leading-relaxed">Tickets issued and sent via priority channels.</p>
                                     </div>
                                 </div>
 
@@ -191,9 +191,9 @@ function FinalizedContent() {
                                         <div className="w-2.5 h-2.5 rounded-full bg-zinc-300" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Just Now</div>
-                                        <h4 className="font-bold text-zinc-700 text-sm mb-1">Payment Verified</h4>
-                                        <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">Finance team confirmed receipt of funds.</p>
+                                        <div className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Just Now</div>
+                                        <h4 className="text-body font-medium text-zinc-700 mb-1">Payment Verified</h4>
+                                        <p className="text-caption text-zinc-400 leading-relaxed">Finance team confirmed receipt of funds.</p>
                                     </div>
                                 </div>
                             </div>
@@ -204,7 +204,7 @@ function FinalizedContent() {
                                 <ShieldCheck size={24} />
                             </div>
                             <div>
-                                <h4 className="font-bold text-emerald-900 text-sm mb-1 uppercase tracking-widest">Protected</h4>
+                                <h4 className="text-body-sm font-medium text-emerald-900 mb-1 uppercase tracking-widest">Protected</h4>
                                 <p className="text-[10px] text-emerald-700/60 font-medium leading-relaxed">Your request is secured by Luxel Shield™</p>
                             </div>
                         </div>

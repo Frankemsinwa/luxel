@@ -97,7 +97,7 @@ export default function ImageUpload({ value, onChange, onRemove }: ImageUploadPr
                             ) : (
                                 <ImageIcon size={24} className="group-hover:scale-110 transition-transform duration-300" />
                             )}
-                            <span className="text-[10px] font-black uppercase tracking-widest">
+                            <span className="text-caption font-medium uppercase tracking-widest">
                                 {isUploading ? 'Orchestrating...' : 'Add Image'}
                             </span>
                         </button>

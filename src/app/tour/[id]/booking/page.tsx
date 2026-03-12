@@ -140,8 +140,8 @@ export default function TourBookingPage() {
         }
     };
 
-    if (isLoading) return <div className="min-h-screen bg-white flex items-center justify-center font-bold text-zinc-300">Preparing your luxury reservation desk...</div>;
-    if (!tour) return <div className="min-h-screen bg-white flex items-center justify-center font-bold text-zinc-300">Experience unavailable.</div>;
+    if (isLoading) return <div className="min-h-screen bg-white flex items-center justify-center text-body font-medium text-zinc-300">Preparing your luxury reservation desk...</div>;
+    if (!tour) return <div className="min-h-screen bg-white flex items-center justify-center text-body font-medium text-zinc-300">Experience unavailable.</div>;
 
     const basePrice = tour.price * guestsCount;
     const taxes = basePrice * 0.075; // 7.5% Tax
@@ -160,49 +160,49 @@ export default function TourBookingPage() {
 
                             <header className="flex items-center gap-4 mb-2">
                                 <div className="w-10 h-10 rounded-full bg-amber/10 flex items-center justify-center text-amber">
-                                    <span className="font-bold">1</span>
+                                    <span className="text-body-sm font-medium">1</span>
                                 </div>
-                                <h1 className="text-3xl font-black text-zinc-900 tracking-tight">Traveler Details</h1>
+                                <h1 className="text-heading-lg font-medium text-zinc-900 tracking-tight">Traveler Details</h1>
                             </header>
 
                             {/* Primary Traveler */}
                             <div className="bg-white rounded-[2.5rem] p-10 border border-zinc-100 shadow-sm space-y-8">
                                 <div className="flex items-center gap-2 text-zinc-900">
                                     <Users size={20} className="text-amber" />
-                                    <h3 className="font-bold tracking-tight">Primary Traveler</h3>
+                                    <h3 className="text-heading-sm font-medium tracking-tight">Primary Traveler</h3>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">First Name as per Passport</label>
+                                        <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest">First Name as per Passport</label>
                                         <input
                                             type="text"
                                             placeholder="e.g. Julian"
                                             value={formData.firstName}
                                             onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                            className="w-full bg-zinc-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
+                                            className="w-full bg-zinc-50 border-none rounded-xl py-4 px-6 text-body font-medium text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Last Name as per Passport</label>
+                                        <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Last Name as per Passport</label>
                                         <input
                                             type="text"
                                             placeholder="e.g. Thorne"
                                             value={formData.lastName}
                                             onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                            className="w-full bg-zinc-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
+                                            className="w-full bg-zinc-50 border-none rounded-xl py-4 px-6 text-body font-medium text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Email Address</label>
+                                    <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Email Address</label>
                                     <input
                                         type="email"
                                         placeholder="julian.thorne@luxury-travel.com"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="w-full bg-zinc-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
+                                        className="w-full bg-zinc-50 border-none rounded-xl py-4 px-6 text-body font-medium text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
                                     />
                                 </div>
                             </div>
@@ -211,26 +211,26 @@ export default function TourBookingPage() {
                             <div className="bg-white rounded-[2.5rem] p-10 border border-zinc-100 shadow-sm space-y-8">
                                 <div className="flex items-center gap-2 text-zinc-900">
                                     <ShieldCheck size={20} className="text-amber" />
-                                    <h3 className="font-bold tracking-tight">Preferences & Special Requests</h3>
+                                    <h3 className="text-heading-sm font-medium tracking-tight">Preferences & Special Requests</h3>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Dietary Requirements</label>
+                                    <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Dietary Requirements</label>
                                     <textarea
                                         rows={3}
                                         value={formData.dietary}
                                         onChange={(e) => setFormData({ ...formData, dietary: e.target.value })}
-                                        className="w-full bg-zinc-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all resize-none"
+                                        className="w-full bg-zinc-50 border-none rounded-xl py-4 px-6 text-body font-medium text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all resize-none"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Special Requests / Occasions</label>
+                                    <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Special Requests / Occasions</label>
                                     <textarea
                                         rows={3}
                                         value={formData.requests}
                                         onChange={(e) => setFormData({ ...formData, requests: e.target.value })}
-                                        className="w-full bg-zinc-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all resize-none"
+                                        className="w-full bg-zinc-50 border-none rounded-xl py-4 px-6 text-body font-medium text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all resize-none"
                                     />
                                 </div>
                             </div>
@@ -240,12 +240,12 @@ export default function TourBookingPage() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2 text-zinc-900">
                                         <Lock size={20} className="text-amber" />
-                                        <h3 className="font-bold tracking-tight">Verified Payment Engine</h3>
+                                        <h3 className="text-heading-sm font-medium tracking-tight">Verified Payment Engine</h3>
                                     </div>
                                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Paystack_Logo.png/1200px-Paystack_Logo.png" alt="Paystack" className="h-4 object-contain" />
                                 </div>
 
-                                <div className="bg-emerald-50 text-emerald-700 px-6 py-5 rounded-2xl flex items-start gap-4 text-xs font-bold border border-emerald-100">
+                                <div className="bg-emerald-50 text-emerald-700 px-6 py-5 rounded-2xl flex items-start gap-4 text-body-sm font-medium border border-emerald-100">
                                     <ShieldCheck size={20} className="shrink-0" />
                                     <p className="leading-relaxed">
                                         You will be securely redirected to the Paystack checkout to finalize your premium reservation. No card details are stored on Luxel servers.
@@ -257,8 +257,8 @@ export default function TourBookingPage() {
                                         <CreditCard size={24} />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-zinc-900">One-Click Secure Checkout</p>
-                                        <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1">Multi-Bank & International Card Support</p>
+                                        <p className="text-body font-medium text-zinc-900">One-Click Secure Checkout</p>
+                                        <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mt-1">Multi-Bank & International Card Support</p>
                                     </div>
                                 </div>
                             </div>
@@ -269,37 +269,37 @@ export default function TourBookingPage() {
                             <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-xl overflow-hidden sticky top-28">
                                 <div className="relative h-48">
                                     <Image src={tour.hero_image || '/tour-img/fallback.jpg'} alt="Tour Preview" fill className="object-cover" />
-                                    <div className="absolute top-4 left-4 bg-amber text-black text-[10px] font-black px-3 py-1 rounded flex items-center">Premium Tour</div>
+                                    <div className="absolute top-4 left-4 bg-amber text-black text-caption font-medium px-3 py-1 rounded flex items-center uppercase tracking-widest">Premium Tour</div>
                                 </div>
                                 <div className="p-8 space-y-6">
                                     <div>
-                                        <h3 className="text-xl font-black text-zinc-900 leading-tight mb-2">{tour.title}</h3>
+                                        <h3 className="text-heading-sm font-medium text-zinc-900 leading-tight mb-2">{tour.title}</h3>
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-3 text-zinc-400">
                                                 <Calendar size={14} className="text-amber" />
-                                                <span className="text-xs font-bold leading-none">{travelDate} ({tour.duration})</span>
+                                                <span className="text-body-sm font-medium leading-none">{travelDate} ({tour.duration})</span>
                                             </div>
                                             <div className="flex items-center gap-3 text-zinc-400">
                                                 <Users size={14} className="text-amber" />
-                                                <span className="text-xs font-bold leading-none">{guestsCount} Guests</span>
+                                                <span className="text-body-sm font-medium leading-none">{guestsCount} Guests</span>
                                             </div>
                                             <div className="flex items-center gap-3 text-zinc-400">
                                                 <MapPin size={14} className="text-amber" />
-                                                <span className="text-xs font-bold leading-none">{tour.location}</span>
+                                                <span className="text-body-sm font-medium leading-none">{tour.location}</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="pt-6 border-t border-zinc-50 space-y-4">
-                                        <div className="flex justify-between text-xs font-bold text-zinc-400">
+                                        <div className="flex justify-between text-body-sm font-medium text-zinc-400">
                                             <span>Base Tour Price</span>
                                             <span className="text-zinc-900">₦{basePrice.toLocaleString()}</span>
                                         </div>
-                                        <div className="flex justify-between text-xs font-bold text-zinc-400">
+                                        <div className="flex justify-between text-body-sm font-medium text-zinc-400">
                                             <span>Taxes & Local Fees (7.5%)</span>
                                             <span className="text-zinc-900">₦{taxes.toLocaleString()}</span>
                                         </div>
-                                        <div className="flex justify-between text-xs font-bold text-zinc-400">
+                                        <div className="flex justify-between text-body-sm font-medium text-zinc-400">
                                             <div className="flex items-center gap-1.5">
                                                 Luxel Service Fee <Info size={12} className="text-zinc-300" />
                                             </div>
@@ -308,20 +308,20 @@ export default function TourBookingPage() {
                                     </div>
 
                                     <div className="pt-6 border-t border-zinc-50 flex items-center justify-between">
-                                        <span className="text-lg font-black text-zinc-900">Total Amount</span>
-                                        <span className="text-3xl font-black text-amber">₦{total.toLocaleString()}</span>
+                                        <span className="text-heading-sm font-medium text-zinc-900">Total Amount</span>
+                                        <span className="text-heading-lg font-medium text-amber">₦{total.toLocaleString()}</span>
                                     </div>
 
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="w-full bg-amber hover:bg-amber-dark text-black py-5 rounded-2xl font-black text-xs tracking-widest uppercase flex items-center justify-center gap-3 shadow-xl shadow-amber/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full bg-amber hover:bg-amber-dark text-black py-5 rounded-2xl text-body-sm font-medium tracking-widest uppercase flex items-center justify-center gap-3 shadow-xl shadow-amber/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
                                         {isSubmitting ? 'Initializing Secure Engine...' : 'Pay Securely with Paystack'}
                                     </button>
 
-                                    <p className="text-[10px] text-center text-zinc-400 leading-relaxed">
+                                    <p className="text-caption font-medium text-center text-zinc-400 leading-relaxed">
                                         By clicking 'Complete Booking', you agree to our Terms of Service and Privacy Policy. Your booking will be confirmed immediately.
                                     </p>
                                 </div>
@@ -332,8 +332,8 @@ export default function TourBookingPage() {
                                     <Headset size={28} />
                                 </div>
                                 <div>
-                                    <h4 className="text-sm font-black text-zinc-900 mb-1">Personal Concierge Assigned</h4>
-                                    <p className="text-xs text-zinc-500 font-medium leading-relaxed">A dedicated travel expert will contact you within 24 hours.</p>
+                                    <h4 className="text-body font-medium text-zinc-900 mb-1">Personal Concierge Assigned</h4>
+                                    <p className="text-body-sm font-medium text-zinc-500 leading-relaxed">A dedicated travel expert will contact you within 24 hours.</p>
                                 </div>
                             </div>
                         </div>

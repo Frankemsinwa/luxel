@@ -182,7 +182,7 @@ export default function AgentChatPage() {
             <div className="h-[calc(100vh-160px)] flex items-center justify-center bg-white rounded-[3rem] border border-zinc-100">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 size={32} className="text-amber animate-spin" />
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Initializing Concierge Console...</p>
+                    <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Initializing Concierge Console...</p>
                 </div>
             </div>
         );
@@ -194,15 +194,15 @@ export default function AgentChatPage() {
             <div className="w-96 bg-white rounded-[3rem] border border-zinc-100 shadow-sm flex flex-col overflow-hidden">
                 <div className="p-8 border-b border-zinc-50">
                     <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-black text-zinc-900 tracking-tight">Concierge Chat</h3>
-                        <span className="bg-zinc-900 text-amber text-[8px] font-black px-2 py-1 rounded uppercase">{rooms.length} Active</span>
+                        <h3 className="text-heading-sm font-medium text-zinc-900 tracking-tight">Concierge Chat</h3>
+                        <span className="bg-zinc-900 text-amber text-caption font-medium px-2 py-1 rounded uppercase">{rooms.length} Active</span>
                     </div>
                     <div className="relative group">
                         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-amber transition-colors" />
                         <input
                             type="text"
                             placeholder="Search conversations..."
-                            className="w-full bg-zinc-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
+                            className="w-full bg-zinc-50 border-none rounded-2xl py-3 pl-10 pr-4 text-body-sm font-medium text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
                         />
                     </div>
                 </div>
@@ -225,15 +225,15 @@ export default function AgentChatPage() {
                             </div>
                             <div className="flex-1 text-left">
                                 <div className="flex items-center justify-between mb-1">
-                                    <span className="text-sm font-black text-zinc-900 truncate w-32">
+                                    <span className="text-body font-medium text-zinc-900 truncate w-32">
                                         {room.customer?.full_name || 'Guest Member'}
                                     </span>
-                                    <span className="text-[9px] font-bold text-zinc-400 uppercase">
+                                    <span className="text-caption font-medium text-zinc-400 uppercase">
                                         {new Date(room.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <p className="text-xs text-zinc-400 truncate w-40 font-medium italic">
+                                    <p className="text-body-sm text-zinc-400 truncate w-40 font-medium italic">
                                         Request #{room.request?.id?.substring(0, 8) || 'GEN'}
                                     </p>
                                 </div>
@@ -243,7 +243,7 @@ export default function AgentChatPage() {
                     
                     {rooms.length === 0 && (
                         <div className="p-12 text-center">
-                            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">No active sessions</p>
+                            <p className="text-caption font-medium text-zinc-300 uppercase tracking-widest">No active sessions</p>
                         </div>
                     )}
                 </div>
@@ -264,12 +264,12 @@ export default function AgentChatPage() {
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2 mb-0.5">
-                                        <h3 className="text-base font-black text-zinc-900 leading-none">
+                                        <h3 className="text-base font-medium text-zinc-900 leading-none">
                                             {selectedRoom?.customer?.full_name || 'Guest Member'}
                                         </h3>
-                                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-zinc-900 text-white uppercase tracking-widest">VIP</span>
+                                        <span className="text-caption font-medium px-1.5 py-0.5 rounded bg-zinc-900 text-white uppercase tracking-widest">VIP</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-[10px] text-emerald-500 font-bold uppercase tracking-widest">
+                                    <div className="flex items-center gap-2 text-caption text-emerald-500 font-medium uppercase tracking-widest">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                         In active session
                                     </div>
@@ -301,14 +301,14 @@ export default function AgentChatPage() {
                                     return (
                                         <div key={msg.id || i} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                             <div className={`max-w-[70%] space-y-2 ${isMe ? 'items-end flex flex-col' : ''}`}>
-                                                <div className={`p-6 rounded-[2rem] text-sm font-medium leading-relaxed shadow-sm ${isMe
+                                                <div className={`p-6 rounded-[2rem] text-body font-medium leading-relaxed shadow-sm ${isMe
                                                         ? 'bg-zinc-900 text-white rounded-tr-none'
                                                         : 'bg-white border border-zinc-100 text-zinc-700 rounded-tl-none'
                                                     }`}>
                                                     {msg.content}
                                                 </div>
                                                 <div className="flex items-center gap-2 px-2">
-                                                    <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">
+                                                    <span className="text-caption font-medium text-zinc-300 uppercase tracking-widest">
                                                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </span>
                                                     {isMe && <CheckCheck size={12} className="text-amber" />}
@@ -321,7 +321,7 @@ export default function AgentChatPage() {
                             
                             {isTyping && (
                                 <div className="flex justify-start">
-                                    <div className="bg-zinc-50 px-4 py-2 rounded-xl text-[10px] font-bold text-zinc-400 animate-pulse uppercase tracking-widest">
+                                    <div className="bg-zinc-50 px-4 py-2 rounded-xl text-caption font-medium text-zinc-400 animate-pulse uppercase tracking-widest">
                                         Client is typing...
                                     </div>
                                 </div>
@@ -345,7 +345,7 @@ export default function AgentChatPage() {
                                     value={newMessage}
                                     onChange={handleInputChange}
                                     placeholder="Type a response to the member..."
-                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-bold text-zinc-900 placeholder:text-zinc-300"
+                                    className="flex-1 bg-transparent border-none focus:ring-0 text-body font-medium text-zinc-900 placeholder:text-zinc-300"
                                 />
                                 <button type="button" className="w-10 h-10 rounded-full hover:bg-white flex items-center justify-center text-zinc-400 hover:text-amber transition-all">
                                     <Smile size={18} />
@@ -366,8 +366,8 @@ export default function AgentChatPage() {
                             <div className="w-20 h-20 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-200 mx-auto mb-6">
                                 <MessageSquare size={40} />
                             </div>
-                            <h3 className="text-xl font-black text-zinc-900 mb-2">Select a Conversation</h3>
-                            <p className="text-sm text-zinc-400 font-medium">Connect with an active member to begin support</p>
+                            <h3 className="text-heading-sm font-medium text-zinc-900 mb-2">Select a Conversation</h3>
+                            <p className="text-body text-zinc-400 font-medium">Connect with an active member to begin support</p>
                         </div>
                     </div>
                 )}

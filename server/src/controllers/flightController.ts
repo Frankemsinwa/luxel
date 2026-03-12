@@ -47,15 +47,24 @@ export const searchLocations = async (req: Request, res: Response) => {
  *         required: true
  *         schema:
  *           type: string
- *       - in: query
- *         name: departureDate
- *         required: true
- *         schema:
- *           type: string
- *       - in: query
- *         name: adults
- *         schema:
- *           type: string
+  *       - in: query
+  *         name: departureDate
+  *         required: true
+  *         schema:
+  *           type: string
+  *       - in: query
+  *         name: tripType
+  *         schema:
+  *           type: string
+  *           enum: [ONE_WAY, ROUND_TRIP]
+  *       - in: query
+  *         name: returnDate
+  *         schema:
+  *           type: string
+  *       - in: query
+  *         name: adults
+  *         schema:
+  *           type: string
  *       - in: query
  *         name: children
  *         schema:
@@ -71,6 +80,8 @@ export const searchLocations = async (req: Request, res: Response) => {
 export const searchFlights = async (req: Request, res: Response) => {
     try {
         const { from, to, departureDate, adults, children, travelClass } = req.query;
+        const rawTripType = (req.query.tripType as string | undefined) || undefined;
+        const rawReturnDate = (req.query.returnDate as string | undefined) || (req.query.return as string | undefined) || undefined;
 
         if (!from || !to || !departureDate) {
             return res.status(400).json({
@@ -78,10 +89,19 @@ export const searchFlights = async (req: Request, res: Response) => {
             });
         }
 
+        const tripType = (rawTripType || (rawReturnDate ? 'ROUND_TRIP' : 'ONE_WAY')).toString().toUpperCase();
+        if (tripType === 'ROUND_TRIP' && !rawReturnDate) {
+            return res.status(400).json({
+                message: 'Missing required search parameters for round-trip. Needs returnDate'
+            });
+        }
+
         const flights = await amadeusService.searchFlights({
             from: from as string,
             to: to as string,
             departureDate: departureDate as string,
+            tripType: tripType as any,
+            returnDate: rawReturnDate,
             adults: adults as string,
             children: children as string,
             travelClass: travelClass as string

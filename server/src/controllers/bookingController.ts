@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase, supabaseAdmin } from '../config/supabase.js';
 import * as paymentService from '../services/paymentService.js';
+import { sendAgentFlightNotification } from '../services/emailService.js';
 
 /**
  * @swagger
@@ -41,12 +42,22 @@ import * as paymentService from '../services/paymentService.js';
  */
 export const createBooking = async (req: any, res: Response) => {
     try {
-        const { flightData, totalPrice, passengers, contactInfo } = req.body;
+        const { flightData, totalPrice, passengers, contactInfo, tripDetails, pricing } = req.body;
         const userId = req.user?.id; // From auth middleware
 
         if (!flightData || !totalPrice || !passengers) {
             return res.status(400).json({ message: 'Missing booking details' });
         }
+
+        // Never persist passport numbers (privacy). If older clients still send it, strip it here.
+        const safePassengers = Array.isArray(passengers)
+            ? passengers.map((p: any) => {
+                if (!p || typeof p !== 'object') return p;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { passportNumber, ...rest } = p;
+                return rest;
+            })
+            : passengers;
 
         // 1. Create Booking record
         const { data: booking, error: bookingError } = await supabaseAdmin
@@ -55,8 +66,10 @@ export const createBooking = async (req: any, res: Response) => {
                 user_id: userId,
                 flight_data: {
                     ...flightData,
-                    passengers: passengers,
-                    contact: contactInfo
+                    passengers: safePassengers,
+                    contact: contactInfo,
+                    trip_details: tripDetails,
+                    pricing
                 },
                 total_price: totalPrice,
                 status: 'PENDING',
@@ -75,10 +88,13 @@ export const createBooking = async (req: any, res: Response) => {
                 service_type: 'FLIGHT',
                 details: {
                     booking_id: booking.id,
-                    passengers: passengers,
+                    passengers: safePassengers,
                     contact: contactInfo,
-                    itinerary: `${flightData.departureCode} → ${flightData.arrivalCode}`,
-                    flight_id: flightData.id
+                    itinerary: `${flightData.departureCode} -> ${flightData.arrivalCode}`,
+                    flight_id: flightData.id,
+                    flight_data: flightData,
+                    trip_details: tripDetails,
+                    pricing
                 },
                 status: 'OPEN',
                 priority: 'NORMAL'
@@ -87,6 +103,35 @@ export const createBooking = async (req: any, res: Response) => {
             .single();
 
         if (requestError) throw requestError;
+
+        // 3. Notify agents via email (do not fail booking creation if email fails)
+        try {
+            const rawRecipients = process.env.AGENT_NOTIFICATION_EMAILS || process.env.AGENT_NOTIFICATION_EMAIL || '';
+            const recipients = rawRecipients
+                .split(',')
+                .map((e) => e.trim())
+                .filter(Boolean);
+
+            if (recipients.length > 0) {
+                const origin = (req.headers.origin as string) || (req.headers.referer as string) || '';
+                await Promise.allSettled(
+                    recipients.map((email) =>
+                        sendAgentFlightNotification(email, {
+                            requestId: request.id,
+                            bookingRef: booking.booking_reference,
+                            itinerary: `${flightData.departureCode} -> ${flightData.arrivalCode}`,
+                            totalPrice,
+                            contact: contactInfo,
+                            passengers: safePassengers,
+                            tripDetails,
+                            agentLink: origin ? `${origin.replace(/\/$/, '')}/agent/requests/${request.id}` : undefined
+                        })
+                    )
+                );
+            }
+        } catch (notifyErr) {
+            console.error('Agent flight notification failed:', notifyErr);
+        }
 
         return res.status(201).json({
             message: 'Booking request received. Our agents are verifying availability.',

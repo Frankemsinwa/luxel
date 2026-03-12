@@ -11,9 +11,11 @@ interface CalendarDropdownProps {
   label: string;
   selectedDate: Date | undefined;
   onSelectDate: (date: Date | undefined) => void;
+  disabled?: boolean;
+  disabledText?: string;
 }
 
-export default function CalendarDropdown({ label, selectedDate, onSelectDate }: CalendarDropdownProps) {
+export default function CalendarDropdown({ label, selectedDate, onSelectDate, disabled = false, disabledText }: CalendarDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -35,26 +37,27 @@ export default function CalendarDropdown({ label, selectedDate, onSelectDate }: 
   };
 
   return (
-    <div className="relative flex-1 min-w-[200px]" ref={dropdownRef}>
+    <div className="relative flex-1 min-w-0 min-w-[200px] lg:min-w-[170px]" ref={dropdownRef}>
       <div
-        onClick={() => setIsOpen(!isOpen)}
-        className={`group flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 cursor-pointer border border-transparent hover:border-zinc-200 hover:bg-white/80 hover:shadow-sm ${isOpen ? 'bg-white shadow-md border-zinc-200' : ''}`}
+        onClick={() => { if (!disabled) setIsOpen(!isOpen); }}
+        aria-disabled={disabled}
+        className={`group flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 border border-transparent hover:border-zinc-200 hover:bg-white/80 hover:shadow-sm ${isOpen ? 'bg-white shadow-md border-zinc-200' : ''} ${disabled ? 'opacity-50 cursor-not-allowed hover:bg-transparent hover:border-transparent hover:shadow-none' : 'cursor-pointer'}`}
       >
         <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 ${isOpen ? 'bg-amber text-white ring-4 ring-amber/10' : 'bg-zinc-50 text-zinc-400 group-hover:bg-amber group-hover:text-white group-hover:scale-110'}`}>
           <CalendarIcon size={18} strokeWidth={2.5} />
         </div>
 
-        <div className="flex flex-col">
-          <span className="text-[10px] uppercase tracking-[0.1em] text-zinc-400 font-bold mb-0.5">
+        <div className="flex flex-col min-w-0">
+          <span className="text-caption font-medium uppercase tracking-[0.1em] text-zinc-400 mb-0.5">
             {label}
           </span>
           <div className="flex items-center gap-1.5">
-            <span className={`text-sm font-semibold transition-colors ${selectedDate ? 'text-zinc-900' : 'text-zinc-500'}`}>
-              {selectedDate ? format(selectedDate, 'EEE, dd MMM') : 'Add date'}
+            <span className={`text-body font-medium transition-colors truncate ${selectedDate ? 'text-zinc-900' : 'text-zinc-500'}`}>
+              {disabled ? (disabledText || 'One-way') : (selectedDate ? format(selectedDate, 'EEE, dd MMM') : 'Add date')}
             </span>
             <ChevronRight
               size={12}
-              className={`text-amber transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-0'}`}
+              className={`text-amber transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-0'} ${disabled ? 'opacity-40' : ''}`}
             />
           </div>
         </div>
@@ -70,7 +73,7 @@ export default function CalendarDropdown({ label, selectedDate, onSelectDate }: 
             className="absolute top-full left-0 mt-3 bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/20 z-[100] p-6 min-w-[340px]"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-zinc-900 font-bold text-lg">Select Date</h3>
+              <h3 className="text-heading-sm text-zinc-900">Select Date</h3>
               <button
                 onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
                 className="p-1.5 hover:bg-zinc-100 rounded-full text-zinc-400 transition-colors"
@@ -89,7 +92,7 @@ export default function CalendarDropdown({ label, selectedDate, onSelectDate }: 
               .rdp-day_selected {
                 background-color: var(--amber) !important;
                 color: white !important;
-                font-weight: bold;
+                font-weight: 500;
                 border-radius: 12px !important;
                 box-shadow: 0 4px 10px rgba(241, 188, 50, 0.3);
               }
@@ -99,7 +102,7 @@ export default function CalendarDropdown({ label, selectedDate, onSelectDate }: 
                 border-radius: 12px;
               }
               .rdp-day_today {
-                font-weight: 800;
+                font-weight: 500;
                 color: var(--amber);
               }
               .rdp-nav_button {
@@ -113,7 +116,7 @@ export default function CalendarDropdown({ label, selectedDate, onSelectDate }: 
               }
               .rdp-head_cell {
                 font-size: 0.75rem;
-                font-weight: 600;
+                font-weight: 500;
                 color: #a1a1aa;
                 text-transform: uppercase;
                 letter-spacing: 0.05em;
@@ -133,12 +136,12 @@ export default function CalendarDropdown({ label, selectedDate, onSelectDate }: 
             {selectedDate && (
               <div className="mt-4 pt-4 border-t border-zinc-100 flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">Departure</p>
-                  <p className="text-sm font-bold text-zinc-900">{format(selectedDate, 'MMM dd, yyyy')}</p>
+                  <p className="text-caption text-zinc-400 font-medium uppercase tracking-wider">Departure</p>
+                  <p className="text-body font-medium text-zinc-900">{format(selectedDate, 'MMM dd, yyyy')}</p>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="bg-black text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-zinc-800 transition-all active:scale-95"
+                  className="bg-black text-white text-body-sm font-medium px-4 py-2 rounded-xl hover:bg-zinc-800 transition-all active:scale-95"
                 >
                   Confirm
                 </button>

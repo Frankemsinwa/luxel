@@ -123,15 +123,15 @@ function AgentConfirmingContent() {
                     >
                         <XCircle size={48} strokeWidth={2.5} />
                     </motion.div>
-                    <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight mb-6">
+                    <h1 className="text-display text-zinc-900 tracking-tight mb-6">
                         Request Unavailable
                     </h1>
-                    <p className="text-zinc-500 text-lg font-medium max-w-xl mx-auto mb-12 leading-relaxed">
+                    <p className="text-body-lg text-zinc-500 max-w-xl mx-auto mb-12">
                         Unfortunately, our concierge team was unable to confirm availability for this route. No charges have been made. Please try a different flight or contact our support team.
                     </p>
                     <button
                         onClick={() => router.push('/flights')}
-                        className="bg-zinc-900 text-white px-10 py-6 rounded-3xl flex items-center justify-center gap-4 font-black text-xs tracking-widest uppercase shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all group"
+                        className="bg-zinc-900 text-white px-10 py-6 rounded-3xl flex items-center justify-center gap-4 text-body-sm font-medium tracking-widest uppercase shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all group"
                     >
                         Search New Flights
                         <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -161,10 +161,10 @@ function AgentConfirmingContent() {
                         <div className="space-y-8">
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                 <div>
-                                    <h1 className="text-4xl font-bold text-black tracking-tight mb-2">
+                                    <h1 className="text-heading-xl text-black tracking-tight mb-2">
                                         {timeLeft === 0 ? "High Request Volume" : "Verifying Availability"}
                                     </h1>
-                                    <p className="text-black/60 font-medium">
+                                    <p className="text-body text-black/60">
                                         {timeLeft === 0
                                             ? "We are currently experiencing high volume. Your request is queued and will be confirmed shortly."
                                             : "Your request is being handled by our VIP desk."}
@@ -175,8 +175,8 @@ function AgentConfirmingContent() {
                                         <Clock size={20} />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-black text-black uppercase tracking-widest">Expected in</div>
-                                        <div className="text-xl font-black text-black">{formatTime(timeLeft)}</div>
+                                        <div className="text-caption font-medium text-black uppercase tracking-widest">Expected in</div>
+                                        <div className="text-heading-md text-black">{formatTime(timeLeft)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -203,8 +203,8 @@ function AgentConfirmingContent() {
                                         {isStartingChat ? <Loader2 size={22} className="text-amber animate-spin" /> : <MessageSquare size={22} className="text-amber" />}
                                     </div>
                                     <div className="text-left">
-                                        <h3 className="font-bold text-white uppercase tracking-widest text-[10px] mb-1">Direct Access</h3>
-                                        <p className="text-white/60 text-xs">Chat with Concierge</p>
+                                        <h3 className="text-caption font-medium text-white uppercase tracking-widest mb-1">Direct Access</h3>
+                                        <p className="text-body-sm text-white/60">Chat with Concierge</p>
                                     </div>
                                 </div>
                                 <ArrowRight size={20} className="text-white/20 group-hover:translate-x-1 group-hover:text-amber transition-all" />
@@ -216,17 +216,17 @@ function AgentConfirmingContent() {
                                         <ShieldCheck size={22} className="text-emerald-500" />
                                     </div>
                                     <div className="text-left">
-                                        <h3 className="font-bold text-zinc-400 uppercase tracking-widest text-[10px] mb-1">Security</h3>
+                                        <h3 className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Security</h3>
                                         <p className="text-zinc-600 font-bold text-xs uppercase tracking-tighter">Luxel Shield™ Active</p>
                                     </div>
                                 </div>
-                                <div className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-widest">Verified</div>
+                                <div className="text-caption font-medium text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-widest">Verified</div>
                             </div>
                         </div>
 
                         {/* Live Radar / Animation */}
                         <div className="space-y-6">
-                            <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] pl-1">Live Tracking Radar</h3>
+                            <h3 className="text-caption font-medium text-zinc-400 uppercase tracking-[0.3em] pl-1">Live Tracking Radar</h3>
                             <div className="bg-black rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20 border border-white/5 relative group">
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none" />
                                 <video

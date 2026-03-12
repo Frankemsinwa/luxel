@@ -71,12 +71,12 @@ export default function ToursManagementPage() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-semibold text-zinc-900 tracking-tight mb-2">Tour Experiences</h1>
+                    <h1 className="text-heading-lg font-medium text-zinc-900 tracking-tight mb-2">Tour Experiences</h1>
                     <p className="text-zinc-500 font-medium">Manage and curate your elite travel portfolio.</p>
                 </div>
                 <button
                     onClick={() => router.push('/agent/tours/create')}
-                    className="bg-zinc-900 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
+                    className="bg-zinc-900 text-white px-8 py-4 rounded-2xl font-medium text-body shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
                 >
                     <Plus size={20} />
                     Create New Tour
@@ -86,16 +86,16 @@ export default function ToursManagementPage() {
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm transition-all hover:shadow-md">
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Total Tours</p>
-                    <h3 className="text-3xl font-black text-zinc-900 tracking-tight">{tours.length}</h3>
+                    <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Total Tours</p>
+                    <h3 className="text-heading-lg font-medium text-zinc-900 tracking-tight">{tours.length}</h3>
                 </div>
                 <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm transition-all hover:shadow-md">
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Active Listings</p>
-                    <h3 className="text-3xl font-black text-emerald-500 tracking-tight">{tours.filter(t => t.status === 'PUBLISHED').length}</h3>
+                    <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Active Listings</p>
+                    <h3 className="text-heading-lg font-medium text-emerald-500 tracking-tight">{tours.filter(t => t.status === 'PUBLISHED').length}</h3>
                 </div>
                 <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm transition-all hover:shadow-md">
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Drafts / Archived</p>
-                    <h3 className="text-3xl font-black text-amber tracking-tight">{tours.filter(t => t.status !== 'PUBLISHED').length}</h3>
+                    <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Drafts / Archived</p>
+                    <h3 className="text-heading-lg font-medium text-amber tracking-tight">{tours.filter(t => t.status !== 'PUBLISHED').length}</h3>
                 </div>
             </div>
 
@@ -109,7 +109,7 @@ export default function ToursManagementPage() {
                             placeholder="Filter by title or location..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-zinc-50 border-none rounded-xl py-3 pl-12 pr-4 text-xs font-bold text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
+                            className="w-full bg-zinc-50 border-none rounded-xl py-3 pl-12 pr-4 text-body-sm font-medium text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
                         />
                     </div>
                 </div>
@@ -118,16 +118,16 @@ export default function ToursManagementPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-zinc-50/50">
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest w-[400px]">Experience Details</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Base Price</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Status</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-right">Actions</th>
+                                <th className="px-10 py-6 text-caption font-medium text-zinc-400 uppercase tracking-widest w-[400px]">Experience Details</th>
+                                <th className="px-10 py-6 text-caption font-medium text-zinc-400 uppercase tracking-widest">Base Price</th>
+                                <th className="px-10 py-6 text-caption font-medium text-zinc-400 uppercase tracking-widest">Status</th>
+                                <th className="px-10 py-6 text-caption font-medium text-zinc-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-50">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={4} className="text-center py-20 text-zinc-300 font-bold uppercase tracking-widest text-xs">Accessing your luxury portfolio...</td>
+                                    <td colSpan={4} className="text-center py-20 text-zinc-300 font-medium uppercase tracking-widest text-body-sm">Accessing your luxury portfolio...</td>
                                 </tr>
                             ) : filteredTours.length > 0 ? filteredTours.map((tour) => (
                                 <tr key={tour.id} className="hover:bg-zinc-50/50 transition-colors group">
@@ -143,8 +143,8 @@ export default function ToursManagementPage() {
                                                 )}
                                             </div>
                                             <div>
-                                                <h4 className="text-sm font-bold text-zinc-900 mb-1">{tour.title}</h4>
-                                                <div className="flex items-center gap-3 text-xs text-zinc-400 font-medium whitespace-nowrap">
+                                                <h4 className="text-body font-medium text-zinc-900 mb-1">{tour.title}</h4>
+                                                <div className="flex items-center gap-3 text-body-sm text-zinc-400 font-medium whitespace-nowrap">
                                                     <div className="flex items-center gap-1"><MapPin size={12} className="text-amber" /> {tour.location}</div>
                                                     <div className="flex items-center gap-1"><Calendar size={12} className="text-amber" /> {tour.duration}</div>
                                                 </div>
@@ -152,11 +152,11 @@ export default function ToursManagementPage() {
                                         </div>
                                     </td>
                                     <td className="px-10 py-6">
-                                        <span className="text-sm font-bold text-zinc-900 tracking-tight">₦{Number(tour.price).toLocaleString()}</span>
-                                        <p className="text-[10px] font-bold text-zinc-400 tracking-widest uppercase">Per Guest</p>
+                                        <span className="text-body font-medium text-zinc-900 tracking-tight">₦{Number(tour.price).toLocaleString()}</span>
+                                        <p className="text-caption font-medium text-zinc-400 tracking-widest uppercase">Per Guest</p>
                                     </td>
                                     <td className="px-10 py-6">
-                                        <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${tour.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-600' :
+                                        <span className={`text-caption font-medium px-3 py-1 rounded-full uppercase tracking-widest ${tour.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-600' :
                                             tour.status === 'ARCHIVED' ? 'bg-zinc-100 text-zinc-400' : 'bg-amber/5 text-amber'
                                             }`}>
                                             {tour.status}
@@ -197,10 +197,10 @@ export default function ToursManagementPage() {
                                             <div className="w-16 h-16 rounded-3xl bg-zinc-50 flex items-center justify-center text-zinc-200">
                                                 <Palmtree size={32} />
                                             </div>
-                                            <p className="text-zinc-400 font-bold">No exclusive experiences found.</p>
+                                            <p className="text-zinc-400 font-medium">No exclusive experiences found.</p>
                                             <button
                                                 onClick={() => router.push('/agent/tours/create')}
-                                                className="text-amber font-bold text-xs uppercase tracking-widest hover:underline"
+                                                className="text-amber font-medium text-body-sm uppercase tracking-widest hover:underline"
                                             >
                                                 Start Curating Your First Tour
                                             </button>

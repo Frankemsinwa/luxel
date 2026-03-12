@@ -81,7 +81,7 @@ function FlightDetailsContent() {
         return (
             <div className="min-h-screen bg-amber/5 flex flex-col items-center justify-center">
                 <Loader2 size={40} className="text-amber animate-spin mb-4" />
-                <p className="text-zinc-500 font-semibold text-sm">Synchronizing elite itineraries...</p>
+                <p className="text-body text-zinc-500">Synchronizing elite itineraries...</p>
             </div>
         );
     }
@@ -99,13 +99,13 @@ function FlightDetailsContent() {
                     <div className="w-20 h-20 rounded-full bg-amber/10 flex items-center justify-center text-amber mb-8">
                         <RefreshCcw size={40} />
                     </div>
-                    <h2 className="text-3xl font-semibold text-black mb-4">Itinerary Data Expired</h2>
-                    <p className="text-zinc-500 max-w-md mb-10 font-medium">
+                    <h2 className="text-heading-xl text-black mb-4">Itinerary Data Expired</h2>
+                    <p className="text-body text-zinc-500 max-w-md mb-10">
                         For security and real-time accuracy, flight details are held in a temporary secure session. Your session has timed out or the server synchronized.
                     </p>
                     <button
                         onClick={() => router.push('/flights')}
-                        className="bg-black text-white px-10 py-5 rounded-2xl font-semibold text-sm shadow-xl hover:scale-105 transition-all flex items-center gap-3"
+                        className="bg-black text-white px-10 py-5 rounded-2xl text-body-sm font-medium shadow-xl hover:scale-105 transition-all flex items-center gap-3"
                     >
                         <ArrowRight size={18} className="rotate-180" />
                         Return to Search Results
@@ -125,7 +125,7 @@ function FlightDetailsContent() {
                     <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center text-flight-card">
                         <LayoutGrid size={20} />
                     </div>
-                    <h1 className="text-2xl font-semibold text-black">Flight Breakdown</h1>
+                    <h1 className="text-heading-md text-black">Flight Breakdown</h1>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-10">
@@ -243,7 +243,7 @@ function FlightDetailsContent() {
                             <div className="bg-flight-card p-10 rounded-[2.5rem] shadow-sm border border-black/5">
                                 <div className="flex items-center gap-3 mb-8">
                                     <Briefcase className="text-black" size={24} />
-                                    <h3 className="text-xl font-semibold text-black">Baggage Allowance</h3>
+                                    <h3 className="text-heading-sm text-black">Baggage Allowance</h3>
                                 </div>
                                 <div className="space-y-6">
                                     <div className="bg-black/5 rounded-2xl p-6 flex items-center gap-5">
@@ -251,8 +251,8 @@ function FlightDetailsContent() {
                                             <Backpack size={18} />
                                         </div>
                                         <div>
-                                            <div className="text-sm font-semibold text-black">1 Carry-on bag</div>
-                                            <div className="text-xs text-black/50 uppercase tracking-widest mt-0.5 font-semibold">Included in cabin</div>
+                                            <div className="text-body font-medium text-black">1 Carry-on bag</div>
+                                            <div className="text-caption font-medium text-black/50 uppercase tracking-widest mt-0.5">Included in cabin</div>
                                         </div>
                                     </div>
                                     <div className="bg-black/5 rounded-2xl p-6 flex items-center gap-5">
@@ -274,7 +274,7 @@ function FlightDetailsContent() {
                             <div className="bg-flight-card p-10 rounded-[2.5rem] shadow-sm border border-black/5">
                                 <div className="flex items-center gap-3 mb-8">
                                     <PenTool className="text-black" size={24} />
-                                    <h3 className="text-xl font-semibold text-black">Fare Rules</h3>
+                                    <h3 className="text-heading-sm text-black">Fare Rules</h3>
                                 </div>
                                 <div className="space-y-6">
                                     <div className="bg-emerald-900/10 border border-emerald-900/20 rounded-2xl p-6 flex items-center gap-5">
@@ -282,8 +282,8 @@ function FlightDetailsContent() {
                                             <RefreshCcw size={18} />
                                         </div>
                                         <div>
-                                            <div className="text-sm font-semibold text-emerald-900">Change Policy</div>
-                                            <div className="text-[10px] text-emerald-800 font-semibold leading-relaxed mt-0.5 uppercase tracking-wider">Free changes up to 24h</div>
+                                            <div className="text-body font-medium text-emerald-900">Change Policy</div>
+                                            <div className="text-caption font-medium text-emerald-800 leading-relaxed mt-0.5 uppercase tracking-wider">Free changes up to 24h</div>
                                         </div>
                                     </div>
                                     <div className="bg-black/5 rounded-2xl p-6 flex items-center gap-5">
@@ -291,8 +291,8 @@ function FlightDetailsContent() {
                                             <Undo2 size={18} />
                                         </div>
                                         <div>
-                                            <div className="text-sm font-semibold text-black">Refundability</div>
-                                            <div className="text-[10px] text-black/50 font-semibold leading-relaxed mt-0.5 uppercase tracking-wider">Standard fee applies</div>
+                                            <div className="text-body font-medium text-black">Refundability</div>
+                                            <div className="text-caption font-medium text-black/50 leading-relaxed mt-0.5 uppercase tracking-wider">Standard fee applies</div>
                                         </div>
                                     </div>
                                 </div>
@@ -303,7 +303,7 @@ function FlightDetailsContent() {
                     {/* Right Column - Pricing Summary */}
                     <div className="w-full lg:w-96 flex flex-col gap-8">
                         <div className="bg-flight-card p-10 rounded-[3rem] shadow-xl shadow-black/5 border border-black/5">
-                            <h3 className="text-xs font-semibold text-black/50 uppercase tracking-[0.2em] mb-10">Price Summary</h3>
+                            <h3 className="text-caption font-medium text-black/50 uppercase tracking-[0.2em] mb-10">Price Summary</h3>
 
                             <div className="space-y-6 mb-10 pb-10 border-b border-black/10">
                                 <div className="flex items-center justify-between">

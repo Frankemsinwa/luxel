@@ -93,11 +93,13 @@ export const searchFlights = async (searchParams: {
     from: string;
     to: string;
     departureDate: string;
+    tripType?: 'ONE_WAY' | 'ROUND_TRIP';
+    returnDate?: string;
     adults?: string;
     children?: string;
     travelClass?: string;
 }) => {
-    const { from, to, departureDate, adults, children, travelClass } = searchParams;
+    const { from, to, departureDate, tripType, returnDate, adults, children, travelClass } = searchParams;
     const originCode = getIataCode(from);
     const destinationCode = getIataCode(to);
 
@@ -112,6 +114,10 @@ export const searchFlights = async (searchParams: {
             adults: adults || '1',
             max: '20'
         };
+
+        if ((tripType || '').toUpperCase() === 'ROUND_TRIP' && returnDate) {
+            query.returnDate = returnDate.split('T')[0];
+        }
 
         if (children && parseInt(children) > 0) query.children = children;
         if (travelClass && travelClass !== 'ECONOMY') query.travelClass = travelClass;

@@ -37,7 +37,7 @@ export default function SettingsPage() {
         <div className="max-w-4xl space-y-10">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-black text-zinc-900 tracking-tight mb-2">Workspace Settings</h1>
+                <h1 className="text-heading-lg font-medium text-zinc-900 tracking-tight mb-2">Workspace Settings</h1>
                 <p className="text-zinc-500 font-medium">Manage your agent profile and global application preferences.</p>
             </div>
 
@@ -54,14 +54,14 @@ export default function SettingsPage() {
                     </div>
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Agent Sarah</h2>
-                            <span className="text-[10px] font-black px-2 py-0.5 rounded bg-amber text-white uppercase tracking-widest">Verified</span>
+                            <h2 className="text-heading-md font-medium text-zinc-900 tracking-tight">Agent Sarah</h2>
+                            <span className="text-caption font-medium px-2 py-0.5 rounded bg-amber text-white uppercase tracking-widest">Verified</span>
                         </div>
-                        <p className="text-zinc-400 text-sm font-bold tracking-tight">Senior Concierge & Flight Coordinator</p>
-                        <p className="text-zinc-300 text-xs font-medium mt-1">UUID: srh-9428-luxel-alpha</p>
+                        <p className="text-zinc-400 text-body font-medium tracking-tight">Senior Concierge & Flight Coordinator</p>
+                        <p className="text-zinc-300 text-body-sm font-medium mt-1">UUID: srh-9428-luxel-alpha</p>
                     </div>
                 </div>
-                <button className="px-6 py-3 rounded-2xl bg-zinc-900 text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-zinc-200 hover:scale-105 active:scale-95 transition-all">
+                <button className="px-6 py-3 rounded-2xl bg-zinc-900 text-white font-medium text-caption uppercase tracking-widest shadow-xl shadow-zinc-200 hover:scale-105 active:scale-95 transition-all">
                     Edit Profile
                 </button>
             </div>
@@ -69,7 +69,7 @@ export default function SettingsPage() {
             {/* Settings Sections */}
             {sections.map((section, si) => (
                 <div key={section.title} className="space-y-6">
-                    <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] pl-4">{section.title}</h3>
+                    <h3 className="text-caption font-medium text-zinc-400 uppercase tracking-widest pl-4">{section.title}</h3>
                     <div className="bg-white rounded-[3rem] border border-zinc-100 shadow-sm overflow-hidden">
                         <div className="divide-y divide-zinc-50">
                             {section.items.map((item, ii) => (
@@ -79,8 +79,8 @@ export default function SettingsPage() {
                                             {item.icon}
                                         </div>
                                         <div className="text-left">
-                                            <p className="text-sm font-black text-zinc-900 mb-0.5">{item.label}</p>
-                                            <p className="text-xs text-zinc-400 font-medium">{item.sub}</p>
+                                            <p className="text-body font-medium text-zinc-900 mb-0.5">{item.label}</p>
+                                            <p className="text-body-sm text-zinc-400 font-medium">{item.sub}</p>
                                         </div>
                                     </div>
                                     {item.type === 'link' ? (
@@ -98,7 +98,7 @@ export default function SettingsPage() {
             ))}
 
             <div className="pt-10">
-                <button className="flex items-center gap-4 px-8 py-4 rounded-2xl text-red-500 hover:bg-red-50 transition-all font-black text-[10px] uppercase tracking-widest border border-red-100">
+                <button className="flex items-center gap-4 px-8 py-4 rounded-2xl text-red-500 hover:bg-red-50 transition-all font-medium text-caption uppercase tracking-widest border border-red-100">
                     <LogOut size={16} />
                     Sign Out of Workspace
                 </button>
