@@ -174,7 +174,8 @@ export const verifyFlightPrice = async (req: any, res: Response) => {
 
         return res.json({
             verified: true,
-            flights,
+            flights: flights.flights,
+            meta: flights.meta,
             verifiedAt: new Date().toISOString()
         });
     } catch (error: any) {

@@ -31,6 +31,23 @@ const EUR_TO_NGN_RATE = 1750; // Current estimated rate or configurable
 
 // Simple in-memory cache for the prototype
 let searchCache: Map<string, any> = new Map();
+let queryCache: Map<string, { flights: any[]; cachedAt: number }> = new Map();
+
+const QUERY_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+export class ProviderUnavailableError extends Error {
+    provider: string;
+    code: string;
+    details?: any;
+
+    constructor(message: string, details?: any) {
+        super(message);
+        this.name = 'ProviderUnavailableError';
+        this.provider = 'amadeus';
+        this.code = 'PROVIDER_UNAVAILABLE';
+        this.details = details;
+    }
+}
 
 /**
  * Searches for airports and cities
@@ -103,26 +120,60 @@ export const searchFlights = async (searchParams: {
     const originCode = getIataCode(from);
     const destinationCode = getIataCode(to);
 
+    const depDateOnly = (departureDate || '').includes('T') ? departureDate.split('T')[0] : departureDate;
+    const retDateOnly = returnDate
+        ? ((returnDate || '').includes('T') ? returnDate.split('T')[0] : returnDate)
+        : undefined;
+
+    const queryKey = JSON.stringify({
+        originCode,
+        destinationCode,
+        depDateOnly,
+        retDateOnly,
+        tripType: (tripType || (retDateOnly ? 'ROUND_TRIP' : 'ONE_WAY')).toString().toUpperCase(),
+        adults: adults || '1',
+        children: children || '0',
+        travelClass: travelClass || 'ECONOMY'
+    });
+
     try {
         const amadeus = getAmadeus();
-        if (!amadeus) throw new Error('Amadeus credentials missing');
+        if (!amadeus) throw new ProviderUnavailableError('Amadeus credentials missing');
 
         const query: any = {
             originLocationCode: originCode,
             destinationLocationCode: destinationCode,
-            departureDate: departureDate.split('T')[0],
+            departureDate: depDateOnly,
             adults: adults || '1',
             max: '20'
         };
 
-        if ((tripType || '').toUpperCase() === 'ROUND_TRIP' && returnDate) {
-            query.returnDate = returnDate.split('T')[0];
+        if ((tripType || '').toUpperCase() === 'ROUND_TRIP' && retDateOnly) {
+            query.returnDate = retDateOnly;
         }
 
         if (children && parseInt(children) > 0) query.children = children;
         if (travelClass && travelClass !== 'ECONOMY') query.travelClass = travelClass;
 
-        const response = await amadeus.shopping.flightOffersSearch.get(query);
+        const shouldRetry = (err: any) => {
+            const status = err?.response?.statusCode || err?.response?.status || err?.statusCode;
+            // Common transient cases: rate limits, upstream errors, timeouts/network
+            return status === 429 || (typeof status === 'number' && status >= 500) || err?.code === 'ETIMEDOUT' || err?.code === 'ECONNRESET';
+        };
+
+        let response: any = null;
+        for (let attempt = 1; attempt <= 2; attempt++) {
+            try {
+                response = await amadeus.shopping.flightOffersSearch.get(query);
+                break;
+            } catch (err: any) {
+                if (attempt < 2 && shouldRetry(err)) {
+                    await new Promise((r) => setTimeout(r, 300));
+                    continue;
+                }
+                throw err;
+            }
+        }
 
         const mappedFlights = response.data.map((offer: any) => {
             const rawPrice = parseFloat(offer.price.total);
@@ -167,49 +218,29 @@ export const searchFlights = async (searchParams: {
 
         // Cache results so they can be retrieved by ID
         mappedFlights.forEach((f: any) => searchCache.set(f.id, f));
+        queryCache.set(queryKey, { flights: mappedFlights, cachedAt: Date.now() });
 
-        return mappedFlights;
+        return { flights: mappedFlights, meta: { source: 'amadeus', stale: false } };
 
     } catch (error: any) {
-        console.warn('Amadeus API failed or not configured, using enhanced mock data:', error.message);
+        const cached = queryCache.get(queryKey);
+        const now = Date.now();
+        if (cached && now - cached.cachedAt <= QUERY_CACHE_TTL_MS) {
+            return { flights: cached.flights, meta: { source: 'cache', stale: true, cachedAt: cached.cachedAt } };
+        }
 
-        const mockResult = [
-            {
-                id: 'MOCK-' + Math.random().toString(36).substr(2, 9),
-                airline: 'British Airways',
-                logo: 'https://pics.avs.io/al/BA.png',
-                departureTime: '10:30',
-                departureCode: originCode,
-                departureCity: from.split(',')[0],
-                arrivalTime: '18:45',
-                arrivalCode: destinationCode,
-                arrivalCity: to.split(',')[0],
-                duration: '8h 15m',
-                stops: 'NON-STOP',
-                price: 945000,
-                currency: 'NGN',
-                itineraries: [
-                    {
-                        duration: '8h 15m',
-                        segments: [
-                            {
-                                departure: { iataCode: originCode, at: '2026-10-12T10:30:00', terminal: '5' },
-                                arrival: { iataCode: destinationCode, at: '2026-10-12T18:45:00', terminal: '3' },
-                                carrierCode: 'BA',
-                                logo: 'https://pics.avs.io/al/BA.png',
-                                number: '005',
-                                aircraft: '787-9',
-                                duration: '8h 15m'
-                            }
-                        ]
-                    }
-                ],
-                baggage: { quantity: 2 }
-            }
-        ];
+        const details = {
+            message: error?.message,
+            code: error?.code,
+            description: error?.description,
+            statusCode: error?.response?.statusCode,
+            result: error?.response?.result
+        };
 
-        mockResult.forEach(f => searchCache.set(f.id, f));
-        return mockResult;
+        // Production-safe behavior: no mock data. Surface a provider-unavailable error.
+        throw (error instanceof ProviderUnavailableError)
+            ? error
+            : new ProviderUnavailableError('Live flight search is temporarily unavailable', details);
     }
 };
 

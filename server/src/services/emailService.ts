@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { supabaseAdmin } from '../config/supabase.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,68 @@ const transporter = nodemailer.createTransport({
         pass: process.env.SMTP_PASS || 'password',
     },
 });
+
+const AGENT_EMAIL_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+let agentEmailCache: { emails: string[]; cachedAt: number } = { emails: [], cachedAt: 0 };
+
+const parseEnvEmails = () => {
+    const rawRecipients = process.env.AGENT_NOTIFICATION_EMAILS || process.env.AGENT_NOTIFICATION_EMAIL || '';
+    return rawRecipients
+        .split(',')
+        .map((e) => e.trim())
+        .filter(Boolean);
+};
+
+/**
+ * Resolve agent notification recipients.
+ * Priority:
+ * 1) Supabase profiles with role AGENT/ADMIN (resolved to auth.users emails via admin API)
+ * 2) Fallback to env AGENT_NOTIFICATION_EMAILS / AGENT_NOTIFICATION_EMAIL
+ */
+export const getAgentNotificationEmails = async () => {
+    const envEmails = parseEnvEmails();
+
+    // Use cache for Supabase lookup to avoid repeated admin calls.
+    const now = Date.now();
+    if (agentEmailCache.emails.length > 0 && now - agentEmailCache.cachedAt <= AGENT_EMAIL_CACHE_TTL_MS) {
+        return Array.from(new Set([...agentEmailCache.emails, ...envEmails]));
+    }
+
+    try {
+        const { data: agents, error } = await supabaseAdmin
+            .from('profiles')
+            .select('id, role')
+            .in('role', ['AGENT', 'ADMIN']);
+
+        if (error) throw error;
+
+        const ids = (agents || []).map((a: any) => a.id).filter(Boolean);
+        if (ids.length === 0) {
+            return envEmails;
+        }
+
+        const emails: string[] = [];
+        for (const id of ids) {
+            try {
+                // Service role client required for admin endpoints.
+                // @ts-ignore
+                const { data, error: userErr } = await supabaseAdmin.auth.admin.getUserById(id);
+                if (!userErr && data?.user?.email) {
+                    emails.push(data.user.email);
+                }
+            } catch {
+                // ignore individual failures
+            }
+        }
+
+        const unique = Array.from(new Set([...emails, ...envEmails])).filter(Boolean);
+        agentEmailCache = { emails: unique, cachedAt: now };
+        return unique;
+    } catch (err) {
+        // If Supabase lookup fails (missing service key, etc.), fall back to env.
+        return envEmails;
+    }
+};
 
 export const sendETicketEmail = async (
     recipientEmail: string,

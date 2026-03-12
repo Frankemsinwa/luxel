@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase, supabaseAdmin } from '../config/supabase.js';
 import * as paymentService from '../services/paymentService.js';
-import { sendAgentFlightNotification } from '../services/emailService.js';
+import { getAgentNotificationEmails, sendAgentFlightNotification } from '../services/emailService.js';
 import crypto from 'crypto';
 
 /**
@@ -114,11 +114,7 @@ export const createBooking = async (req: any, res: Response) => {
 
         // 3. Notify agents via email (do not fail booking creation if email fails)
         try {
-            const rawRecipients = process.env.AGENT_NOTIFICATION_EMAILS || process.env.AGENT_NOTIFICATION_EMAIL || '';
-            const recipients = rawRecipients
-                .split(',')
-                .map((e) => e.trim())
-                .filter(Boolean);
+            const recipients = await getAgentNotificationEmails();
 
             if (recipients.length > 0) {
                 const origin = (req.headers.origin as string) || (req.headers.referer as string) || '';

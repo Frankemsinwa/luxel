@@ -26,6 +26,7 @@ function FlightsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
+    const [fetchError, setFetchError] = useState<{ title: string; detail: string; correlationId?: string } | null>(null);
 
     // Search states
     const [searchData, setSearchData] = useState({
@@ -103,6 +104,7 @@ function FlightsContent() {
         const fetchFlights = async () => {
             setIsLoading(true);
             setResults([]); // Clear previous results while loading
+            setFetchError(null);
             try {
                 const response = await api.get('/flights/search', {
                     params: {
@@ -122,9 +124,23 @@ function FlightsContent() {
                 } else {
                     setResults([]);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Error fetching flights:', error);
                 setResults([]);
+
+                const status = error?.response?.status;
+                if (status === 503) {
+                    setFetchError({
+                        title: 'Live flight search is temporarily unavailable',
+                        detail: "We're having trouble retrieving live fares right now. Please try again in a moment.",
+                        correlationId: error?.response?.data?.correlationId
+                    });
+                } else {
+                    setFetchError({
+                        title: 'Could not load flights',
+                        detail: 'Please check your connection and try again.'
+                    });
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -207,6 +223,38 @@ function FlightsContent() {
             </div>
 
             {/* Main Content */}
+            {fetchError && !isLoading && (
+                <div className="max-w-7xl mx-auto w-full px-6 pb-6">
+                    <div className="rounded-[2.5rem] border border-black/10 bg-white p-8 shadow-sm">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                            <div>
+                                <h2 className="text-heading-md text-zinc-900">{fetchError.title}</h2>
+                                <p className="text-body text-zinc-600 mt-2 max-w-2xl">{fetchError.detail}</p>
+                                {fetchError.correlationId && (
+                                    <p className="text-caption text-zinc-400 mt-3">
+                                        Reference ID: <span className="font-medium text-zinc-600">{fetchError.correlationId}</span>
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setSearchData((prev) => ({ ...prev }))}
+                                    className="px-6 py-3 rounded-2xl bg-zinc-900 text-white text-body-sm font-medium tracking-widest uppercase hover:bg-zinc-800 transition-colors"
+                                >
+                                    Try again
+                                </button>
+                                <button
+                                    onClick={() => router.push('/auth?mode=login')}
+                                    className="px-6 py-3 rounded-2xl border border-zinc-200 bg-white text-zinc-900 text-body-sm font-medium tracking-widest uppercase hover:bg-zinc-50 transition-colors"
+                                >
+                                    Login to chat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12 flex flex-col lg:flex-row gap-10">
 
                 {/* Filters Sidebar */}
