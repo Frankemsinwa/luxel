@@ -68,7 +68,7 @@ function ReservationSummaryContent() {
                     )}
                     <div>
                         <span className="text-caption font-medium text-black/50 uppercase tracking-widest block mb-1">Reference</span>
-                        <span className="text-heading-sm text-black">{booking?.booking_reference || 'LX-PENDING'}</span>
+                        <span className="text-heading-sm text-black">{booking?.airline_booking_reference || booking?.booking_reference || 'LX-PENDING'}</span>
                     </div>
                 </div>
                 <div className="text-right">

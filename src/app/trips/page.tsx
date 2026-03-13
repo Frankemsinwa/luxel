@@ -164,7 +164,7 @@ export default function TripsPage() {
                                             <div>
                                                 <div className="flex items-center gap-3 mb-2">
                                                     <span className="px-3 py-1 bg-amber text-black text-[9px] font-medium rounded-lg uppercase tracking-widest">
-                                                        {booking.booking_reference || 'LX-REF'}
+                                                        {booking.airline_booking_reference || booking.booking_reference || 'LX-REF'}
                                                     </span>
                                                     <StatusBadge status={booking.status} />
                                                 </div>

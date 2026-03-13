@@ -165,7 +165,7 @@ export default function TrackingClient() {
 
                 <div className="mt-8 rounded-2xl border border-black/10 bg-black/[0.03] p-5">
                   <div className="text-body-sm text-black/70">
-                    Your Luxel reference: <span className="font-medium text-black">{tracker.bookingRef}</span>
+                    Your Luxel reference: <span className="font-medium text-black">{bookingStatus?.airline_booking_reference || tracker.bookingRef}</span>
                   </div>
                   <div className="text-caption text-black/50 mt-2">
                     Saved: {new Date(tracker.createdAt).toLocaleString()}

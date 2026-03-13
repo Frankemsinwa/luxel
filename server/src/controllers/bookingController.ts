@@ -323,7 +323,7 @@ export const verifyPayment = async (req: any, res: Response) => {
                     const pdfBuffer = await generateTicketPdf(data, passengerName, email);
 
                     // Fire Off Email (await it to ensure it sends, or let it run async)
-                    await sendETicketEmail(email, data.booking_reference, pdfBuffer);
+                    await sendETicketEmail(email, data.airline_booking_reference || data.booking_reference, pdfBuffer);
                 } catch (emailErr) {
                     console.error('Failed to send auto-ticket email:', emailErr);
                     // We do not fail the request if the email fails, the booking is still confirmed.
@@ -416,7 +416,7 @@ export const confirmPayment = async (req: any, res: Response) => {
             const pdfBuffer = await generateTicketPdf(data, passengerName, email);
 
             // Dispatch Email
-            await sendETicketEmail(email, data.booking_reference, pdfBuffer);
+            await sendETicketEmail(email, data.airline_booking_reference || data.booking_reference, pdfBuffer);
         } catch (emailErr) {
             console.error('Failed to send auto-ticket email for bank confirm:', emailErr);
             // Non-blocking

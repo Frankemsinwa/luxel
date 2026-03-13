@@ -35,7 +35,7 @@ function FinalizedContent() {
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = `Luxel_Ticket_${booking?.booking_reference || bookingId}.pdf`;
+            a.download = `Luxel_Ticket_${booking?.airline_booking_reference || booking?.booking_reference || bookingId}.pdf`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -123,7 +123,7 @@ function FinalizedContent() {
                                         <QrCode size={48} className="text-flight-card" />
                                         <div className="text-left">
                                             <span className="text-caption font-medium text-white/50 uppercase tracking-widest block mb-1">Booking Reference (PNR)</span>
-                                            <span className="text-heading-xl text-white tracking-widest">{booking?.booking_reference || bookingId?.split('-')[0].toUpperCase() || 'LX-592849'}</span>
+                                            <span className="text-heading-xl text-white tracking-widest">{booking?.airline_booking_reference || booking?.booking_reference || bookingId?.split('-')[0].toUpperCase() || 'LX-592849'}</span>
                                         </div>
                                     </div>
                                 </div>
