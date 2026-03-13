@@ -43,6 +43,7 @@ function ReservationSummaryContent() {
         arrTime: searchParams.get('arrTime') || "06:45 PM",
         logo: searchParams.get('logo') || "",
         airline: searchParams.get('airline') || "",
+        airlineCode: searchParams.get('airlineCode') || searchParams.get('airline') || "",
         departureDate: searchParams.get('departure') ? new Date(searchParams.get('departure')!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Oct 24, 2024',
         returnDate: searchParams.get('return') ? new Date(searchParams.get('return')!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Oct 31, 2024',
     };
@@ -54,21 +55,27 @@ function ReservationSummaryContent() {
         <div className="bg-flight-card rounded-[3rem] shadow-xl shadow-black/5 border border-black/5 overflow-hidden">
             <div className="p-8 border-b border-black/10 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    {route.airline && (
-                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1.5 border border-black/5 overflow-hidden">
-                            <img 
-                                src={`https://cdn.jsdelivr.net/gh/besrourms/airline-logos/logos/${route.airline}.png`} 
+                    {route.airlineCode && (
+                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1.5 border border-black/5 overflow-hidden relative">
+                             <img 
+                                src={`https://www.gstatic.com/flights/airline_logos/70px/${route.airlineCode}.png`} 
                                 alt={route.airline} 
-                                className="w-full h-full object-contain" 
+                                className="w-full h-full object-contain relative z-10" 
                                 onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    const target = e.target as HTMLImageElement;
+                                    if (!target.dataset.fallback) {
+                                        target.dataset.fallback = '1';
+                                        target.src = `https://pics.avs.io/200/80/${route.airlineCode}.png`;
+                                    } else {
+                                        target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(route.airline)}&background=1a1a1a&color=dbb35e&bold=true&size=128`;
+                                    }
                                 }}
                             />
                         </div>
                     )}
                     <div>
                         <span className="text-caption font-medium text-black/50 uppercase tracking-widest block mb-1">Reference</span>
-                        <span className="text-heading-sm text-black">{booking?.airline_booking_reference || booking?.booking_reference || 'LX-PENDING'}</span>
+                        <span className="text-heading-sm text-black uppercase tracking-widest">{booking?.airline_booking_reference || booking?.booking_reference || 'LX-PENDING'}</span>
                     </div>
                 </div>
                 <div className="text-right">
@@ -99,7 +106,6 @@ function ReservationSummaryContent() {
                         </div>
                     </div>
                 </div>
-                {/* Note: I removed the static hardcoded 'Return' section entirely unless roundtrip is specified, but to keep it simple we show just Oneway if roundtrip is empty */}
             </div>
 
             <div className="bg-black p-8 flex items-center justify-between">

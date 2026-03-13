@@ -102,7 +102,7 @@ function FinalizedContent() {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-black rounded-[3rem] p-16 shadow-2xl shadow-black/20 border border-white/10 relative overflow-hidden text-center"
+                            className="bg-black rounded-[2rem] md:rounded-[3rem] p-6 md:p-16 shadow-2xl shadow-black/20 border border-white/10 relative overflow-hidden text-center"
                         >
                             <div className="flex flex-col items-center max-w-2xl mx-auto relative z-10">
                                 <motion.div
@@ -119,8 +119,8 @@ function FinalizedContent() {
                                 </h2>
 
                                 <div className="bg-white/5 rounded-3xl p-6 mb-10 inline-block border border-white/10 mx-auto transform transition-all hover:scale-105">
-                                    <div className="flex items-center gap-6">
-                                        <QrCode size={48} className="text-flight-card" />
+                                    <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                                        <QrCode size={48} className="text-flight-card shrink-0" />
                                         <div className="text-left">
                                             <span className="text-caption font-medium text-white/50 uppercase tracking-widest block mb-1">Booking Reference (PNR)</span>
                                             <span className="text-heading-xl text-white tracking-widest">{booking?.airline_booking_reference || booking?.booking_reference || bookingId?.split('-')[0].toUpperCase() || 'LX-592849'}</span>
@@ -168,9 +168,9 @@ function FinalizedContent() {
                     </div>
 
                     {/* Activity Log Sidebar */}
-                    <aside className="space-y-8">
-                        <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-zinc-100">
-                            <h3 className="text-caption font-medium text-zinc-400 uppercase tracking-[0.2em] mb-12">Activity Log</h3>
+                    <aside className="space-y-6 md:space-y-8">
+                        <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-sm border border-zinc-100">
+                            <h3 className="text-caption font-medium text-zinc-400 uppercase tracking-[0.2em] mb-8 md:mb-12">Activity Log</h3>
 
                             <div className="space-y-12 relative overflow-hidden">
                                 <div className="absolute top-0 left-[1.125rem] w-[1px] h-full bg-zinc-50" />
@@ -199,8 +199,8 @@ function FinalizedContent() {
                             </div>
                         </div>
 
-                        <div className="bg-emerald-50/50 border border-emerald-100 rounded-[2.5rem] p-8 flex items-center gap-6 group hover:translate-y-[-4px] transition-all">
-                            <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-emerald-500 shadow-sm">
+                        <div className="bg-emerald-50/50 border border-emerald-100 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 flex items-center gap-4 md:gap-6 group hover:translate-y-[-4px] transition-all">
+                            <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-emerald-500 shadow-sm shrink-0">
                                 <ShieldCheck size={24} />
                             </div>
                             <div>

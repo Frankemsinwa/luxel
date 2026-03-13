@@ -72,7 +72,7 @@ function VerifyingContent() {
                         <motion.div
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-black rounded-[3rem] p-12 shadow-2xl shadow-black/20 border border-black/20 relative overflow-hidden"
+                            className="bg-black rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 shadow-2xl shadow-black/20 border border-black/20 relative overflow-hidden"
                         >
                             <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
                                 <Loader2 size={200} className="animate-spin text-white" />
@@ -96,8 +96,8 @@ function VerifyingContent() {
                                     </div>
                                 )}
 
-                                <div className="bg-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/10 flex flex-col gap-6 max-w-lg group">
-                                    <div className="flex items-center justify-between">
+                                <div className="bg-white/5 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/10 flex flex-col gap-6 max-w-lg group">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                         <div className="flex items-center gap-6">
                                             <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-flight-card">
                                                 <FileText size={32} />
@@ -135,9 +135,9 @@ function VerifyingContent() {
                     </div>
 
                     {/* Activity Log Sidebar */}
-                    <aside className="space-y-8">
-                        <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-zinc-100">
-                            <h3 className="text-caption font-medium text-zinc-400 uppercase tracking-[0.2em] mb-12">Activity Log</h3>
+                    <aside className="space-y-6 md:space-y-8">
+                        <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-sm border border-zinc-100">
+                            <h3 className="text-caption font-medium text-zinc-400 uppercase tracking-[0.2em] mb-8 md:mb-12">Activity Log</h3>
 
                             <div className="space-y-12 relative overflow-hidden">
                                 <div className="absolute top-0 left-[1.125rem] w-[1px] h-full bg-zinc-50" />
@@ -166,8 +166,8 @@ function VerifyingContent() {
                             </div>
                         </div>
 
-                        <div className="bg-emerald-50/50 border border-emerald-100 rounded-[2.5rem] p-8 flex items-center gap-6 group hover:translate-y-[-4px] transition-all">
-                            <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-emerald-500 shadow-sm">
+                        <div className="bg-emerald-50/50 border border-emerald-100 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 flex items-center gap-4 md:gap-6 group hover:translate-y-[-4px] transition-all">
+                            <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-emerald-500 shadow-sm shrink-0">
                                 <ShieldCheck size={24} />
                             </div>
                             <div>

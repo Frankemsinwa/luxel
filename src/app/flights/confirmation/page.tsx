@@ -70,14 +70,14 @@ function ConfirmationContent() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="w-full bg-white rounded-[3rem] p-10 border border-zinc-100 shadow-sm mb-12 relative overflow-hidden group"
+                    className="w-full bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 border border-zinc-100 shadow-sm mb-12 relative overflow-hidden group"
                 >
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
                         <Plane size={120} />
                     </div>
 
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
-                        <div className="flex items-center gap-6">
+                    <div className="flex flex-col md:flex-row items-center md:justify-between gap-6 md:gap-8 relative z-10">
+                        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
                             <div className="w-16 h-16 rounded-[1.5rem] bg-zinc-900 flex items-center justify-center text-amber">
                                 <Plane size={28} />
                             </div>
@@ -87,13 +87,13 @@ function ConfirmationContent() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <div className="text-right">
+                        <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+                            <div>
                                 <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Itinerary</p>
                                 <p className="text-sm font-semibold text-zinc-900">{depCode} → {arrCode}</p>
                             </div>
-                            <div className="w-px h-8 bg-zinc-100" />
-                            <div className="text-left">
+                            <div className="w-8 h-px md:w-px md:h-8 bg-zinc-100 hidden md:block" />
+                            <div>
                                 <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Date</p>
                                 <p className="text-body text-zinc-900 underline decoration-amber decoration-2 underline-offset-4">{date}</p>
                             </div>
@@ -128,7 +128,7 @@ function ConfirmationContent() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6 }}
-                    className="flex items-center gap-8 mt-16"
+                    className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mt-16"
                 >
                     <div className="flex items-center gap-2 text-zinc-400">
                         <Clock size={16} />

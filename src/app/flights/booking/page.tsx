@@ -298,7 +298,7 @@ function PassengerDetailsContent() {
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
-                                className="bg-flight-card rounded-[3rem] p-10 shadow-sm border border-black/5"
+                                className="bg-flight-card rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-sm border border-black/5"
                             >
                                 <div className="flex items-center gap-4 mb-10">
                                     <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center text-black">
@@ -307,7 +307,7 @@ function PassengerDetailsContent() {
                                     <h2 className="text-heading-md text-black">Passenger {p.id}</h2>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                                     <div className="flex flex-col gap-2">
                                         <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">Title</label>
                                         <div className="relative">
@@ -407,7 +407,7 @@ function PassengerDetailsContent() {
                         ))}
 
                         {/* Contact Information Card */}
-                        <div className="bg-flight-card rounded-[3rem] p-10 shadow-sm border border-black/5">
+                        <div className="bg-flight-card rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-sm border border-black/5">
                             <div className="flex items-center gap-4 mb-10">
                                 <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center text-black">
                                     <Contact size={24} />
@@ -418,7 +418,7 @@ function PassengerDetailsContent() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                                 <div className="flex flex-col gap-2">
                                     <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Email address</label>
                                     <input
@@ -432,7 +432,7 @@ function PassengerDetailsContent() {
                                 <div className="flex flex-col gap-2">
                                     <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Phone number</label>
                                     <div className="flex gap-2">
-                                        <select className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black w-28 appearance-none cursor-pointer">
+                                        <select className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black w-24 sm:w-28 appearance-none cursor-pointer">
                                             <option>+44 (UK)</option>
                                             <option>+1 (USA)</option>
                                             <option>+234 (NG)</option>
@@ -452,8 +452,8 @@ function PassengerDetailsContent() {
                     </div>
 
                     {/* Right Column - Summary */}
-                    <div className="w-full lg:w-96 flex flex-col gap-8">
-                        <div className="bg-flight-card p-10 rounded-[3rem] shadow-xl shadow-black/5 border border-black/5">
+                    <div className="w-full lg:w-96 flex flex-col gap-6 md:gap-8">
+                        <div className="bg-flight-card p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-xl shadow-black/5 border border-black/5">
                             <h3 className="text-caption font-medium text-black/50 uppercase tracking-widest mb-8">Price Summary</h3>
                             <div className="space-y-5 mb-8 pb-8 border-b border-black/10">
                                 <div className="flex justify-between">

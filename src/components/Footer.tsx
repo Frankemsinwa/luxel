@@ -40,9 +40,9 @@ export default function Footer() {
           <div>
             <h4 className="text-heading-sm mb-8">Contact</h4>
             <ul className="space-y-4 text-body text-zinc-500">
-              <li>+923041234567</li>
-              <li>luxel@gmail.com</li>
-              <li>Glassplace, Near<br />Cool Avenue, Boson</li>
+              <li>+234 813 156 7255</li>
+              <li>luxelflight@gmail.com</li>
+              <li>suite D35, Iyemi plaza,<br />Gudu, Abuja</li>
             </ul>
           </div>
         </div>
