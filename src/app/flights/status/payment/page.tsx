@@ -134,7 +134,7 @@ function PaymentContent() {
                                     <div className="w-1.5 h-1.5 rounded-full bg-black" />
                                     Availability Confirmed
                                 </div>
-                                <span className="text-[10px] font-bold text-white/50">Ref: {booking?.booking_reference || '#LX-PENDING'}</span>
+                                <span className="text-[10px] font-bold text-white/50">Ref: {booking?.airline_booking_reference || booking?.booking_reference || '#LX-PENDING'}</span>
                             </div>
 
                             <div className="flex items-baseline justify-between mb-8">
