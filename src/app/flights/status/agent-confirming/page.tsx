@@ -152,7 +152,7 @@ function AgentConfirmingContent() {
             </div>
 
             <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12">
-                <div className="flex flex-col lg:flex-row gap-16">
+                <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
 
                     {/* Left Side: Status & Timeline */}
                     <div className="flex-1 space-y-12">
@@ -196,7 +196,7 @@ function AgentConfirmingContent() {
                             <button 
                                 onClick={handleChatWithConcierge}
                                 disabled={isStartingChat}
-                                className="bg-zinc-900 text-white p-8 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-all cursor-pointer disabled:opacity-70"
+                                className="bg-zinc-900 text-white p-6 md:p-8 rounded-[2rem] flex flex-col sm:flex-row sm:items-center justify-between gap-4 group hover:scale-[1.02] transition-all cursor-pointer disabled:opacity-70 text-left"
                             >
                                 <div className="flex items-center gap-5">
                                     <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
@@ -210,7 +210,7 @@ function AgentConfirmingContent() {
                                 <ArrowRight size={20} className="text-white/20 group-hover:translate-x-1 group-hover:text-amber transition-all" />
                             </button>
 
-                            <div className="bg-white border border-zinc-100 p-8 rounded-[2rem] flex items-center justify-between">
+                            <div className="bg-white border border-zinc-100 p-6 md:p-8 rounded-[2rem] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div className="flex items-center gap-5">
                                     <div className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center">
                                         <ShieldCheck size={22} className="text-emerald-500" />
@@ -262,7 +262,7 @@ function AgentConfirmingContent() {
                             </Suspense>
 
                             {/* Help Banner */}
-                            <div className="mt-8 bg-zinc-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
+                            <div className="mt-8 bg-zinc-900 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-amber/20 transition-all duration-700" />
                                 <Headphones className="text-amber mb-4" size={24} />
                                 <h4 className="text-lg font-bold mb-2">Priority Support</h4>

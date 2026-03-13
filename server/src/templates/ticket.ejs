@@ -294,7 +294,10 @@
                 </div>
                 <div class="detail-item">
                     <div class="label">Airline</div>
-                    <div class="value">
+                    <div class="value" style="display: flex; align-items: center; gap: 8px;">
+                        <% if (airlineLogo) { %>
+                            <img src="<%= airlineLogo %>" alt="" style="height: 20px; width: auto; background: white; border-radius: 4px; padding: 2px;">
+                        <% } %>
                         <%= flight.airline %>
                     </div>
                 </div>

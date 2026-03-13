@@ -38,6 +38,9 @@ export const generateTicketPdf = async (booking: any, passengerName: string, ema
             airline: booking.flight_data?.airline || 'Luxel Charters',
             aircraft: booking.flight_data?.aircraft || 'Luxel Jet',
         },
+        airlineLogo: booking.flight_data?.airlineCode 
+            ? `https://www.gstatic.com/flights/airline_logos/70px/${booking.flight_data.airlineCode}.png`
+            : null,
         cabinClass: 'First Class Premium',
         dateIssued: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     };

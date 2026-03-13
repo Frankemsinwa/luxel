@@ -27,7 +27,7 @@ const getIataCode = (location: string): string => {
     return match ? match[1] : location.split(',')[0].substring(0, 3).toUpperCase();
 };
 
-const EUR_TO_NGN_RATE = 1750; // Current estimated rate or configurable
+const EUR_TO_NGN_RATE = 1590; // Mid-market rate as of Mar 2026 (Xe/Wise avg)
 
 // Simple in-memory cache for the prototype
 let searchCache: Map<string, any> = new Map();
@@ -145,7 +145,7 @@ export const searchFlights = async (searchParams: {
             destinationLocationCode: destinationCode,
             departureDate: depDateOnly,
             adults: adults || '1',
-            max: '20'
+            max: '250' // Increased for wakanow-level variety
         };
 
         if ((tripType || '').toUpperCase() === 'ROUND_TRIP' && retDateOnly) {
@@ -175,9 +175,13 @@ export const searchFlights = async (searchParams: {
             }
         }
 
+        const carriers = response.result.dictionaries?.carriers || {};
+
         const mappedFlights = response.data.map((offer: any) => {
             const rawPrice = parseFloat(offer.price.total);
             const convertedPrice = Math.round(rawPrice * EUR_TO_NGN_RATE);
+            const airlineCode = offer.validatingAirlineCodes[0];
+            const airlineName = carriers[airlineCode] || airlineCode || 'Unknown Airline';
 
             const detailedItineraries = offer.itineraries.map((itinerary: any) => ({
                 duration: itinerary.duration.replace('PT', '').toLowerCase(),
@@ -185,7 +189,8 @@ export const searchFlights = async (searchParams: {
                     departure: segment.departure,
                     arrival: segment.arrival,
                     carrierCode: segment.carrierCode,
-                    logo: `https://pics.avs.io/al/${segment.carrierCode}.png`,
+                    carrierName: carriers[segment.carrierCode] || segment.carrierCode,
+                    logo: `https://www.gstatic.com/flights/airline_logos/70px/${segment.carrierCode}.png`,
                     number: segment.number,
                     aircraft: segment.aircraft.code,
                     duration: segment.duration.replace('PT', '').toLowerCase(),
@@ -196,8 +201,9 @@ export const searchFlights = async (searchParams: {
 
             return {
                 id: offer.id,
-                airline: offer.validatingAirlineCodes[0] || 'Unknown',
-                logo: `https://pics.avs.io/al/${offer.validatingAirlineCodes[0]}.png`,
+                airlineCode: airlineCode,
+                airline: airlineName,
+                logo: `https://www.gstatic.com/flights/airline_logos/70px/${airlineCode}.png`,
                 departureTime: offer.itineraries[0].segments[0].departure.at.split('T')[1].substring(0, 5),
                 departureCode: offer.itineraries[0].segments[0].departure.iataCode,
                 departureCity: originCode,

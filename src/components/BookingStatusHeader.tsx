@@ -47,14 +47,14 @@ export default function BookingStatusHeader({ currentStep }: BookingStatusHeader
     ];
 
     return (
-        <div className="max-w-5xl mx-auto w-full py-16 px-8 pt-24 select-none">
+        <div className="max-w-5xl mx-auto w-full py-8 md:py-16 px-4 md:px-8 pt-32 md:pt-40 select-none">
             <div className="relative">
                 {/* Background Line */}
-                <div className="absolute top-5 left-0 w-full h-[2px] bg-black/10 z-0 rounded-full" />
+                <div className="absolute top-4 md:top-5 left-0 w-full h-[2px] bg-black/10 z-0 rounded-full" />
 
                 {/* Active Progress Line */}
                 <motion.div
-                    className="absolute top-5 left-0 h-[2px] bg-black z-0 rounded-full origin-left"
+                    className="absolute top-4 md:top-5 left-0 h-[2px] bg-black z-0 rounded-full origin-left"
                     initial={{ width: '0%' }}
                     animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
                     transition={{ type: "spring", stiffness: 50, damping: 15 }}
@@ -70,8 +70,7 @@ export default function BookingStatusHeader({ currentStep }: BookingStatusHeader
                     {steps.map((step) => {
                         const isCompleted = currentStep > step.id;
                         const isActive = currentStep === step.id;
-                        const isPending = currentStep < step.id;
-
+ 
                         return (
                             <div key={step.id} className="relative z-10 flex flex-col items-center group">
                                 {/* Step Circle */}
@@ -79,12 +78,12 @@ export default function BookingStatusHeader({ currentStep }: BookingStatusHeader
                                     initial={false}
                                     animate={{
                                         backgroundColor: isCompleted ? "#000000" : isActive ? "#000000" : "#F4F4F5",
-                                        scale: isActive ? 1.15 : 1,
+                                        scale: isActive ? (typeof window !== 'undefined' && window.innerWidth < 768 ? 1.05 : 1.15) : 1,
                                     }}
-                                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm ${isCompleted || isActive ? 'text-amber' : 'text-black/30'
-                                        } ${isActive ? 'ring-[8px] ring-black/10 shadow-lg shadow-black/20' : 'ring-0'}`}
+                                    className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm ${isCompleted || isActive ? 'text-amber' : 'text-black/30'
+                                        } ${isActive ? 'ring-[6px] md:ring-[8px] ring-black/10 shadow-lg shadow-black/20' : 'ring-0'}`}
                                 >
-                                    <div className="relative w-full h-full flex items-center justify-center">
+                                    <div className="relative w-full h-full flex items-center justify-center scale-90 md:scale-100">
                                         <AnimatePresence mode="wait">
                                             {isCompleted ? (
                                                 <motion.div
@@ -111,21 +110,21 @@ export default function BookingStatusHeader({ currentStep }: BookingStatusHeader
                                 </motion.div>
 
                                 {/* Step Label */}
-                                <div className="mt-6 flex flex-col items-center">
-                                    <span className={`text-caption font-medium uppercase tracking-[0.2em] transition-colors duration-500 ${isActive ? 'text-black' : 'text-black/50'
-                                        }`}>
+                                <div className="mt-3 md:mt-6 flex flex-col items-center max-w-[60px] md:max-w-none">
+                                    <span className={`text-[8px] md:text-caption font-medium uppercase tracking-[0.1em] md:tracking-[0.2em] transition-colors duration-500 text-center ${isActive ? 'text-black' : 'text-black/40'
+                                        } ${!isActive && 'hidden md:block'}`}>
                                         {isActive ? step.activeLabel : isCompleted ? step.completedLabel : step.label}
                                     </span>
                                     {isActive && (
                                         <motion.div
                                             layoutId="active-dot"
-                                            className="w-1 h-1 bg-black rounded-full mt-2"
+                                            className="w-1 h-1 bg-black rounded-full mt-1 md:mt-2"
                                         />
                                     )}
                                 </div>
 
-                                {/* Hover Tooltip */}
-                                <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-amber text-black text-caption font-medium py-2 px-4 rounded-xl pointer-events-none whitespace-nowrap tracking-widest uppercase">
+                                {/* Hover Tooltip - Hidden on mobile */}
+                                <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-amber text-black text-caption font-medium py-2 px-4 rounded-xl pointer-events-none whitespace-nowrap tracking-widest uppercase hidden md:block">
                                     Step {step.id}: {step.label}
                                 </div>
                             </div>

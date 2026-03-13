@@ -35,6 +35,7 @@ function FlightDetailsContent() {
     const initialFlight = {
         price: Number(searchParams.get('price')) || 0,
         airline: searchParams.get('airline') || "",
+        airlineCode: searchParams.get('airlineCode') || "",
         logo: searchParams.get('logo') || "",
         depTime: searchParams.get('depTime') || "---",
         depCode: searchParams.get('depCode') || "---",
@@ -132,41 +133,42 @@ function FlightDetailsContent() {
                     {/* Left Column - Flight Info */}
                     <div className="flex-1 space-y-8">
 
-                        <div className="bg-black rounded-[3rem] p-10 shadow-sm border border-white/10 flex flex-col gap-12 relative overflow-hidden text-flight-card">
+                        <div className="bg-black rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-sm border border-white/10 flex flex-col gap-8 md:gap-12 relative overflow-hidden text-flight-card">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-amber/10 rounded-full blur-3xl -mr-32 -mt-32" />
 
                             {segments.length > 0 ? (
                                 segments.map((segment: any, idx: number) => (
                                     <div key={idx} className="relative z-10">
-                                        <div className="flex gap-8">
+                                        <div className="flex gap-4 md:gap-8">
                                             <div className="flex flex-col items-center">
                                                 <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center p-2 overflow-hidden relative">
                                                     <img
-                                                        src={`/flight-logos/${segment.carrierCode}.png`}
-                                                        alt={segment.carrierCode}
+                                                        src={`https://www.gstatic.com/flights/airline_logos/70px/${segment.carrierCode}.png`}
+                                                        alt={segment.carrierName || segment.carrierCode}
                                                         className="w-full h-full object-contain relative z-10"
                                                         onError={(e) => {
                                                             const target = e.target as HTMLImageElement;
-                                                            target.style.display = 'none';
-                                                            const fallback = target.nextElementSibling as HTMLElement;
-                                                            if (fallback) fallback.style.display = 'flex';
+                                                            if (!target.dataset.fallback) {
+                                                                target.dataset.fallback = '1';
+                                                                target.src = `https://pics.avs.io/200/80/${segment.carrierCode}.png`;
+                                                            } else {
+                                                                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(segment.carrierName || segment.carrierCode)}&background=1a1a1a&color=dbb35e&bold=true&size=128`;
+                                                            }
                                                         }}
                                                     />
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 text-zinc-400">
-                                                        <span className="text-[10px] font-black uppercase tracking-tighter">
-                                                            {segment.carrierCode || 'Air'}
-                                                        </span>
-                                                    </div>
                                                 </div>
                                                 {idx < segments.length - 1 && (
                                                     <div className="w-[2px] flex-1 bg-white/10 my-4" />
                                                 )}
                                             </div>
                                             <div className="flex-1">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-[10px] font-semibold text-flight-card uppercase tracking-widest">
-                                                        {idx === 0 ? "Departure" : "Connection"}
-                                                    </span>
+                                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-2 mb-2">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] font-semibold text-flight-card uppercase tracking-widest">
+                                                            {idx === 0 ? "Departure" : "Connection"}
+                                                        </span>
+                                                        <span className="text-[10px] font-bold text-amber uppercase tracking-wider mt-1">{segment.carrierName || segment.carrierCode}</span>
+                                                    </div>
                                                     <span className="text-xs font-semibold text-flight-card/50 font-mono">
                                                         Terminal {segment.departure?.terminal || '1'} • {formatDate(segment.departure?.at)}
                                                     </span>
@@ -186,7 +188,7 @@ function FlightDetailsContent() {
                                                 </div>
 
                                                 {idx < segments.length - 1 && (
-                                                    <div className="mt-12 mb-4 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                    <div className="mt-8 md:mt-12 mb-4 bg-white/5 border border-white/10 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                                         <div className="flex items-center gap-3">
                                                             <span className="font-semibold text-flight-card">Layover at {segment.arrival?.iataCode}</span>
                                                             <div className="w-1 h-1 rounded-full bg-white" />
@@ -198,7 +200,7 @@ function FlightDetailsContent() {
 
                                                 {idx === segments.length - 1 && (
                                                     <div className="mt-12">
-                                                        <div className="flex items-center justify-between mb-2">
+                                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-2 mb-2">
                                                             <span className="text-[10px] font-semibold text-flight-card uppercase tracking-widest">Arrival</span>
                                                             <span className="text-xs font-semibold text-flight-card/50 font-mono">
                                                                 Terminal {segment.arrival?.terminal || '1'} • {formatDate(segment.arrival?.at)}
@@ -239,8 +241,8 @@ function FlightDetailsContent() {
                         </div>
 
                         {/* Baggage & Fare Rules Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="bg-flight-card p-10 rounded-[2.5rem] shadow-sm border border-black/5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                            <div className="bg-flight-card p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-black/5">
                                 <div className="flex items-center gap-3 mb-8">
                                     <Briefcase className="text-black" size={24} />
                                     <h3 className="text-heading-sm text-black">Baggage Allowance</h3>
@@ -264,14 +266,14 @@ function FlightDetailsContent() {
                                                 {fullFlight?.baggage?.quantity || 2} Checked bags
                                             </div>
                                             <div className="text-xs text-black/50 uppercase tracking-widest mt-0.5 font-semibold">
-                                                {fullFlight?.airline === 'BA' ? '32kg each' : '23kg each'} • Included
+                                                {displayFlight.airlineCode === 'BA' ? '32kg each' : '23kg each'} • Included
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-flight-card p-10 rounded-[2.5rem] shadow-sm border border-black/5">
+                            <div className="bg-flight-card p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-black/5">
                                 <div className="flex items-center gap-3 mb-8">
                                     <PenTool className="text-black" size={24} />
                                     <h3 className="text-heading-sm text-black">Fare Rules</h3>
@@ -302,7 +304,7 @@ function FlightDetailsContent() {
 
                     {/* Right Column - Pricing Summary */}
                     <div className="w-full lg:w-96 flex flex-col gap-8">
-                        <div className="bg-flight-card p-10 rounded-[3rem] shadow-xl shadow-black/5 border border-black/5">
+                        <div className="bg-flight-card p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-xl shadow-black/5 border border-black/5">
                             <h3 className="text-caption font-medium text-black/50 uppercase tracking-[0.2em] mb-10">Price Summary</h3>
 
                             <div className="space-y-6 mb-10 pb-10 border-b border-black/10">
@@ -329,6 +331,7 @@ function FlightDetailsContent() {
                                     const params = new URLSearchParams(searchParams.toString());
                                     params.set('price', (fullFlight?.price || initialFlight.price).toString());
                                     params.set('airline', fullFlight?.airline || initialFlight.airline);
+                                    params.set('airlineCode', fullFlight?.airlineCode || initialFlight.airlineCode);
                                     router.push(`/flights/booking?${params.toString()}`);
                                 }}
                                 className="w-full bg-black text-flight-card py-6 rounded-2xl font-semibold text-sm shadow-lg shadow-black/20 hover:bg-black/80 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 group mb-8"
@@ -352,8 +355,8 @@ function FlightDetailsContent() {
                         </div>
 
                         {/* Help Desk */}
-                        <div className="bg-black text-flight-card p-8 rounded-[2.5rem] flex items-center gap-6 group hover:translate-y-[-4px] transition-all cursor-pointer">
-                            <div className="w-14 h-14 rounded-2xl bg-amber/10 flex items-center justify-center group-hover:bg-amber group-hover:text-black transition-colors">
+                        <div className="bg-black text-flight-card p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-4 md:gap-6 group hover:translate-y-[-4px] transition-all cursor-pointer">
+                            <div className="w-14 h-14 rounded-2xl bg-amber/10 flex items-center justify-center min-w-[56px] min-h-[56px] group-hover:bg-amber group-hover:text-black transition-colors">
                                 <Headphones size={24} />
                             </div>
                             <div>

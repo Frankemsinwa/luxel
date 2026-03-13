@@ -50,10 +50,10 @@ function SuccessContent() {
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="relative z-10 bg-white/5 backdrop-blur-2xl border border-white/10 p-12 rounded-[4rem] max-w-xl w-full text-center shadow-2xl"
+                className="relative z-10 bg-white/5 backdrop-blur-2xl border border-white/10 p-6 md:p-12 rounded-[2rem] md:rounded-[4rem] max-w-xl w-full text-center shadow-2xl"
             >
                 {isVerifying ? (
-                    <div className="space-y-6 py-12">
+                    <div className="space-y-6 py-6 md:py-12">
                         <div className="w-20 h-20 border-4 border-amber border-t-transparent rounded-full animate-spin mx-auto" />
                         <h2 className="text-heading-lg text-white tracking-tight">Authenticating Transaction...</h2>
                         <p className="text-body text-white/50">Securing your luxury itinerary with the global clearing house.</p>
@@ -64,13 +64,13 @@ function SuccessContent() {
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ type: "spring", damping: 12 }}
-                            className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-10 shadow-lg shadow-emerald-500/20"
+                            className="w-20 h-20 md:w-24 md:h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 md:mb-10 shadow-lg shadow-emerald-500/20"
                         >
                             <CheckCircle2 size={48} className="text-white" />
                         </motion.div>
 
                         <h1 className="text-heading-xl text-white tracking-tight mb-4">Itinerary Secured</h1>
-                        <p className="text-body-lg text-white/60 mb-12">Your reservation {bookingRef} has been verified. Welcome to the Luxel elite.</p>
+                        <p className="text-body-lg text-white/60 mb-8 md:mb-12">Your reservation {bookingRef} has been verified. Welcome to the Luxel elite.</p>
 
                         <div className="grid grid-cols-1 gap-4">
                             <button
@@ -91,7 +91,7 @@ function SuccessContent() {
                         </div>
                     </>
                 ) : (
-                    <div className="py-12">
+                    <div className="py-6 md:py-12">
                         <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
                             <span className="text-heading-xl text-red-500">!</span>
                         </div>

@@ -232,9 +232,7 @@ export default function Home() {
                     {card.desc}
                   </p>
 
-                  <div className="mt-8 flex items-center gap-2 text-amber text-[10px] font-normal tracking-widest uppercase opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                    Explore More <ChevronRight size={10} />
-                  </div>
+
                 </motion.div>
               ))}
             </div>

@@ -7,7 +7,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
 import { motion, AnimatePresence } from "framer-motion";
-// ... icons
 import {
     Search,
     ChevronRight,
@@ -17,7 +16,8 @@ import {
     User,
     PenTool,
     ChevronDown,
-    Plane
+    Plane,
+    Check
 } from "lucide-react";
 
 const initialFlightResults: any[] = [];
@@ -54,12 +54,21 @@ function FlightsContent() {
             travelClass: searchParams.get('travelClass') || 'ECONOMY',
             passengers: `${Number(searchParams.get('adults') || 1) + Number(searchParams.get('children') || 0)} Passenger${(Number(searchParams.get('adults') || 1) + Number(searchParams.get('children') || 0)) > 1 ? 's' : ''}`
         });
-        // Collapse search bar after updating
         setIsModifyingSearch(false);
     }, [searchParams]);
 
     // Filter states
     const [isModifyingSearch, setIsModifyingSearch] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
+    const [isDesktop, setIsDesktop] = useState(false);
+
+    useEffect(() => {
+        setIsDesktop(window.innerWidth >= 1024);
+        const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const [priceRange, setPriceRange] = useState(3500000);
     const [selectedAirlines, setSelectedAirlines] = useState<string[]>([]);
     const [results, setResults] = useState(initialFlightResults);
@@ -83,7 +92,6 @@ function FlightsContent() {
         return map;
     }, [results]);
 
-    // On a fresh result set, default to "all airlines selected" so filters match what's on screen.
     useEffect(() => {
         setSelectedAirlines(availableAirlines);
     }, [availableAirlines]);
@@ -103,7 +111,7 @@ function FlightsContent() {
     useEffect(() => {
         const fetchFlights = async () => {
             setIsLoading(true);
-            setResults([]); // Clear previous results while loading
+            setResults([]); 
             setFetchError(null);
             try {
                 const response = await api.get('/flights/search', {
@@ -174,8 +182,8 @@ function FlightsContent() {
             {/* Search Summary Bar */}
             <div className="bg-white border-b border-zinc-100 pt-32 pb-6 px-6 relative z-[40]">
                 <div className="max-w-7xl mx-auto">
-                    <div className="flex flex-wrap items-center justify-between gap-10">
-                        <div className="flex flex-wrap items-center gap-12">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-10">
+                        <div className="flex flex-wrap items-center gap-6 md:gap-12">
                             <div className="flex flex-col">
                                 <span className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Flight Route</span>
                                 <span className="text-body font-medium text-zinc-900">{searchData.from} to {searchData.to}</span>
@@ -255,79 +263,110 @@ function FlightsContent() {
                     </div>
                 </div>
             )}
-            <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12 flex flex-col lg:flex-row gap-10">
+            <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6 lg:py-12 flex flex-col lg:flex-row gap-10">
+                
+                {/* Mobile Filter Toggle */}
+                <div className="lg:hidden flex items-center justify-between bg-black p-5 rounded-3xl shadow-sm border border-white/10 mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
+                            <Filter size={18} />
+                        </div>
+                        <div>
+                            <h3 className="text-body font-bold text-white uppercase tracking-widest text-[10px]">Active Filters</h3>
+                            <p className="text-[10px] text-white/50">{selectedAirlines.length} Airlines • ₦{(priceRange/1000).toFixed(0)}k Max</p>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="bg-flight-card text-black px-6 py-2.5 rounded-xl text-caption font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
+                    >
+                        {showFilters ? 'Apply' : 'Filters'}
+                    </button>
+                </div>
 
                 {/* Filters Sidebar */}
-                <aside className="w-full lg:w-80 flex flex-col gap-8">
-                    <div className="bg-black p-8 rounded-[2.5rem] shadow-sm border border-white/10">
-                        <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-heading-sm text-white">Filters</h2>
-                            <button
-                                 onClick={() => {
-                                     setPriceRange(3500000);
-                                     setSelectedAirlines(availableAirlines);
-                                 }}
-                                 className="text-caption font-medium text-white/60 hover:underline uppercase tracking-widest"
-                             >
-                                 Reset
-                            </button>
-                        </div>
-
-                        {/* Price Range */}
-                        <div className="mb-10">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
-                                    <Filter size={18} />
+                <AnimatePresence>
+                    {(showFilters || isDesktop) && (
+                        <motion.aside 
+                            initial={!isDesktop ? { height: 0, opacity: 0 } : {}}
+                            animate={!isDesktop ? { height: 'auto', opacity: 1 } : {}}
+                            exit={!isDesktop ? { height: 0, opacity: 0 } : {}}
+                            className="w-full lg:w-80 flex flex-col gap-8 overflow-hidden lg:overflow-visible"
+                        >
+                            <div className="bg-black p-8 rounded-[2.5rem] shadow-sm border border-white/10">
+                                <div className="flex items-center justify-between mb-8">
+                                    <h2 className="text-heading-sm text-white">Filters</h2>
+                                    <button
+                                        onClick={() => {
+                                            setPriceRange(3500000);
+                                            setSelectedAirlines(availableAirlines);
+                                        }}
+                                        className="text-caption font-medium text-white/60 hover:underline uppercase tracking-widest"
+                                    >
+                                        Reset
+                                    </button>
                                 </div>
-                                <h3 className="text-heading-sm text-white">Price Range</h3>
-                            </div>
-                            <input
-                                type="range"
-                                min="100000"
-                                max="3500000"
-                                step="50000"
-                                value={priceRange}
-                                onChange={(e) => setPriceRange(parseInt(e.target.value))}
-                                className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber mb-4"
-                            />
-                            <div className="flex justify-between text-[10px] font-black text-white/50 tracking-widest uppercase">
-                                <span>₦100k</span>
-                                <span className="text-white">₦{(priceRange / 1000).toFixed(0)}k</span>
-                                <span>₦3.5M</span>
-                            </div>
-                        </div>
 
-                        {/* Airlines */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
-                                    <Plane size={18} />
-                                </div>
-                                <h3 className="text-heading-sm text-white">Airlines</h3>
-                            </div>
-                             <div className="space-y-4">
-                                {availableAirlines.length > 0 ? availableAirlines.map((airline, i) => (
-                                    <label key={i} className="flex items-center justify-between group cursor-pointer">
-                                        <div className="flex items-center gap-3">
-                                            <div
-                                                onClick={() => handleAirlineToggle(airline)}
-                                                className={`w-5 h-5 rounded border transition-colors flex items-center justify-center ${selectedAirlines.includes(airline) ? 'bg-amber border-amber' : 'border-white/30 group-hover:border-white'}`}
-                                            >
-                                                {selectedAirlines.includes(airline) && <div className="w-2 h-2 rounded-full bg-black" />}
-                                            </div>
-                                            <span className="text-body-sm text-white/70 group-hover:text-white">
-                                                {airline}
-                                                <span className="text-white/40 ml-2">({airlineCounts.get(airline) || 0})</span>
-                                            </span>
+                                {/* Price Range */}
+                                <div className="mb-10">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
+                                            <Filter size={18} />
                                         </div>
-                                    </label>
-                                )) : (
-                                    <p className="text-body-sm font-medium text-white/50">No airlines yet</p>
-                                )}
-                             </div>
-                         </div>
-                     </div>
-                 </aside>
+                                        <h3 className="text-heading-sm text-white">Price Range</h3>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="100000"
+                                        max="3500000"
+                                        step="50000"
+                                        value={priceRange}
+                                        onChange={(e) => setPriceRange(parseInt(e.target.value))}
+                                        className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber mb-4"
+                                    />
+                                    <div className="flex justify-between text-[10px] font-black text-white/50 tracking-widest uppercase">
+                                        <span>₦100k</span>
+                                        <span className="text-white">₦{(priceRange / 1000).toFixed(0)}k</span>
+                                        <span>₦3.5M</span>
+                                    </div>
+                                </div>
+
+                                {/* Airlines */}
+                                <div>
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
+                                            <Plane size={18} />
+                                        </div>
+                                        <h3 className="text-heading-sm text-white">Airlines</h3>
+                                    </div>
+                                    <div className="space-y-4">
+                                        {availableAirlines.map(airline => (
+                                            <label key={airline} className="flex items-center justify-between cursor-pointer group">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center ${
+                                                        selectedAirlines.includes(airline) 
+                                                            ? 'bg-amber border-amber' 
+                                                            : 'border-white/20 group-hover:border-white/40'
+                                                    }`}>
+                                                        {selectedAirlines.includes(airline) && <Check size={12} className="text-black" strokeWidth={3} />}
+                                                    </div>
+                                                    <span className="text-body-sm text-white/80 group-hover:text-white transition-colors capitalize">{airline}</span>
+                                                </div>
+                                                <span className="text-[10px] font-bold text-white/40">{airlineCounts.get(airline) || 0}</span>
+                                                <input
+                                                    type="checkbox"
+                                                    className="hidden"
+                                                    checked={selectedAirlines.includes(airline)}
+                                                    onChange={() => handleAirlineToggle(airline)}
+                                                />
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.aside>
+                    )}
+                </AnimatePresence>
 
                 {/* Results Area */}
                 <div className="flex-1">
@@ -389,30 +428,29 @@ function FlightsContent() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
                                         layout
-                                        className="bg-flight-card rounded-[2.5rem] p-8 lg:p-10 shadow-sm border border-black/5 flex flex-col lg:flex-row items-center gap-10 hover:shadow-xl hover:scale-[1.01] transition-all group"
+                                        className="bg-flight-card rounded-[2.5rem] p-6 lg:p-10 shadow-sm border border-black/5 flex flex-col lg:flex-row items-center gap-8 lg:gap-10 hover:shadow-xl hover:scale-[1.01] transition-all group"
                                     >
                                         {/* Flight Info */}
                                         <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 items-center gap-8 md:gap-4">
-                                            <div className="flex items-center gap-6">
-                                                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-3 border border-black/5 group-hover:bg-white transition-colors overflow-hidden relative">
+                                            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
+                                                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-2 border border-black/5 group-hover:shadow-md transition-all overflow-hidden relative">
                                                     <img
-                                                        src={`/flight-logos/${flight.airline}.png`}
+                                                        src={`https://www.gstatic.com/flights/airline_logos/70px/${flight.airlineCode}.png`}
                                                         alt={flight.airline}
                                                         className="w-full h-full object-contain relative z-10"
                                                         onError={(e) => {
                                                             const target = e.target as HTMLImageElement;
-                                                            target.style.display = 'none';
-                                                            const fallback = target.nextElementSibling as HTMLElement;
-                                                            if (fallback) fallback.style.display = 'flex';
+                                                            if (!target.dataset.fallback) {
+                                                                target.dataset.fallback = '1';
+                                                                target.src = `https://pics.avs.io/200/80/${flight.airlineCode}.png`;
+                                                            } else {
+                                                                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(flight.airline)}&background=1a1a1a&color=dbb35e&bold=true&size=128`;
+                                                            }
                                                         }}
                                                     />
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 text-zinc-400">
-                                                        <span className="text-[10px] font-black uppercase tracking-tighter">
-                                                            {flight.airline || 'Air'}
-                                                        </span>
-                                                    </div>
                                                 </div>
                                                 <div>
+                                                    <div className="text-[10px] font-bold text-amber uppercase tracking-[0.2em] mb-1">{flight.airline}</div>
                                                     <div className="text-2xl font-semibold text-black">{flight.departureTime}</div>
                                                     <div className="text-sm font-medium text-black/60 tracking-widest">{flight.departureCode} • {flight.departureCity}</div>
                                                 </div>
@@ -428,7 +466,7 @@ function FlightsContent() {
                                                 <div className="text-[10px] font-semibold text-black uppercase tracking-widest">{flight.stops}</div>
                                             </div>
 
-                                            <div className="text-right">
+                                            <div className="text-center md:text-right">
                                                 <div className="text-2xl font-semibold text-black">{flight.arrivalTime}</div>
                                                 <div className="text-sm font-medium text-black/60 tracking-widest">{flight.arrivalCode}-{flight.arrivalCity}</div>
                                             </div>
@@ -448,7 +486,8 @@ function FlightsContent() {
                                                         id: flight.id,
                                                         price: flight.price.toString(),
                                                         airline: flight.airline,
-                                                        logo: flight.logo,
+                                                        airlineCode: flight.airlineCode || '',
+                                                        logo: flight.logo || '',
                                                         depTime: flight.departureTime,
                                                         depCode: flight.departureCode,
                                                         depCity: flight.departureCity,

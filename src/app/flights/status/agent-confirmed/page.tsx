@@ -54,7 +54,7 @@ function AgentConfirmedContent() {
             </div>
 
             <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12">
-                <div className="flex flex-col lg:flex-row gap-16">
+                <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
 
                     {/* Left Side: Status & Timeline (Primary Focus) */}
                     <div className="flex-1 space-y-12">
@@ -81,8 +81,8 @@ function AgentConfirmedContent() {
                             </div>
 
                             {/* Payment Progress Helper */}
-                            <div className="bg-white border border-zinc-100 rounded-[2rem] p-8 flex flex-col md:flex-row items-center justify-between gap-8">
-                                <div className="flex items-center gap-6">
+                            <div className="bg-white border border-zinc-100 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 text-center md:text-left">
+                                <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
                                     <div className="w-14 h-14 rounded-2xl bg-amber/5 flex items-center justify-center text-amber relative overflow-hidden group">
                                         <div className="absolute inset-0 bg-amber/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                                         <Wallet size={24} className="relative z-10" />
@@ -92,10 +92,10 @@ function AgentConfirmedContent() {
                                         <p className="text-body-sm text-zinc-400">Secure private jet rates for next 2 hours</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 w-full md:w-auto">
+                                <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
                                     <button
                                         onClick={() => router.push(`/flights/status/payment?${searchParams.toString()}`)}
-                                        className="flex-1 md:flex-none bg-amber text-white px-10 py-5 rounded-2xl text-body-sm font-medium shadow-xl shadow-amber/20 hover:bg-amber-dark transition-all active:scale-95 whitespace-nowrap"
+                                        className="flex-1 md:flex-none bg-amber text-white px-8 md:px-10 py-5 rounded-2xl text-body-sm font-medium shadow-xl shadow-amber/20 hover:bg-amber-dark transition-all active:scale-95 whitespace-nowrap"
                                     >
                                         Proceed to Payment
                                     </button>
@@ -113,7 +113,7 @@ function AgentConfirmedContent() {
                                 <motion.div
                                     initial={{ x: -20, opacity: 0 }}
                                     animate={{ x: 0, opacity: 1 }}
-                                    className="bg-emerald-50/30 p-6 rounded-2xl border border-emerald-100/50 flex items-center justify-between"
+                                    className="bg-emerald-50/30 p-4 md:p-6 rounded-2xl border border-emerald-100/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0"
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-50">
@@ -123,7 +123,7 @@ function AgentConfirmedContent() {
                                     </div>
                                     <span className="text-caption font-medium text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-md">NOW</span>
                                 </motion.div>
-                                <div className="bg-white p-6 rounded-2xl border border-zinc-100 flex items-center justify-between">
+                                <div className="bg-white p-4 md:p-6 rounded-2xl border border-zinc-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
                                     <div className="flex items-center gap-4">
                                         <div className="w-8 h-8 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 border border-zinc-100">
                                             <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
@@ -148,8 +148,8 @@ function AgentConfirmedContent() {
                             </Suspense>
 
                             {/* Trust Banner */}
-                            <div className="mt-8 p-8 rounded-[2rem] border border-zinc-100 bg-zinc-50/50 flex items-center gap-6">
-                                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-emerald-500 shadow-sm">
+                            <div className="mt-8 p-6 md:p-8 rounded-[2rem] border border-zinc-100 bg-zinc-50/50 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 text-center sm:text-left">
+                                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-emerald-500 shadow-sm shrink-0 mx-auto sm:mx-0">
                                     <ShieldCheck size={24} />
                                 </div>
                                 <div>

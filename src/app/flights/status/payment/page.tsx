@@ -128,7 +128,7 @@ function PaymentContent() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     {/* Left Side: Summary & Reward */}
                     <div className="space-y-8">
-                        <div className="bg-black rounded-[3rem] p-10 shadow-sm border border-white/10">
+                        <div className="bg-black rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-sm border border-white/10">
                             <div className="flex items-center gap-3 mb-10">
                                 <div className="px-3 py-1 rounded-full bg-flight-card text-black text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-black" />
@@ -137,19 +137,19 @@ function PaymentContent() {
                                 <span className="text-[10px] font-bold text-white/50">Ref: {booking?.airline_booking_reference || booking?.booking_reference || '#LX-PENDING'}</span>
                             </div>
 
-                            <div className="flex items-baseline justify-between mb-8">
+                            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 sm:gap-0 mb-8">
                                 <div className="flex flex-col">
                                     <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1">Departure</span>
                                     <span className="text-xl font-bold text-white">{route.from} ({route.fromCode})</span>
                                 </div>
-                                <div className="flex-1 mx-4 h-px border-t-2 border-dashed border-white/10" />
-                                <div className="flex flex-col text-right">
+                                <div className="flex-1 mx-4 h-px border-t-2 border-dashed border-white/10 hidden sm:block" />
+                                <div className="flex flex-col text-left sm:text-right">
                                     <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1">Arrival</span>
                                     <span className="text-xl font-bold text-white">{route.to} ({route.toCode})</span>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-8 mb-12">
+                            <div className="grid grid-cols-2 gap-4 md:gap-8 mb-12">
                                 <div>
                                     <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest block mb-1">Date</span>
                                     <span className="text-sm font-bold text-white">{route.depTime}</span>
@@ -185,7 +185,7 @@ function PaymentContent() {
                         </div>
 
                         {/* Reward Card */}
-                        <div className="bg-flight-card/5 border border-black/5 rounded-[2.5rem] p-8 flex items-start gap-6 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                        <div className="bg-flight-card/5 border border-black/5 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 flex items-start gap-4 md:gap-6 relative overflow-hidden group hover:scale-[1.02] transition-transform">
                             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                                 <TrendingUp size={80} />
                             </div>
@@ -203,13 +203,13 @@ function PaymentContent() {
 
                     {/* Right Side: Secure Payment Box */}
                     <div className="space-y-8">
-                        <div className="bg-white rounded-[3rem] shadow-xl shadow-black/5 border border-black/5 overflow-hidden">
-                            <div className="bg-black/5 px-10 py-6 border-b border-black/10 flex items-center gap-4">
+                        <div className="bg-white rounded-[2rem] md:rounded-[3rem] shadow-xl shadow-black/5 border border-black/5 overflow-hidden">
+                            <div className="bg-black/5 px-6 md:px-10 py-4 md:py-6 border-b border-black/10 flex items-center gap-4">
                                 <Building2 size={20} className="text-black/60" />
                                 <h2 className="text-caption font-medium text-zinc-900 uppercase tracking-widest">Secure Checkout</h2>
                             </div>
 
-                            <div className="p-10 flex flex-col justify-center items-center text-center space-y-8 min-h-[400px]">
+                            <div className="p-6 md:p-10 flex flex-col justify-center items-center text-center space-y-6 md:space-y-8 min-h-[300px] md:min-h-[400px]">
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Paystack_Logo.png/1200px-Paystack_Logo.png" alt="Paystack" className="h-10 object-contain mx-auto" />
 
                                 <div>
