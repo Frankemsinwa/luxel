@@ -46,7 +46,7 @@ function AgentConfirmingContent() {
 
             if (!error && data) {
                 if (data.status === 'RESOLVED') {
-                    router.push(`/flights/status/agent-confirmed?${searchParams.toString()}`);
+                    router.replace(`/flights/status/agent-confirmed?${searchParams.toString()}`);
                     return;
                 }
                 if (data.status === 'CLOSED') {
@@ -70,9 +70,10 @@ function AgentConfirmingContent() {
                     filter: `id=eq.${reqId}`
                 },
                 (payload) => {
-                    console.log('Request updated:', payload);
+                    console.log('Request updated (realtime):', payload);
                     if (payload.new.status === 'RESOLVED') {
-                        router.push(`/flights/status/agent-confirmed?${searchParams.toString()}`);
+                        // Immediately navigate - no delay
+                        router.replace(`/flights/status/agent-confirmed?${searchParams.toString()}`);
                     } else if (payload.new.status === 'CLOSED') {
                         setRejected(true);
                     }
@@ -91,10 +92,10 @@ function AgentConfirmingContent() {
             });
         }, 1000);
 
-        // 4. Fallback Polling (in case Realtime websockets fail or aren't enabled in Supabase Dashboard)
+        // 4. Aggressive Polling fallback (every 3 seconds for near-instant reaction)
         const pollingInterval = setInterval(async () => {
             await checkCurrentStatus();
-        }, 15000); // Check every 15 seconds as a backup
+        }, 3000);
 
         return () => {
             clearInterval(timer);

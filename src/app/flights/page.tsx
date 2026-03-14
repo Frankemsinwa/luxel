@@ -17,8 +17,12 @@ import {
     PenTool,
     ChevronDown,
     Plane,
-    Check
+    Check,
+    Mail,
+    Loader2,
+    CheckCircle2
 } from "lucide-react";
+import { supabase } from '@/lib/supabase';
 
 const initialFlightResults: any[] = [];
 
@@ -40,6 +44,66 @@ function FlightsContent() {
         travelClass: searchParams.get('travelClass') || 'ECONOMY',
         passengers: `${Number(searchParams.get('adults') || 1) + Number(searchParams.get('children') || 0)} Passenger${(Number(searchParams.get('adults') || 1) + Number(searchParams.get('children') || 0)) > 1 ? 's' : ''}`
     });
+
+    const [user, setUser] = useState<any>(null);
+    const [requestEmail, setRequestEmail] = useState('');
+    const [showEmailPrompt, setShowEmailPrompt] = useState(false);
+    const [isSubmittingAssistance, setIsSubmittingAssistance] = useState(false);
+    const [assistanceSuccess, setAssistanceSuccess] = useState(false);
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setUser(session?.user ?? null);
+            if (session?.user?.email) {
+                setRequestEmail(session.user.email);
+            }
+        });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+            if (session?.user?.email) {
+                setRequestEmail(session.user.email);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const handleRequestAssistance = async (emailOverride?: string) => {
+        const finalEmail = emailOverride || requestEmail;
+        
+        if (!finalEmail || !finalEmail.includes('@')) {
+            setShowEmailPrompt(true);
+            return;
+        }
+
+        setIsSubmittingAssistance(true);
+        try {
+            const response = await api.post('/flights/request-assistance', {
+                customerEmail: finalEmail,
+                searchPayload: {
+                    from: searchData.from,
+                    to: searchData.to,
+                    departure: searchData.departure,
+                    returnDate: searchData.return,
+                    tripType: searchData.tripType,
+                    adults: searchData.adults,
+                    children: searchData.children,
+                    travelClass: searchData.travelClass
+                }
+            });
+
+            if (response) {
+                setAssistanceSuccess(true);
+                setShowEmailPrompt(false);
+            }
+        } catch (error) {
+            console.error('Assistance request error:', error);
+            alert('Failed to send request. Please try again.');
+        } finally {
+            setIsSubmittingAssistance(false);
+        }
+    };
 
     // Update searchData when URL params change
     useEffect(() => {
@@ -517,7 +581,66 @@ function FlightsContent() {
                                         {results.length === 0 ? (
                                             <>
                                                 <h3 className="text-heading-sm text-black mb-2">No flights found</h3>
-                                                <p className="text-body-sm font-medium text-black/50">Try adjusting your search to find more options.</p>
+                                                <p className="text-body-sm font-medium text-black/50 mb-8 max-w-md mx-auto">
+                                                    We couldn't find any live offers for this route. Would you like the Luxel team to manually search for private charter or commercial options for you?
+                                                </p>
+
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <AnimatePresence mode="wait">
+                                                        {assistanceSuccess ? (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                                animate={{ opacity: 1, scale: 1 }}
+                                                                className="flex flex-col items-center gap-2 p-6 bg-green-50 rounded-[2rem] border border-green-100"
+                                                            >
+                                                                <CheckCircle2 className="text-green-600 mb-2" size={32} />
+                                                                <p className="text-body-sm font-semibold text-green-900">Request Sent!</p>
+                                                                <p className="text-caption text-green-700 uppercase tracking-widest text-[10px]">An agent will contact you shortly</p>
+                                                            </motion.div>
+                                                        ) : (
+                                                            <div className="w-full max-w-sm space-y-4">
+                                                                {showEmailPrompt && !user && (
+                                                                    <motion.div
+                                                                        initial={{ opacity: 0, y: 10 }}
+                                                                        animate={{ opacity: 1, y: 0 }}
+                                                                        className="space-y-3"
+                                                                    >
+                                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-black/40 block text-left px-4">Contact Email</label>
+                                                                        <input
+                                                                            type="email"
+                                                                            placeholder="your@email.com"
+                                                                            value={requestEmail}
+                                                                            onChange={(e) => setRequestEmail(e.target.value)}
+                                                                            className="w-full bg-black/5 border border-black/10 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:ring-2 focus:ring-amber/30 transition-all font-medium"
+                                                                        />
+                                                                    </motion.div>
+                                                                )}
+
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleRequestAssistance()}
+                                                                    disabled={isSubmittingAssistance}
+                                                                    className="w-full bg-black text-white py-5 rounded-[2rem] font-semibold text-sm shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+                                                                >
+                                                                    {isSubmittingAssistance ? (
+                                                                        <>
+                                                                            <Loader2 className="animate-spin" size={20} />
+                                                                            <span>Sending Request...</span>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <Mail size={20} />
+                                                                            <span>Request Luxel Assistance</span>
+                                                                        </>
+                                                                    )}
+                                                                </button>
+                                                                {!showEmailPrompt && !user && (
+                                                                    <p className="text-[10px] text-black/40 uppercase tracking-tighter">Enter your email to receive a quote</p>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
                                             </>
                                         ) : (
                                             <>
