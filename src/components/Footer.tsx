@@ -1,6 +1,22 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Footer() {
+  const resources = [
+    { name: "About Us", href: "/about" },
+    { name: "Contact Us", href: "/contact" },
+    { name: "Book your stay", href: "/hotels" },
+    { name: "Become a Host", href: "/become-a-host" },
+    { name: "Careers", href: "/careers" }
+  ];
+
+  const support = [
+    { name: "Help Center", href: "/help" },
+    { name: "Safety Information", href: "/safety" },
+    { name: "Cancellation Option", href: "/cancellation" },
+    { name: "FAQs", href: "/faqs" }
+  ];
+
   return (
     <footer className="bg-black text-white pt-24 pb-12 px-6">
       <div className="max-w-7xl mx-auto">
@@ -21,20 +37,25 @@ export default function Footer() {
           <div>
             <h4 className="text-heading-sm mb-8">Resources</h4>
             <ul className="space-y-4 text-body text-zinc-500">
-              <li className="hover:text-amber cursor-pointer">About Us</li>
-              <li className="hover:text-amber cursor-pointer">Contact Us</li>
-              <li className="hover:text-amber cursor-pointer">Book your stay</li>
-              <li className="hover:text-amber cursor-pointer">Become a Host</li>
-              <li className="hover:text-amber cursor-pointer">Careers</li>
+              {resources.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="hover:text-amber transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
             <h4 className="text-heading-sm mb-8">Support</h4>
             <ul className="space-y-4 text-body text-zinc-500">
-              <li className="hover:text-amber cursor-pointer">Help Center</li>
-              <li className="hover:text-amber cursor-pointer">Safety Information</li>
-              <li className="hover:text-amber cursor-pointer">Cancellation Option</li>
-              <li className="hover:text-amber cursor-pointer">FAQs</li>
+              {support.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="hover:text-amber transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
@@ -48,11 +69,11 @@ export default function Footer() {
         </div>
         <div className="pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-caption font-medium text-zinc-600 uppercase tracking-widest">
           <div className="flex gap-8">
-            <span className="hover:text-zinc-400 cursor-pointer">Privacy Policy</span>
-            <span className="hover:text-zinc-400 cursor-pointer">Terms of Use</span>
-            <span className="hover:text-zinc-400 cursor-pointer">Sales and refund</span>
-            <span className="hover:text-zinc-400 cursor-pointer">Legal</span>
-            <span className="hover:text-zinc-400 cursor-pointer">Site Map</span>
+            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-zinc-400 transition-colors">Terms of Use</Link>
+            <Link href="/refund-policy" className="hover:text-zinc-400 transition-colors">Sales and refund</Link>
+            <Link href="/legal" className="hover:text-zinc-400 transition-colors">Legal</Link>
+            <Link href="/sitemap" className="hover:text-zinc-400 transition-colors">Site Map</Link>
           </div>
           <p>Copywrite 2026 Luxel All right reserved</p>
         </div>
