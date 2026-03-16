@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { clearTracker, readTracker, writeTracker, type BookingTrackerRecord } from '@/lib/bookingTracker';
+import { supabase } from '@/lib/supabase';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plane, X, ArrowRight, RefreshCw, CheckCircle2, Clock3 } from 'lucide-react';
 
@@ -86,7 +87,29 @@ export default function BookingTrackerWidget() {
     if (!tracker) return;
     refresh({ silent: true });
     const t = window.setInterval(() => refresh({ silent: true }), 15000);
-    return () => window.clearInterval(t);
+
+    // Supabase Realtime: instant status updates (fires within ~1s)
+    const channel = supabase
+      .channel(`widget-request-${tracker.requestId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'requests',
+          filter: `id=eq.${tracker.requestId}`,
+        },
+        () => {
+          // A change happened — immediately refresh via API to get full data
+          refresh({ silent: true });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      window.clearInterval(t);
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tracker?.bookingId, tracker?.requestId, tracker?.guestToken]);
 

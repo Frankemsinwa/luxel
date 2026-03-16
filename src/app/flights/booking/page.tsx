@@ -5,8 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, useEffect } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from '@/lib/supabase';
+import { COUNTRIES } from '@/lib/countries';
 import { writeTracker } from '@/lib/bookingTracker';
 import {
     User,
@@ -14,13 +15,13 @@ import {
     ChevronDown,
     Contact,
     Globe,
-    Loader2
+    Loader2,
+    Sparkles,
+    Shield,
+    ArrowRight,
+    X,
+    Clock
 } from "lucide-react";
-
-const countries = [
-    "United Kingdom", "United States", "Nigeria", "United Arab Emirates",
-    "Singapore", "Canada", "Germany", "France", "Japan", "Australia"
-];
 
 const months = [
     "January", "February", "March", "April", "May", "June",
@@ -46,6 +47,7 @@ function PassengerDetailsContent() {
 
     const [passengerData, setPassengerData] = useState<any[]>([]);
     const [contactEmail, setContactEmail] = useState('');
+    const [contactDialCode, setContactDialCode] = useState('+44');
     const [contactPhone, setContactPhone] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStep, setSubmitStep] = useState(0); // 0: Idle, 1: Verifying, 2: Creating, 3: Finalizing
@@ -155,7 +157,8 @@ function PassengerDetailsContent() {
                 passengers: passengerData,
                 contactInfo: {
                     email: contactEmail,
-                    phone: contactPhone
+                    phone: `${contactDialCode} ${contactPhone}`.trim(),
+                    dialCode: contactDialCode
                 },
                 tripDetails: {
                     from: searchParams.get('from') || '',
@@ -228,56 +231,89 @@ function PassengerDetailsContent() {
         <div className="min-h-screen bg-amber/5 flex flex-col">
             <Navbar />
 
-            {showAuthPrompt && (
-                <div className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6">
-                    <div className="w-full max-w-xl rounded-[2.5rem] bg-white border border-black/10 shadow-[0_30px_90px_rgba(0,0,0,0.25)] p-7 md:p-9">
-                        <div className="text-heading-md font-medium text-black">Continue as guest or login</div>
-                        <div className="text-body text-black/60 mt-2">
-                            You can request a reservation without logging in. Logging in helps you keep your trips synced across devices and access your history anytime.
-                        </div>
-
-                        <div className="mt-6 rounded-2xl bg-black/[0.03] border border-black/10 p-5">
-                            <div className="text-body-sm font-medium text-black">Why login?</div>
-                            <ul className="mt-2 space-y-1 text-body-sm text-black/70 list-disc pl-5">
-                                <li>See all requests in one place (My Trips)</li>
-                                <li>Resume on any device</li>
-                                <li>Faster checkout next time</li>
-                            </ul>
-                        </div>
-
-                        <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                            <button
-                                onClick={() => {
-                                    setAuthChoice('guest');
-                                    setShowAuthPrompt(false);
-                                    setTimeout(() => handleRequestReservation(), 0);
-                                }}
-                                className="flex-1 px-5 py-3 rounded-2xl border border-black/10 bg-white hover:bg-black/5 text-body-sm font-medium text-black transition-colors"
-                            >
-                                Continue without login
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setAuthChoice('login');
-                                    setShowAuthPrompt(false);
-                                    const redirect = encodeURIComponent(`/flights/booking?${searchParams.toString()}`);
-                                    router.push(`/auth?mode=login&redirect=${redirect}`);
-                                }}
-                                className="flex-1 px-5 py-3 rounded-2xl bg-black text-white hover:bg-black/90 text-body-sm font-medium transition-colors"
-                            >
-                                Login
-                            </button>
-                        </div>
-
-                        <button
-                            onClick={() => setShowAuthPrompt(false)}
-                            className="mt-4 w-full px-5 py-3 rounded-2xl bg-black/5 hover:bg-black/10 text-body-sm font-medium text-black transition-colors"
+            <AnimatePresence>
+                {showAuthPrompt && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 md:p-6"
+                    >
+                        <motion.div 
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
+                            className="relative w-full max-w-2xl rounded-[3rem] bg-zinc-950/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_80px_rgba(241,188,50,0.15)] overflow-hidden"
                         >
-                            Not now
-                        </button>
-                    </div>
-                </div>
-            )}
+                            <div className="absolute top-0 right-0 w-96 h-96 bg-amber/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+                            
+                            <div className="p-8 md:p-12 relative z-10 text-center">
+                                <button 
+                                    onClick={() => setShowAuthPrompt(false)}
+                                    className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all font-light"
+                                >
+                                    <X size={18} />
+                                </button>
+                                
+                                <div className="w-16 h-16 bg-gradient-to-br from-amber/20 to-amber/5 rounded-2xl border border-amber/20 flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(241,188,50,0.2)]">
+                                    <Sparkles className="text-amber" size={28} />
+                                </div>
+                                <h2 className="text-3xl md:text-4xl text-white tracking-tighter mb-4">
+                                    <span className="font-light">Elevate Your</span> <span className="font-newton italic text-amber">Experience</span>
+                                </h2>
+                                <p className="text-zinc-400 text-sm md:text-base max-w-md mx-auto mb-10 font-light leading-relaxed">
+                                    Unlock the full potential of your journey. Members enjoy seamless syncing across devices, priority assistance, and a curated travel history.
+                                </p>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => {
+                                            setAuthChoice('login');
+                                            setShowAuthPrompt(false);
+                                            const redirect = encodeURIComponent(`/flights/booking?${searchParams.toString()}`);
+                                            router.push(`/auth?mode=login&redirect=${redirect}`);
+                                        }}
+                                        className="group relative px-6 py-5 rounded-3xl bg-amber text-black hover:bg-amber-light transition-all duration-300 shadow-[0_20px_40px_rgba(241,188,50,0.25)] hover:shadow-[0_25px_50px_rgba(241,188,50,0.35)] flex flex-col items-center justify-center gap-1 overflow-hidden transform hover:-translate-y-1"
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <span className="text-sm font-bold tracking-widest uppercase relative z-10 flex items-center gap-2">
+                                            Log In / Sign Up <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                        </span>
+                                        <span className="text-[10px] text-black/60 font-medium relative z-10 uppercase tracking-widest">Access VIP Benefits</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setAuthChoice('guest');
+                                            setShowAuthPrompt(false);
+                                            setTimeout(() => handleRequestReservation(), 0);
+                                        }}
+                                        className="group px-6 py-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 flex flex-col items-center justify-center gap-1 text-white hover:border-white/20 transform hover:-translate-y-1"
+                                    >
+                                        <span className="text-sm font-bold tracking-widest uppercase flex items-center gap-2">
+                                            Continue as Guest <ArrowRight size={16} className="text-white/30 group-hover:translate-x-1 group-hover:text-amber transition-all" />
+                                        </span>
+                                        <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest group-hover:text-zinc-400 transition-colors">Standard Booking</span>
+                                    </button>
+                                </div>
+                                
+                                <div className="mt-10 pt-8 border-t border-white/10 flex flex-wrap items-center justify-center gap-6">
+                                    <div className="flex items-center gap-2 text-zinc-500 text-xs tracking-widest uppercase">
+                                        <Shield size={14} className="text-amber/50" />
+                                        <span>Secure 256-bit Encryption</span>
+                                    </div>
+                                    <div className="hidden sm:block w-1 h-1 bg-white/10 rounded-full" />
+                                    <div className="flex items-center gap-2 text-zinc-500 text-xs tracking-widest uppercase">
+                                        <Clock size={14} className="text-amber/50" />
+                                        <span>Instant Confirmation</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12 pt-28">
                 <div className="flex flex-col lg:flex-row gap-10">
@@ -397,7 +433,7 @@ function PassengerDetailsContent() {
                                                 onChange={(e) => updatePassenger(p.id, 'nationality', e.target.value)}
                                                 className="w-full bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black appearance-none cursor-pointer focus:ring-2 focus:ring-black/20"
                                             >
-                                                {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                                                {COUNTRIES.map(c => <option key={c.code} value={c.name}>{c.name}</option>)}
                                             </select>
                                             <Globe size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-black/30" />
                                         </div>
@@ -432,12 +468,18 @@ function PassengerDetailsContent() {
                                 <div className="flex flex-col gap-2">
                                     <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Phone number</label>
                                     <div className="flex gap-2">
-                                        <select className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black w-24 sm:w-28 appearance-none cursor-pointer">
-                                            <option>+44 (UK)</option>
-                                            <option>+1 (USA)</option>
-                                            <option>+234 (NG)</option>
-                                            <option>+971 (UAE)</option>
-                                        </select>
+                                        <div className="relative w-24 sm:w-28 shrink-0">
+                                            <select 
+                                                value={contactDialCode}
+                                                onChange={(e) => setContactDialCode(e.target.value)}
+                                                className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black w-full appearance-none cursor-pointer focus:ring-2 focus:ring-black/20 text-ellipsis overflow-hidden"
+                                            >
+                                                {COUNTRIES.map(c => (
+                                                    <option key={c.code} value={c.dial}>{c.dial} ({c.code})</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 pointer-events-none" />
+                                        </div>
                                         <input
                                             type="tel"
                                             value={contactPhone}
