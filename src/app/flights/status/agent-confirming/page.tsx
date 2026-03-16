@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { MessageSquare, Clock, ShieldCheck, Headphones, ArrowRight, XCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import api from "@/lib/api";
+import { readTracker, writeTracker } from "@/lib/bookingTracker";
 
 function AgentConfirmingContent() {
     const router = useRouter();
@@ -18,6 +19,39 @@ function AgentConfirmingContent() {
     const [rejected, setRejected] = useState(false);
     const [isStartingChat, setIsStartingChat] = useState(false);
     const reqId = searchParams.get('reqId');
+    const bookingId = searchParams.get('id');
+    const navigatedRef = useRef(false);
+
+    /** Sync the BookingTracker widget's local storage so it reflects the new status instantly */
+    const syncTracker = useCallback((requestStatus: string, bookingStatus?: string) => {
+        try {
+            const tracker = readTracker();
+            if (!tracker) return;
+            const next = {
+                ...tracker,
+                lastKnownRequestStatus: requestStatus,
+                ...(bookingStatus ? { lastKnownBookingStatus: bookingStatus } : {}),
+                lastSyncedAt: Date.now(),
+            };
+            writeTracker(next);
+        } catch {
+            // best-effort
+        }
+    }, []);
+
+    /** Navigate to agent-confirmed (guarded so it only fires once) */
+    const goToConfirmed = useCallback(() => {
+        if (navigatedRef.current) return;
+        navigatedRef.current = true;
+        syncTracker('RESOLVED');
+        router.replace(`/flights/status/agent-confirmed?${searchParams.toString()}`);
+    }, [router, searchParams, syncTracker]);
+
+    /** Mark as rejected */
+    const markRejected = useCallback(() => {
+        syncTracker('CLOSED');
+        setRejected(true);
+    }, [syncTracker]);
 
     const handleChatWithConcierge = async () => {
         setIsStartingChat(true);
@@ -36,29 +70,49 @@ function AgentConfirmingContent() {
     useEffect(() => {
         if (!reqId) return;
 
-        // 1. Check the CURRENT status first (handles page refresh)
-        const checkCurrentStatus = async () => {
-            const { data, error } = await supabase
-                .from('requests')
-                .select('status')
-                .eq('id', reqId)
-                .single();
+        // Build headers from guest token if present in tracker
+        const tracker = readTracker();
+        const headers: Record<string, string> = {};
+        if (tracker?.guestToken) {
+            headers['x-guest-token'] = tracker.guestToken;
+        }
 
-            if (!error && data) {
-                if (data.status === 'RESOLVED') {
-                    router.replace(`/flights/status/agent-confirmed?${searchParams.toString()}`);
+        // ── 1. Check current status via API (reliable, goes through backend auth) ──
+        const checkViaApi = async () => {
+            if (navigatedRef.current) return;
+            try {
+                const res = await api.get(`/bookings/requests/${reqId}/status`, { headers });
+                const status = String(res.data?.status || '').toUpperCase();
+                if (status === 'RESOLVED') {
+                    goToConfirmed();
                     return;
                 }
-                if (data.status === 'CLOSED') {
-                    setRejected(true);
+                if (status === 'CLOSED') {
+                    markRejected();
                     return;
+                }
+            } catch {
+                // Fallback: try Supabase direct query if API fails (guest w/o token, etc.)
+                try {
+                    const { data, error } = await supabase
+                        .from('requests')
+                        .select('status')
+                        .eq('id', reqId)
+                        .single();
+                    if (!error && data) {
+                        if (data.status === 'RESOLVED') { goToConfirmed(); return; }
+                        if (data.status === 'CLOSED') { markRejected(); return; }
+                    }
+                } catch {
+                    // swallow
                 }
             }
         };
 
-        checkCurrentStatus();
+        // Run initial check immediately
+        checkViaApi();
 
-        // 2. Real-time listener for future status changes
+        // ── 2. Supabase Realtime listener (fast-path — fires within ~1s when working) ──
         const channel = supabase
             .channel(`request-tracking-${reqId}`)
             .on(
@@ -70,18 +124,20 @@ function AgentConfirmingContent() {
                     filter: `id=eq.${reqId}`
                 },
                 (payload) => {
-                    console.log('Request updated (realtime):', payload);
-                    if (payload.new.status === 'RESOLVED') {
-                        // Immediately navigate - no delay
-                        router.replace(`/flights/status/agent-confirmed?${searchParams.toString()}`);
-                    } else if (payload.new.status === 'CLOSED') {
-                        setRejected(true);
+                    console.log('[Realtime] Request updated:', payload);
+                    const newStatus = String(payload.new?.status || '').toUpperCase();
+                    if (newStatus === 'RESOLVED') {
+                        goToConfirmed();
+                    } else if (newStatus === 'CLOSED') {
+                        markRejected();
                     }
                 }
             )
-            .subscribe();
+            .subscribe((status) => {
+                console.log('[Realtime] Subscription status:', status);
+            });
 
-        // 3. Countdown Timer
+        // ── 3. Countdown Timer ──
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
@@ -92,16 +148,15 @@ function AgentConfirmingContent() {
             });
         }, 1000);
 
-        // 4. Aggressive Polling fallback (every 3 seconds for near-instant reaction)
-        const pollingInterval = setInterval(async () => {
-            await checkCurrentStatus();
-        }, 3000);
+        // ── 4. API Polling fallback (every 3s — catches changes if Realtime is down) ──
+        const pollingInterval = setInterval(checkViaApi, 3000);
 
         return () => {
             clearInterval(timer);
             clearInterval(pollingInterval);
             supabase.removeChannel(channel);
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reqId, router, searchParams]);
 
     const formatTime = (seconds: number) => {

@@ -27,7 +27,31 @@ const getIataCode = (location: string): string => {
     return match ? match[1] : location.split(',')[0].substring(0, 3).toUpperCase();
 };
 
-const EUR_TO_NGN_RATE = 1590; // Mid-market rate as of Mar 2026 (Xe/Wise avg)
+let cachedExchangeRate = 1590; // Fallback mid-market rate
+let lastExchangeRateFetch = 0;
+const EXCHANGE_RATE_TTL = 1000 * 60 * 60 * 12; // 12 hours
+
+export const getExchangeRate = async (): Promise<number> => {
+    const now = Date.now();
+    if (now - lastExchangeRateFetch < EXCHANGE_RATE_TTL && lastExchangeRateFetch !== 0) {
+        return cachedExchangeRate;
+    }
+    
+    try {
+        const response = await fetch('https://open.er-api.com/v6/latest/EUR');
+        const data: any = await response.json();
+        if (data && data.rates && data.rates.NGN) {
+            cachedExchangeRate = data.rates.NGN;
+            lastExchangeRateFetch = now;
+            console.log(`[Amadeus Service] Updated live EUR to NGN rate: ${cachedExchangeRate}`);
+            return cachedExchangeRate;
+        }
+    } catch (error) {
+        console.error("[Amadeus Service] Failed to fetch live exchange rate, using fallback rate:", error);
+    }
+    
+    return cachedExchangeRate;
+};
 
 // Simple in-memory cache for the prototype
 let searchCache: Map<string, any> = new Map();
@@ -137,6 +161,8 @@ export const searchFlights = async (searchParams: {
     });
 
     try {
+        const currentExchangeRate = await getExchangeRate();
+        
         const amadeus = getAmadeus();
         if (!amadeus) throw new ProviderUnavailableError('Amadeus credentials missing');
 
@@ -179,7 +205,9 @@ export const searchFlights = async (searchParams: {
 
         const mappedFlights = response.data.map((offer: any) => {
             const rawPrice = parseFloat(offer.price.total);
-            const convertedPrice = Math.round(rawPrice * EUR_TO_NGN_RATE);
+            const numPassengers = offer.travelerPricings ? offer.travelerPricings.length : parseInt(query.adults || '1');
+            const unitRawPrice = rawPrice / numPassengers;
+            const convertedPrice = Math.round(unitRawPrice * currentExchangeRate);
             const airlineCode = offer.validatingAirlineCodes[0];
             const airlineName = carriers[airlineCode] || airlineCode || 'Unknown Airline';
 
@@ -214,7 +242,7 @@ export const searchFlights = async (searchParams: {
                 stops: offer.itineraries[0].segments.length > 1 ? `${offer.itineraries[0].segments.length - 1} STOP(S)` : 'NON-STOP',
                 price: convertedPrice,
                 currency: 'NGN',
-                originalPrice: rawPrice,
+                originalPrice: unitRawPrice,
                 originalCurrency: offer.price.currency,
                 itineraries: detailedItineraries,
                 baggage: baggageInfo,

@@ -4,41 +4,55 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import { ChevronRight, PlaneLanding } from "lucide-react";
 
 export default function Home() {
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+
+  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
   const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3,
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
       },
     },
   };
 
   const itemVariants: any = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0, y: 40, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
+      scale: 1,
       transition: {
         duration: 0.8,
-        ease: [0.21, 1, 0.36, 1] as any,
+        type: "spring",
+        bounce: 0.4,
       },
     },
   };
 
   const titleVariants: any = {
-    hidden: { opacity: 0, y: 50 },
+    hidden: { opacity: 0, y: 60, scale: 0.9 },
     visible: {
       opacity: 1,
       y: 0,
+      scale: 1,
       transition: {
         duration: 1.2,
-        ease: [0.21, 1, 0.36, 1] as any,
+        type: "spring",
+        bounce: 0.3,
       },
     },
   };
@@ -74,7 +88,7 @@ export default function Home() {
     },
     {
       name: "Lagos",
-      img: "/pic/lagos.jpeg", // Using local image
+      img: "/pic/lagos.jpeg", 
       desc: "Lagos is Africa's most populous city, famous as Nigeria's financial hub and Nollywood epicenter."
     },
     {
@@ -93,10 +107,16 @@ export default function Home() {
       <Navbar />
       <main className="min-h-screen bg-white">
         {/* Hero Section */}
-        <section className="relative bg-black text-white pt-6 pb-44 overflow-hidden">
+        <section ref={heroRef} className="relative bg-black text-white pt-6 pb-44 overflow-hidden">
           {/* Subtle Ambient Light */}
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber/10 rounded-full blur-[120px] -translate-y-1/2" />
-          <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-amber/5 rounded-full blur-[150px] translate-x-1/2" />
+          <motion.div 
+            style={{ y: heroY, opacity: heroOpacity }}
+            className="absolute top-0 left-1/4 w-96 h-96 bg-amber/10 rounded-full blur-[120px] -translate-y-1/2" 
+          />
+          <motion.div 
+            style={{ y: heroY, opacity: heroOpacity }}
+            className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-amber/5 rounded-full blur-[150px] translate-x-1/2" 
+          />
 
           {/* Hero Content */}
           <div className="max-w-7xl mx-auto px-6 mt-16 lg:mt-32 flex flex-col lg:flex-row items-center gap-16 relative z-20">
@@ -106,8 +126,9 @@ export default function Home() {
               variants={containerVariants}
               initial="hidden"
               animate="visible"
+              style={{ y: heroY, opacity: heroOpacity }}
             >
-              <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-800 bg-white/5 backdrop-blur-sm">
+              <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-800 bg-white/5 backdrop-blur-sm shadow-[0_0_20px_rgba(255,255,255,0.05)]">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse" />
                 <span className="text-[10px] font-normal tracking-[0.2em] text-zinc-400 uppercase">Premium Travel Experience</span>
               </motion.div>
@@ -123,7 +144,7 @@ export default function Home() {
 
               <motion.p
                 variants={itemVariants}
-                className="text-zinc-400 max-w-md mb-12 leading-relaxed font-light text-base lg:text-lg"
+                className="text-zinc-400 max-w-md mb-12 leading-relaxed font-light text-base lg:text-lg mx-auto lg:mx-0"
               >
                 Experience the pinnacle of luxury travel without the luxury price tag. Discover curated hotels and elite flights worldwide.
               </motion.p>
@@ -132,7 +153,7 @@ export default function Home() {
                 <button className="bg-amber text-black px-10 py-5 rounded-2xl text-[12px] font-normal tracking-widest shadow-[0_20px_40px_rgba(241,188,50,0.25)] hover:bg-amber-light transition-all transform hover:-translate-y-1 active:scale-95 cursor-pointer">
                   START YOUR SEARCH
                 </button>
-                <button className="px-10 py-5 rounded-2xl text-[12px] font-normal tracking-widest border border-zinc-800 hover:bg-white/5 transition-all cursor-pointer">
+                <button className="px-10 py-5 rounded-2xl text-[12px] font-normal tracking-widest border border-zinc-800 hover:bg-white/5 transition-all cursor-pointer transform hover:-translate-y-1 active:scale-95">
                   LEARN MORE
                 </button>
               </motion.div>
@@ -140,16 +161,17 @@ export default function Home() {
 
             {/* Right Side - Oval Images */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 1.5, ease: [0.21, 1, 0.36, 1], delay: 0.5 }}
+              initial={{ opacity: 0, scale: 0.8, rotate: 10, x: 50 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0, x: 0 }}
+              transition={{ duration: 1.5, type: "spring", bounce: 0.4, delay: 0.5 }}
+              style={{ y: heroY, opacity: heroOpacity }}
               className="flex-1 relative flex items-center justify-center lg:justify-end gap-6 h-[550px] w-full"
             >
               <div className="relative group">
                 <motion.div
                   animate={{ y: [0, -15, 0] }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                  className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] rounded-full border-[6px] border-amber/20 overflow-hidden transform translate-y-8 shadow-2xl transition-all duration-500 group-hover:border-amber/40"
+                  className="relative w-48 h-[360px] lg:w-56 lg:h-[420px] rounded-full border-[6px] border-amber/20 overflow-hidden transform translate-y-8 shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-all duration-500 group-hover:border-amber/40 group-hover:-translate-y-2 group-hover:shadow-amber/20"
                 >
                   <Image
                     src="/hero-left.png"
@@ -166,8 +188,8 @@ export default function Home() {
               <div className="relative group">
                 <motion.div
                   animate={{ y: [0, 15, 0] }}
-                  transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-                  className="relative w-56 h-[440px] lg:w-64 lg:h-[500px] rounded-full border-[6px] border-amber/20 overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-amber/40"
+                  transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                  className="relative w-56 h-[440px] lg:w-64 lg:h-[500px] rounded-full border-[6px] border-amber/20 overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-all duration-500 group-hover:border-amber/40 group-hover:-translate-y-2 group-hover:shadow-amber/20"
                 >
                   <Image
                     src="/hero-right.png"
@@ -191,17 +213,25 @@ export default function Home() {
           </div>
         </section>
 
-        <SearchBar />
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+          className="relative z-20"
+        >
+          <SearchBar />
+        </motion.div>
 
         {/* Yellow Services Section */}
         <section className="bg-amber pt-32 pb-24 px-6 relative z-0 -mt-12">
           <div className="max-w-7xl mx-auto text-center">
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="text-white text-heading-xl font-medium mb-16 leading-tight tracking-[0.08em]"
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+              className="text-white text-heading-xl font-medium mb-16 leading-tight tracking-[0.08em] shadow-black/20"
               >
                 Everything You Need For A Perfect Trip
               </motion.h2>
@@ -209,18 +239,22 @@ export default function Home() {
               {serviceCards.map((card, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                  whileHover={{ y: -10 }}
-                  className="bg-zinc-950 text-white p-8 rounded-[2rem] text-left transition-all duration-300 group shadow-2xl relative overflow-hidden"
+                  initial={{ opacity: 0, y: 80, rotate: -5 }}
+                  whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.8, delay: i * 0.15, type: "spring", bounce: 0.4 }}
+                  whileHover={{ y: -15, scale: 1.02 }}
+                  className="bg-zinc-950 text-white p-8 rounded-[2rem] text-left transition-all duration-300 group shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.4)] relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-amber/10 transition-colors" />
+                  <motion.div 
+                    className="absolute top-0 right-0 w-32 h-32 bg-amber/5 rounded-full blur-3xl -mr-16 -mt-16 transition-colors"
+                    group-hover={{ scale: 1.5, backgroundColor: "rgba(241,188,50,0.15)" }} 
+                  />
 
                   <motion.div
-                    whileHover={{ rotate: 15, scale: 1.1 }}
-                    className="w-14 h-14 bg-amber rounded-2xl flex items-center justify-center mb-8 relative z-10 shadow-[0_10px_30px_rgba(241,188,50,0.3)]"
+                    whileHover={{ rotate: 15, scale: 1.15 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    className="w-14 h-14 bg-amber rounded-2xl flex items-center justify-center mb-8 relative z-10 shadow-[0_10px_30px_rgba(241,188,50,0.3)] group-hover:shadow-[0_15px_40px_rgba(241,188,50,0.5)]"
                   >
                     <div className="text-black transform-none">
                       {card.icon}
@@ -231,8 +265,6 @@ export default function Home() {
                   <p className="text-zinc-400 text-sm leading-relaxed font-light relative z-10">
                     {card.desc}
                   </p>
-
-
                 </motion.div>
               ))}
             </div>
@@ -243,10 +275,10 @@ export default function Home() {
           <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
             {/* Illustration Area */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: [0.21, 1, 0.36, 1] }}
+              initial={{ opacity: 0, x: -100, rotate: -5 }}
+              whileInView={{ opacity: 1, x: 0, rotate: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1.2, type: "spring", bounce: 0.3 }}
               className="flex-1 relative"
             >
               <div className="relative w-full max-w-lg aspect-square">
@@ -254,42 +286,68 @@ export default function Home() {
                 <motion.div
                   animate={{ y: [0, -20, 0] }}
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                  className="relative w-full h-full"
+                  className="relative w-full h-full pb-10"
                 >
                   <Image
                     src="/why.png"
                     alt="Luxel Benefits Illustration"
                     fill
-                    className="object-contain relative z-10"
+                    className="object-contain relative z-10 drop-shadow-[0_30px_40px_rgba(0,0,0,0.1)]"
                     priority
                   />
                 </motion.div>
 
                 {/* Decorative Elements */}
-                <div className="absolute top-10 right-10 w-20 h-20 border-2 border-amber/20 rounded-full animate-spin-slow" />
-                <div className="absolute bottom-10 left-10 w-12 h-12 bg-amber/20 rounded-3xl rotate-45" />
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                  className="absolute top-10 right-10 w-24 h-24 border-2 border-amber/30 border-dashed rounded-full" 
+                />
+                <motion.div 
+                  animate={{ y: [0, 10, 0], rotate: [45, 90, 45] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute bottom-10 left-10 w-12 h-12 bg-gradient-to-br from-amber/40 to-amber/10 backdrop-blur-sm rounded-3xl" 
+                />
               </div>
             </motion.div>
 
             {/* Content */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 100 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: [0.21, 1, 0.36, 1] }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1.2, type: "spring", bounce: 0.3, staggerChildren: 0.2 }}
               className="flex-1"
             >
-              <p className="text-caption text-amber tracking-[0.3em] mb-6 uppercase flex items-center gap-3">
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-caption text-amber tracking-[0.3em] mb-6 uppercase flex items-center gap-3"
+              >
                 <span className="w-8 h-[1px] bg-amber" />
                 Core Values
-              </p>
-              <h2 className="text-display mb-8 text-zinc-900 tracking-tighter">
+              </motion.p>
+              
+              <motion.h2 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="text-display mb-8 text-zinc-900 tracking-tighter"
+              >
                 <span className="font-medium">Why</span> <span className="italic font-newton text-amber">Luxel?</span>
-              </h2>
+              </motion.h2>
 
-              <p className="text-body-lg text-zinc-500 mb-12 max-w-md">
+              <motion.p 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="text-body-lg text-zinc-500 mb-12 max-w-md"
+              >
                 We don't just book tickets; we curate experiences. Luxel provides a seamless, high-touch journey powered by elite technology.
-              </p>
+              </motion.p>
 
               <div className="space-y-12">
                 {[
@@ -305,16 +363,20 @@ export default function Home() {
                   <motion.div
                     key={i}
                     className="flex flex-col gap-4 group"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 + (i * 0.1) }}
+                    initial={{ opacity: 0, x: 50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ delay: 0.3 + (i * 0.2), type: "spring", bounce: 0.4 }}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-amber" />
+                      <motion.div 
+                        whileInView={{ scale: [0, 1.5, 1] }}
+                        transition={{ delay: 0.4 + (i * 0.2), duration: 0.5 }}
+                        className="w-2.5 h-2.5 rounded-full bg-amber shadow-[0_0_10px_rgba(241,188,50,0.5)]" 
+                      />
                       <h4 className="text-heading-sm text-zinc-900 group-hover:text-amber transition-colors">{benefit.title}</h4>
                     </div>
-                    <p className="text-body-sm text-zinc-500 max-w-sm pl-5 border-l-2 border-zinc-100 group-hover:border-amber transition-colors">
+                    <p className="text-body-sm text-zinc-500 max-w-sm pl-6 border-l-2 border-zinc-100 group-hover:border-amber transition-all duration-300">
                       {benefit.desc}
                     </p>
                   </motion.div>
@@ -328,26 +390,30 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
               <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
+                initial={{ opacity: 0, x: -50, scale: 0.95 }}
+                whileInView={{ opacity: 1, x: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 1, type: "spring", bounce: 0.3 }}
               >
                 <h2 className="text-display text-zinc-900 tracking-tighter">
                   <span className="font-medium">Destinations</span> <br />
                   <span className="text-amber italic font-newton tracking-[-0.05em]">fordiscovery</span>
                 </h2>
-                <p className="text-body-lg text-zinc-500">Curated recommendations for the global elite.</p>
+                <p className="text-body-lg text-zinc-500 mt-2">Curated recommendations for the global elite.</p>
               </motion.div>
 
               <motion.button
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.2 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="group flex items-center gap-3 text-caption tracking-widest uppercase hover:text-amber transition-colors"
+                className="group flex items-center gap-3 text-caption tracking-widest uppercase hover:text-amber transition-colors bg-white px-6 py-3 rounded-full shadow-sm hover:shadow-md border border-zinc-100"
               >
                 View all places
-                <div className="w-10 h-10 rounded-full border border-zinc-200 flex items-center justify-center group-hover:border-amber transition-colors">
-                  <ChevronRight size={18} />
+                <div className="w-10 h-10 rounded-full border border-zinc-200 bg-zinc-50 flex items-center justify-center group-hover:border-amber group-hover:bg-amber/10 transition-colors">
+                  <ChevronRight size={18} className="text-zinc-400 group-hover:text-amber transition-colors" />
                 </div>
               </motion.button>
             </div>
@@ -356,34 +422,34 @@ export default function Home() {
               {destinationCards.map((card, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: i * 0.1 }}
+                  initial={{ opacity: 0, y: 80, scale: 0.9 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.8, delay: i * 0.15, type: "spring", bounce: 0.4 }}
                   className="group cursor-pointer"
                 >
-                  <div className="relative h-80 rounded-[3rem] overflow-hidden mb-[-3rem] z-10 shadow-2xl border-[6px] border-white transition-transform duration-500 group-hover:-translate-y-4">
+                  <div className="relative h-80 rounded-[3rem] overflow-hidden mb-[-3rem] z-10 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border-[6px] border-white transition-all duration-700 group-hover:-translate-y-6 group-hover:shadow-[0_30px_60px_rgba(241,188,50,0.2)]">
                     <Image
                       src={card.img}
                       alt={card.name}
                       fill
-                      className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                      className="object-cover transition-transform duration-1000 group-hover:scale-125"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>
 
                   <motion.div
-                    whileHover={{ backgroundColor: "#000", color: "#fff" }}
+                    whileHover={{ backgroundColor: "#18181b", color: "#fff" }}
                     className="bg-[#FBC335] p-8 pt-16 rounded-[3rem] shadow-xl transition-all duration-500 min-h-[260px] flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-heading-md">{card.name}</h3>
-                        <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <PlaneLanding size={14} className="text-white" />
+                        <h3 className="text-heading-md transition-colors duration-300">{card.name}</h3>
+                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
+                          <PlaneLanding size={16} className="text-white transform group-hover:-rotate-45 transition-transform duration-500 delay-100" />
                         </div>
                       </div>
-                      <p className="text-body-sm leading-relaxed mb-6 line-clamp-3 opacity-90">
+                      <p className="text-body-sm leading-relaxed mb-6 line-clamp-3 opacity-90 transition-opacity duration-300">
                         {card.desc}
                       </p>
                     </div>
