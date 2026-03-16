@@ -94,8 +94,8 @@ export default function RequestDetailsPage() {
             const response = await api.post('/agent/verify-price', {
                 from: depCode,
                 to: arrCode,
-                departureDate: new Date().toISOString().split('T')[0],
-                passengers: String(request.details?.passengers?.length || 1)
+                departureDate: request.details?.tripDetails?.departure?.split('T')[0] || new Date().toISOString().split('T')[0],
+                passengers: String(request.details?.tripDetails?.adults || request.details?.passengers?.length || 1)
             });
 
             const data = response.data;
