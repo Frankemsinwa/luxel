@@ -1,6 +1,7 @@
 'use client'
 
 import Image from "next/image";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
@@ -328,35 +329,39 @@ export default function Home() {
                 and elite flights to <span className="text-white font-medium">5,000+</span> destinations worldwide.
               </motion.p>
 
-              <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -3 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="group bg-amber text-black px-10 py-5 rounded-2xl text-[12px] font-semibold tracking-widest shadow-[0_20px_50px_rgba(241,188,50,0.3)] hover:shadow-[0_25px_60px_rgba(241,188,50,0.45)] transition-all cursor-pointer relative overflow-hidden"
-                >
-                  <span className="relative z-10 flex items-center gap-3">
-                    START YOUR SEARCH
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                  </span>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
-                    animate={{ x: ["-100%", "200%"] }}
-                    transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-                  />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -3 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="px-10 py-5 rounded-2xl text-[12px] font-medium tracking-widest border border-zinc-700 hover:border-amber/40 hover:bg-amber/5 transition-all cursor-pointer text-zinc-300 hover:text-white"
-                >
-                  LEARN MORE
-                </motion.button>
+              <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 w-full">
+                <Link href="/flights" className="w-full sm:w-auto">
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -3 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="group bg-amber text-black w-full px-10 py-5 rounded-2xl text-[12px] font-semibold tracking-widest shadow-[0_20px_50px_rgba(241,188,50,0.3)] hover:shadow-[0_25px_60px_rgba(241,188,50,0.45)] transition-all cursor-pointer relative overflow-hidden"
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-3">
+                      START YOUR SEARCH
+                      <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </span>
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
+                      animate={{ x: ["-100%", "200%"] }}
+                      transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                    />
+                  </motion.button>
+                </Link>
+                <Link href="/about" className="w-full sm:w-auto">
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -3 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="w-full px-10 py-5 rounded-2xl text-[12px] font-medium tracking-widest border border-zinc-700 hover:border-amber/40 hover:bg-amber/5 transition-all cursor-pointer text-zinc-300 hover:text-white"
+                  >
+                    LEARN MORE
+                  </motion.button>
+                </Link>
               </motion.div>
 
               {/* Trust Badges Row */}
               <motion.div
                 variants={itemVariants}
-                className="mt-12 flex items-center justify-center lg:justify-start gap-6 text-zinc-500"
+                className="mt-12 flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-6 text-zinc-500"
               >
                 {[
                   { icon: <Shield size={14} />, text: "Secure Booking" },
@@ -377,7 +382,7 @@ export default function Home() {
               animate={{ opacity: 1, scale: 1, rotate: 0, x: 0 }}
               transition={{ duration: 1.5, type: "spring", bounce: 0.4, delay: 0.5 }}
               style={{ y: heroY, opacity: heroOpacity }}
-              className="flex-1 relative flex items-center justify-center lg:justify-end gap-6 h-[550px] w-full"
+              className="flex-1 relative flex items-center justify-center lg:justify-end gap-2 sm:gap-6 h-[350px] sm:h-[450px] lg:h-[550px] w-full mt-10 lg:mt-0 scale-75 sm:scale-90 lg:scale-100"
             >
               <div className="relative group">
                 <motion.div
@@ -821,20 +826,22 @@ export default function Home() {
                 <p className="text-body-lg text-zinc-500 mt-3">Curated recommendations for the global elite.</p>
               </motion.div>
 
-              <motion.button
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="group flex items-center gap-3 text-caption tracking-widest uppercase text-zinc-400 hover:text-amber transition-colors bg-zinc-900/50 backdrop-blur-sm px-6 py-3 rounded-full shadow-sm border border-zinc-800 hover:border-amber/30"
-              >
-                View all places
-                <div className="w-10 h-10 rounded-full border border-zinc-700 bg-zinc-900 flex items-center justify-center group-hover:border-amber group-hover:bg-amber/10 transition-colors">
-                  <ChevronRight size={18} className="text-zinc-400 group-hover:text-amber transition-colors" />
-                </div>
-              </motion.button>
+              <Link href="/tour">
+                <motion.button
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="group flex items-center gap-3 text-caption tracking-widest uppercase text-zinc-400 hover:text-amber transition-colors bg-zinc-900/50 backdrop-blur-sm px-6 py-3 rounded-full shadow-sm border border-zinc-800 hover:border-amber/30 w-full sm:w-auto mt-6 md:mt-0 justify-center"
+                >
+                  View all places
+                  <div className="w-10 h-10 rounded-full border border-zinc-700 bg-zinc-900 flex items-center justify-center group-hover:border-amber group-hover:bg-amber/10 transition-colors">
+                    <ChevronRight size={18} className="text-zinc-400 group-hover:text-amber transition-colors" />
+                  </div>
+                </motion.button>
+              </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -911,23 +918,27 @@ export default function Home() {
                 their domestic and international flights. Your next adventure starts here.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -3 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="group bg-zinc-950 text-white px-10 py-5 rounded-2xl text-[12px] font-semibold tracking-widest shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.4)] transition-all cursor-pointer flex items-center gap-3"
-                >
-                  SEARCH FLIGHTS NOW
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </motion.button>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-4 sm:px-0">
+                <Link href="/flights" className="w-full sm:w-auto">
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -3 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="group bg-zinc-950 text-white w-full px-10 py-5 rounded-2xl text-[12px] font-semibold tracking-widest shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.4)] transition-all cursor-pointer flex items-center justify-center gap-3"
+                  >
+                    SEARCH FLIGHTS NOW
+                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                  </motion.button>
+                </Link>
 
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -3 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="px-10 py-5 rounded-2xl text-[12px] font-medium tracking-widest border-2 border-black/20 hover:border-black/40 transition-all cursor-pointer text-black/80 hover:text-black"
-                >
-                  CONTACT US
-                </motion.button>
+                <Link href="/contact" className="w-full sm:w-auto">
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -3 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="w-full px-10 py-5 rounded-2xl text-[12px] font-medium tracking-widest border-2 border-black/20 hover:border-black/40 transition-all cursor-pointer text-black/80 hover:text-black"
+                  >
+                    CONTACT US
+                  </motion.button>
+                </Link>
               </div>
             </motion.div>
           </div>
