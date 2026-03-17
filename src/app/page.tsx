@@ -1,10 +1,13 @@
 'use client'
 
+import dynamic from 'next/dynamic';
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
+
+// Dynamically import off-screen/heavy components to reduce initial JS payload
+const Footer = dynamic(() => import("@/components/Footer"));
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { ChevronRight, PlaneLanding, Star, Shield, Zap, Globe, Users, Plane, ArrowRight, CheckCircle2, Sparkles, MapPin, Clock, CreditCard, HeadphonesIcon } from "lucide-react";
