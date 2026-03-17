@@ -1,10 +1,13 @@
 'use client'
 
+import dynamic from 'next/dynamic';
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
+
+// Dynamically import off-screen/heavy components to reduce initial JS payload
+const Footer = dynamic(() => import("@/components/Footer"));
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { ChevronRight, PlaneLanding, Star, Shield, Zap, Globe, Users, Plane, ArrowRight, CheckCircle2, Sparkles, MapPin, Clock, CreditCard, HeadphonesIcon } from "lucide-react";
@@ -90,6 +93,103 @@ const AnimatedCounter = ({ target, suffix = "", prefix = "" }: { target: number;
     >
       {prefix}{count.toLocaleString()}{suffix}
     </motion.span>
+  );
+};
+
+/* ───── Custom Cursor Component ───── */
+const CustomCursor = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [trail, setTrail] = useState<{ x: number, y: number, id: number }[]>([]);
+  const [isHoveringAmber, setIsHoveringAmber] = useState(false);
+  const idCounter = useRef(0);
+
+  useEffect(() => {
+    let lastTime = 0;
+    const updateMousePosition = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+      
+      const now = Date.now();
+      if (now - lastTime > 40) { // Add trail point every 40ms
+        setTrail((prev) => [...prev, { x: e.clientX, y: e.clientY, id: idCounter.current++ }].slice(-15)); // Keep last 15 points
+        lastTime = now;
+      }
+      
+      // Check if hovering over an amber background section
+      try {
+        const hoveredElements = document.elementsFromPoint(e.clientX, e.clientY);
+        const hasAmberBg = hoveredElements.some((el) => 
+          el.classList && (el.classList.contains('bg-amber') || el.classList.contains('bg-amber/90'))
+        );
+        setIsHoveringAmber(hasAmberBg);
+      } catch (err) {}
+    };
+    
+    // Add event listener
+    window.addEventListener("mousemove", updateMousePosition);
+
+    // Only hide default cursor on non-touch devices
+    if (window.matchMedia("(pointer: fine)").matches) {
+      document.body.style.cursor = 'none';
+      
+      // Additional logic to hide cursor on interactive elements if desired, though 'none' on body usually covers it,
+      // it's essential to reset on unmount
+    }
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("mousemove", updateMousePosition);
+      document.body.style.cursor = 'auto'; // Restore normal cursor when leaving homepage
+    };
+  }, []);
+
+  // Don't render cursor on mobile/touch devices
+  if (typeof window !== 'undefined' && !window.matchMedia("(pointer: fine)").matches) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden hidden md:block">
+      {/* Smoke Trail */}
+      <AnimatePresence>
+        {trail.map((point) => (
+          <motion.div
+            key={point.id}
+            initial={{ opacity: 0.8, scale: 0.5 }}
+            animate={{ opacity: 0, scale: 2 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="absolute rounded-full bg-white/40 blur-[2px]"
+            style={{
+              left: point.x,
+              top: point.y,
+              width: "8px",
+              height: "8px",
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+        ))}
+      </AnimatePresence>
+
+      {/* Plane Cursor */}
+      <motion.div
+        className={`absolute transition-colors duration-300 ${isHoveringAmber ? 'text-white' : 'text-amber'}`}
+        animate={{
+          x: mousePosition.x - 12,
+          y: mousePosition.y - 12,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 28,
+          mass: 0.5,
+        }}
+      >
+        <Plane 
+          size={24} 
+          className={`-rotate-45 transition-all duration-300 ${isHoveringAmber ? 'drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] fill-white' : 'drop-shadow-[0_0_8px_rgba(241,188,50,0.8)] fill-amber'}`} 
+        />
+      </motion.div>
+    </div>
   );
 };
 
@@ -252,8 +352,9 @@ export default function Home() {
 
   return (
     <>
+      <CustomCursor />
       <Navbar />
-      <main className="min-h-screen bg-zinc-950">
+      <main className="min-h-screen bg-zinc-950 cursor-none">
 
         {/* ═══════════════════════════════════════════ */}
         {/* HERO SECTION — Ultra-Premium Dark + Grid   */}
@@ -312,7 +413,7 @@ export default function Home() {
                 a <span className="text-amber italic font-newton relative">
                   Billionaire
                   <motion.span
-                    className="absolute -bottom-2 left-0 w-full h-[2px] bg-gradient-to-r from-amber/80 via-amber to-amber/80"
+                    className="absolute bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-amber/80 via-amber to-amber/80"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
                     transition={{ delay: 1.5, duration: 0.8 }}
