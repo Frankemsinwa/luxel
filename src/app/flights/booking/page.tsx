@@ -2,7 +2,7 @@
 
 import api from '@/lib/api';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,18 +10,119 @@ import { supabase } from '@/lib/supabase';
 import { COUNTRIES } from '@/lib/countries';
 import { writeTracker } from '@/lib/bookingTracker';
 import {
+    Loader2 as LucideLoader,
     User,
     Check,
     ChevronDown,
     Contact,
     Globe,
-    Loader2,
     Sparkles,
     Shield,
     ArrowRight,
+    Search,
     X,
     Clock
 } from "lucide-react";
+
+const SearchableDropdown = ({ 
+    options, 
+    value, 
+    onChange, 
+    placeholder = "Search...", 
+    displayValue, 
+    className = "",
+    icon: Icon,
+    error = false
+}: any) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const filteredOptions = options.filter((opt: any) => 
+        (opt.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (opt.dial || '').includes(searchTerm) ||
+        (opt.code || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <div className={`relative w-full ${className}`} ref={dropdownRef}>
+            <div 
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-full bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black flex items-center justify-between cursor-pointer transition-all ${isOpen ? 'ring-2 ring-black/10' : ''} ${error ? 'ring-2 ring-red-500/50 bg-red-50' : ''}`}
+            >
+                <span className="truncate">{displayValue || value}</span>
+                {Icon ? <Icon size={16} className="text-black/50" /> : <ChevronDown size={16} className="text-black/50 transition-transform duration-300" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />}
+            </div>
+
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute z-[100] mt-2 w-full bg-white rounded-2xl shadow-2xl border border-black/5 overflow-hidden"
+                    >
+                        <div className="p-2 border-b border-black/5">
+                            <div className="relative">
+                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-black/30" />
+                                <input 
+                                    autoFocus
+                                    type="text"
+                                    placeholder={placeholder}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full bg-black/5 border-none rounded-xl py-2 pl-9 pr-4 text-xs font-semibold focus:ring-1 focus:ring-black/10 text-black"
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            </div>
+                        </div>
+                        <div className="max-h-[250px] overflow-y-auto custom-scrollbar">
+                            {filteredOptions.length > 0 ? (
+                                filteredOptions.map((opt: any, i: number) => (
+                                    <div 
+                                        key={opt.code || i}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onChange(opt);
+                                            setIsOpen(false);
+                                            setSearchTerm('');
+                                        }}
+                                        className="px-4 py-3 text-sm font-medium hover:bg-amber/10 cursor-pointer flex items-center justify-between group transition-colors"
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className={`truncate group-hover:text-black transition-colors ${value === (opt.dial || opt.name) ? 'text-amber' : 'text-black'}`}>
+                                                {opt.name}
+                                            </span>
+                                            {opt.dial && opt.dial !== opt.name && <span className="text-[10px] text-black/30 font-bold uppercase">{opt.code}</span>}
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            {opt.dial && <span className="text-[10px] text-black/40 font-bold group-hover:text-black/60 transition-colors">{opt.dial}</span>}
+                                            {value === (opt.dial || opt.name) && <Check size={14} className="text-amber" />}
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="px-4 py-8 text-center text-xs text-black/30 font-bold uppercase tracking-widest">
+                                    No matches
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
 
 const months = [
     "January", "February", "March", "April", "May", "June",
@@ -221,7 +322,7 @@ function PassengerDetailsContent() {
     if (isLoading) {
         return (
             <div className="min-h-screen bg-amber/5 flex flex-col items-center justify-center">
-                <Loader2 size={40} className="text-amber animate-spin mb-4" />
+                <LucideLoader size={40} className="text-amber animate-spin mb-4" />
                 <p className="text-body text-zinc-500">Preparing your reservation suite...</p>
             </div>
         );
@@ -427,16 +528,13 @@ function PassengerDetailsContent() {
 
                                     <div className="flex flex-col gap-2">
                                         <label className="text-xs font-semibold text-black/50 uppercase tracking-widest pl-1">Nationality</label>
-                                        <div className="relative">
-                                            <select
-                                                value={p.nationality}
-                                                onChange={(e) => updatePassenger(p.id, 'nationality', e.target.value)}
-                                                className="w-full bg-black/5 border-none rounded-2xl p-4 text-sm font-semibold text-black appearance-none cursor-pointer focus:ring-2 focus:ring-black/20"
-                                            >
-                                                {COUNTRIES.map(c => <option key={c.code} value={c.name}>{c.name}</option>)}
-                                            </select>
-                                            <Globe size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-black/30" />
-                                        </div>
+                                        <SearchableDropdown 
+                                            options={COUNTRIES}
+                                            value={p.nationality}
+                                            onChange={(val: any) => updatePassenger(p.id, 'nationality', val.name)}
+                                            icon={Globe}
+                                            placeholder="Search nationality..."
+                                        />
                                     </div>
                                 </div>
                             </motion.div>
@@ -468,17 +566,15 @@ function PassengerDetailsContent() {
                                 <div className="flex flex-col gap-2">
                                     <label className="text-xs font-bold text-black/50 uppercase tracking-widest pl-1">Phone number</label>
                                     <div className="flex gap-2">
-                                        <div className="relative w-24 sm:w-28 shrink-0">
-                                            <select 
+                                        <div className="w-24 sm:w-32 shrink-0">
+                                            <SearchableDropdown 
+                                                options={COUNTRIES}
                                                 value={contactDialCode}
-                                                onChange={(e) => setContactDialCode(e.target.value)}
-                                                className="bg-black/5 border-none rounded-2xl p-4 text-sm font-bold text-black w-full appearance-none cursor-pointer focus:ring-2 focus:ring-black/20 text-ellipsis overflow-hidden"
-                                            >
-                                                {COUNTRIES.map(c => (
-                                                    <option key={c.code} value={c.dial}>{c.dial} ({c.code})</option>
-                                                ))}
-                                            </select>
-                                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 pointer-events-none" />
+                                                onChange={(val: any) => setContactDialCode(val.dial)}
+                                                displayValue={contactDialCode}
+                                                placeholder="Code..."
+                                                error={showErrors && !contactDialCode}
+                                            />
                                         </div>
                                         <input
                                             type="tel"
