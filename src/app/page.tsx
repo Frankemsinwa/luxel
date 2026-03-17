@@ -93,6 +93,90 @@ const AnimatedCounter = ({ target, suffix = "", prefix = "" }: { target: number;
   );
 };
 
+/* ───── Custom Cursor Component ───── */
+const CustomCursor = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [trail, setTrail] = useState<{ x: number, y: number, id: number }[]>([]);
+  const idCounter = useRef(0);
+
+  useEffect(() => {
+    let lastTime = 0;
+    const updateMousePosition = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+      
+      const now = Date.now();
+      if (now - lastTime > 40) { // Add trail point every 40ms
+        setTrail((prev) => [...prev, { x: e.clientX, y: e.clientY, id: idCounter.current++ }].slice(-15)); // Keep last 15 points
+        lastTime = now;
+      }
+    };
+    
+    // Add event listener
+    window.addEventListener("mousemove", updateMousePosition);
+
+    // Only hide default cursor on non-touch devices
+    if (window.matchMedia("(pointer: fine)").matches) {
+      document.body.style.cursor = 'none';
+      
+      // Additional logic to hide cursor on interactive elements if desired, though 'none' on body usually covers it,
+      // it's essential to reset on unmount
+    }
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("mousemove", updateMousePosition);
+      document.body.style.cursor = 'auto'; // Restore normal cursor when leaving homepage
+    };
+  }, []);
+
+  // Don't render cursor on mobile/touch devices
+  if (typeof window !== 'undefined' && !window.matchMedia("(pointer: fine)").matches) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden hidden md:block">
+      {/* Smoke Trail */}
+      <AnimatePresence>
+        {trail.map((point) => (
+          <motion.div
+            key={point.id}
+            initial={{ opacity: 0.8, scale: 0.5 }}
+            animate={{ opacity: 0, scale: 2 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="absolute rounded-full bg-white/40 blur-[2px]"
+            style={{
+              left: point.x,
+              top: point.y,
+              width: "8px",
+              height: "8px",
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+        ))}
+      </AnimatePresence>
+
+      {/* Plane Cursor */}
+      <motion.div
+        className="absolute text-amber"
+        animate={{
+          x: mousePosition.x - 12,
+          y: mousePosition.y - 12,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 28,
+          mass: 0.5,
+        }}
+      >
+        <Plane size={24} className="-rotate-45 drop-shadow-[0_0_8px_rgba(241,188,50,0.8)] fill-amber" />
+      </motion.div>
+    </div>
+  );
+};
+
 export default function Home() {
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -252,8 +336,9 @@ export default function Home() {
 
   return (
     <>
+      <CustomCursor />
       <Navbar />
-      <main className="min-h-screen bg-zinc-950">
+      <main className="min-h-screen bg-zinc-950 cursor-none">
 
         {/* ═══════════════════════════════════════════ */}
         {/* HERO SECTION — Ultra-Premium Dark + Grid   */}
