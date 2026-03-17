@@ -312,7 +312,7 @@ export default function Home() {
                 a <span className="text-amber italic font-newton relative">
                   Billionaire
                   <motion.span
-                    className="absolute -bottom-2 left-0 w-full h-[2px] bg-gradient-to-r from-amber/80 via-amber to-amber/80"
+                    className="absolute bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-amber/80 via-amber to-amber/80"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
                     transition={{ delay: 1.5, duration: 0.8 }}
