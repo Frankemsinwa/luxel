@@ -97,6 +97,7 @@ const AnimatedCounter = ({ target, suffix = "", prefix = "" }: { target: number;
 const CustomCursor = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [trail, setTrail] = useState<{ x: number, y: number, id: number }[]>([]);
+  const [isHoveringAmber, setIsHoveringAmber] = useState(false);
   const idCounter = useRef(0);
 
   useEffect(() => {
@@ -109,6 +110,15 @@ const CustomCursor = () => {
         setTrail((prev) => [...prev, { x: e.clientX, y: e.clientY, id: idCounter.current++ }].slice(-15)); // Keep last 15 points
         lastTime = now;
       }
+      
+      // Check if hovering over an amber background section
+      try {
+        const hoveredElements = document.elementsFromPoint(e.clientX, e.clientY);
+        const hasAmberBg = hoveredElements.some((el) => 
+          el.classList && (el.classList.contains('bg-amber') || el.classList.contains('bg-amber/90'))
+        );
+        setIsHoveringAmber(hasAmberBg);
+      } catch (err) {}
     };
     
     // Add event listener
@@ -159,7 +169,7 @@ const CustomCursor = () => {
 
       {/* Plane Cursor */}
       <motion.div
-        className="absolute text-amber"
+        className={`absolute transition-colors duration-300 ${isHoveringAmber ? 'text-white' : 'text-amber'}`}
         animate={{
           x: mousePosition.x - 12,
           y: mousePosition.y - 12,
@@ -171,7 +181,10 @@ const CustomCursor = () => {
           mass: 0.5,
         }}
       >
-        <Plane size={24} className="-rotate-45 drop-shadow-[0_0_8px_rgba(241,188,50,0.8)] fill-amber" />
+        <Plane 
+          size={24} 
+          className={`-rotate-45 transition-all duration-300 ${isHoveringAmber ? 'drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] fill-white' : 'drop-shadow-[0_0_8px_rgba(241,188,50,0.8)] fill-amber'}`} 
+        />
       </motion.div>
     </div>
   );
