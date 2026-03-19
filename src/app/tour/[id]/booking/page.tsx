@@ -3,7 +3,11 @@
 import api from '@/lib/api';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { useState, useEffect, Suspense } from 'react';
 import {
     ShieldCheck,
     CreditCard,
@@ -16,13 +20,8 @@ import {
     Lock,
     Loader2
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 
-export default function TourBookingPage() {
+function TourBookingContent() {
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -342,5 +341,13 @@ export default function TourBookingPage() {
             </div>
             <Footer />
         </div>
+    );
+}
+
+export default function TourBookingPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center text-body font-medium text-zinc-300 uppercase tracking-widest">Opening Secure Desk...</div>}>
+            <TourBookingContent />
+        </Suspense>
     );
 }
