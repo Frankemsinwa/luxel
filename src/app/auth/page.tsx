@@ -13,9 +13,9 @@ import Footer from '@/components/Footer';
 function AuthContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const initialMode = (searchParams.get('mode') as 'login' | 'signup') || 'login';
+    const initialMode = (searchParams.get('mode') as 'login' | 'signup' | 'forgot-password') || 'login';
     
-    const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
+    const [mode, setMode] = useState<'login' | 'signup' | 'forgot-password'>(initialMode);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -37,7 +37,13 @@ function AuthContent() {
         setError(null);
 
         try {
-            if (mode === 'signup') {
+            if (mode === 'forgot-password') {
+                const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/auth/reset-password`,
+                });
+                if (resetError) throw resetError;
+                setError("Reset link sent! Please check your inbox.");
+            } else if (mode === 'signup') {
                 const { error: signUpError } = await supabase.auth.signUp({
                     email,
                     password,
@@ -152,16 +158,17 @@ function AuthContent() {
                     >
                         <div className="space-y-6">
                             <div className="inline-block px-4 py-1.5 rounded-full bg-zinc-900 text-amber text-caption font-medium uppercase tracking-[0.2em]">
-                                {mode === 'login' ? 'Private Portal' : 'Membership Access'}
+                                {mode === 'login' ? 'Private Portal' : mode === 'signup' ? 'Membership Access' : 'Security Protocol'}
                             </div>
                             <h1 className="text-display font-medium text-zinc-900 leading-[1.1] tracking-tight">
-                                {mode === 'login' ? 'Welcome' : 'Join the'} <br />
-                                <span className="text-amber italic font-newton">{mode === 'login' ? 'Back' : 'Elite'}</span>.
+                                {mode === 'login' ? 'Welcome' : mode === 'signup' ? 'Join the' : 'Reset'} <br />
+                                <span className="text-amber italic font-newton">{mode === 'login' ? 'Back' : mode === 'signup' ? 'Elite' : 'Access'}</span>.
                             </h1>
                             <p className="text-body-lg font-normal text-zinc-500 leading-relaxed">
                                 {mode === 'login' 
                                     ? 'Enter your credentials to access your luxury concierge.' 
-                                    : 'Unlock exclusive rates, priority handling, and global access.'}
+                                    : mode === 'signup' ? 'Unlock exclusive rates, priority handling, and global access.'
+                                    : 'Enter your email to receive a secure password restoration link.'}
                             </p>
                         </div>
 
@@ -169,7 +176,11 @@ function AuthContent() {
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className={`p-5 rounded-2xl text-body-sm font-medium ${error.includes('Account created') ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-500 border border-red-100'}`}
+                                className={`p-5 rounded-2xl text-body-sm font-medium ${
+                                    (error.includes('Account created') || error.includes('Reset link sent'))
+                                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                    : 'bg-red-50 text-red-500 border border-red-100'
+                                }`}
                             >
                                 {error}
                             </motion.div>
@@ -220,34 +231,50 @@ function AuthContent() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center px-1">
-                                    <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Password</label>
-                                    {mode === 'login' && (
-                                        <button type="button" className="text-caption font-medium text-amber hover:underline uppercase tracking-widest">Forgot Password?</button>
-                                    )}
-                                </div>
-                                <div className="relative group">
-                                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-amber transition-colors">
-                                        <Lock size={18} strokeWidth={1.5} />
-                                    </div>
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="••••••••"
-                                        className="w-full bg-zinc-50 border border-transparent rounded-2xl py-4 pl-12 pr-12 text-body font-medium text-zinc-900 focus:ring-2 focus:ring-amber/20 focus:bg-white focus:border-amber/10 transition-all outline-none"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-amber transition-colors"
+                            <AnimatePresence mode="wait">
+                                {mode !== 'forgot-password' && (
+                                    <motion.div
+                                        key="password-field"
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="space-y-2 overflow-hidden"
                                     >
-                                        {showPassword ? <EyeOff size={18} strokeWidth={1.5} /> : <Eye size={18} strokeWidth={1.5} />}
-                                    </button>
-                                </div>
-                            </div>
+                                        <div className="flex justify-between items-center px-1">
+                                            <label className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Password</label>
+                                            {mode === 'login' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setMode('forgot-password')}
+                                                    className="text-caption font-medium text-amber hover:underline uppercase tracking-widest"
+                                                >
+                                                    Forgot Password?
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="relative group">
+                                            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-amber transition-colors">
+                                                <Lock size={18} strokeWidth={1.5} />
+                                            </div>
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                required
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                placeholder="••••••••"
+                                                className="w-full bg-zinc-50 border border-transparent rounded-2xl py-4 pl-12 pr-12 text-body font-medium text-zinc-900 focus:ring-2 focus:ring-amber/20 focus:bg-white focus:border-amber/10 transition-all outline-none"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-amber transition-colors"
+                                            >
+                                                {showPassword ? <EyeOff size={18} strokeWidth={1.5} /> : <Eye size={18} strokeWidth={1.5} />}
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
 
                             <button
                                 type="submit"
@@ -256,7 +283,7 @@ function AuthContent() {
                             >
                                 <div className="absolute inset-0 bg-amber -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
                                 <span className="relative z-10 group-hover:text-black transition-colors">
-                                    {isLoading ? 'Processing Access...' : mode === 'login' ? 'Sign In' : 'Sign Up'}
+                                    {isLoading ? 'Processing...' : mode === 'login' ? 'Sign In' : mode === 'signup' ? 'Sign Up' : 'Send Recovery Link'}
                                 </span>
                                 {!isLoading && <ArrowRight size={18} className="relative z-10 group-hover:text-black transition-colors" />}
                             </button>
@@ -264,12 +291,13 @@ function AuthContent() {
 
                         <div className="text-center pt-4">
                             <p className="text-body-sm font-medium text-zinc-500">
-                                {mode === 'login' ? "Not yet a member? " : "Already an elite member? "}
+                                {mode === 'login' ? "Not yet a member? " : mode === 'signup' ? "Already an elite member? " : "Remember your access? "}
                                 <button
+                                    type="button"
                                     onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
                                     className="text-amber font-medium hover:underline ml-1"
                                 >
-                                    {mode === 'login' ? 'Sign Up' : 'Sign In'}
+                                    {mode === 'login' ? 'Sign Up' : mode === 'signup' ? 'Sign In' : 'Back to Login'}
                                 </button>
                             </p>
                         </div>

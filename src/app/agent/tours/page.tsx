@@ -12,7 +12,8 @@ import {
     Eye,
     Edit,
     Trash2,
-    Palmtree
+    Palmtree,
+    BarChart3
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -170,6 +171,13 @@ export default function ToursManagementPage() {
                                                 title="Preview Experience"
                                             >
                                                 <Eye size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => router.push(`/agent/tours/bookings?tourId=${tour.id}`)}
+                                                className="p-2 rounded-lg bg-white border border-zinc-100 text-zinc-400 hover:text-emerald-500 shadow-sm hover:shadow-md active:scale-95 transition-all"
+                                                title="View Bookings & Analytics"
+                                            >
+                                                <BarChart3 size={18} />
                                             </button>
                                             <button
                                                 onClick={() => router.push(`/agent/tours/edit/${tour.id}`)}

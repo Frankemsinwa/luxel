@@ -1,12 +1,13 @@
 import { supabaseAdmin } from '../config/supabase.js';
 import * as emailService from './emailService.js';
+import * as ticketService from './ticketService.js';
 
 /**
  * Service to handle Tour Booking workflows
  */
 export const processTourBooking = async (
     tourId: string,
-    userId: string,
+    userId: string | null,
     guestCount: number,
     contactInfo: any,
     preferences: any,
@@ -15,7 +16,7 @@ export const processTourBooking = async (
     // 1. Fetch tour details & check slots
     const { data: tour, error: tourError } = await supabaseAdmin
         .from('tours')
-        .select('title, price, available_slots, agent_id')
+        .select('*')
         .eq('id', tourId)
         .single();
 
@@ -48,10 +49,24 @@ export const processTourBooking = async (
         .eq('id', tourId);
 
     // 4. Trigger Notifications (Async)
-    const guestName = contactInfo.fullName || contactInfo.email || 'Valued Guest';
+    const guestName = contactInfo.fullName || `${contactInfo.firstName} ${contactInfo.lastName}`.trim() || contactInfo.email || 'Valued Guest';
+
+    // Prepare full booking data for ticket generation
+    const fullBooking = {
+        ...booking,
+        tour: tour
+    };
+
+    // Generate Ticket PDF
+    let pdfBuffer: Buffer | undefined;
+    try {
+        pdfBuffer = await ticketService.generateTourTicketPdf(fullBooking);
+    } catch (err) {
+        console.error('Failed to generate tour ticket PDF:', err);
+    }
 
     // Notify Guest
-    emailService.sendTourConfirmationEmail(contactInfo.email, tour.title, booking.id);
+    emailService.sendTourConfirmationEmail(contactInfo.email, tour.title, booking.id, pdfBuffer);
 
     // Notify Agent (if assigned)
     if (tour.agent_id) {

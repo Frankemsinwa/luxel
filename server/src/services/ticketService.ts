@@ -55,7 +55,7 @@ export const generateTicketPdf = async (booking: any, passengerName: string, ema
         defaultViewport: (chromium as any).defaultViewport,
         executablePath: isVercel 
             ? await chromium.executablePath() 
-            : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Fallback for your local Windows machine
+            : process.env.CHROME_PATH || '/usr/bin/google-chrome', // Fallback to common Linux path or env var
         headless: isVercel ? (chromium as any).headless : true,
     });
 
@@ -63,6 +63,55 @@ export const generateTicketPdf = async (booking: any, passengerName: string, ema
         const page = await browser.newPage();
 
         // Wait until network is idle ensures webfonts are loaded
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: { top: '0', right: '0', bottom: '0', left: '0' }
+        });
+
+        return Buffer.from(pdfBuffer);
+    } finally {
+        await browser.close();
+    }
+};
+
+export const generateTourTicketPdf = async (booking: any): Promise<Buffer> => {
+    // Read logo
+    const logoFullSizePath = path.join(__dirname, '../../public/assets/logo.png');
+    const logoBase64 = fs.readFileSync(logoFullSizePath, { encoding: 'base64' });
+    const logoDataUrl = `data:image/png;base64,${logoBase64}`;
+
+    // Prepare Template Data
+    const templateData = {
+        logoPath: logoDataUrl,
+        bookingRef: booking.id.substring(0, 8).toUpperCase(),
+        guestName: booking.contact_info?.fullName || `${booking.contact_info?.firstName || ''} ${booking.contact_info?.lastName || ''}`.trim() || 'Valued Guest',
+        tourTitle: booking.tour?.title || 'Luxury Experience',
+        location: booking.tour?.location || 'Premium Destination',
+        date: booking.booking_date ? new Date(booking.booking_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'To be scheduled',
+        guestCount: booking.guest_count || 1,
+        meetingPoint: booking.tour?.meeting_point || 'Luxel Priority Lounge - Terminal 1, Gate B-12',
+        tourImage: booking.tour?.hero_image || 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&q=80',
+        dateIssued: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    };
+
+    // Render EJS to HTML
+    const templatePath = path.join(__dirname, '../templates/tour_ticket.ejs');
+    const html = await ejs.renderFile(templatePath, templateData);
+
+    // Generate PDF using Puppeteer Core + Chromium
+    const browser = await puppeteer.launch({
+        args: isVercel ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+        defaultViewport: (chromium as any).defaultViewport,
+        executablePath: isVercel
+            ? await chromium.executablePath()
+            : process.env.CHROME_PATH || '/usr/bin/google-chrome',
+        headless: isVercel ? (chromium as any).headless : true,
+    });
+
+    try {
+        const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
         const pdfBuffer = await page.pdf({
             format: 'A4',
