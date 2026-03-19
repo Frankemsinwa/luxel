@@ -17,10 +17,14 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import LocationPicker from '@/components/LocationPicker';
+import { PlaneTakeoff, PlaneLanding } from 'lucide-react';
+
 
 export default function FlightPricingPage() {
-    const [from, setFrom] = useState('LOS');
-    const [to, setTo] = useState('ABV');
+    const [from, setFrom] = useState('Lagos (LOS)');
+    const [to, setTo] = useState('Abuja (ABV)');
+
     const [flights, setFlights] = useState<any[]>([]);
     const [overrides, setOverrides] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -40,18 +44,28 @@ export default function FlightPricingPage() {
         }
     };
 
+    const extractIATA = (val: string) => {
+        const match = val.match(/\(([A-Z]{3})\)/);
+        return match ? match[1] : val.toUpperCase();
+    };
+
     const handleSearch = async () => {
         if (!from || !to) return;
+        const originCode = extractIATA(from);
+        const destinationCode = extractIATA(to);
+        
         setIsLoading(true);
+
         setFlights([]);
         try {
             // Use today's date for searching available flights
             const today = new Date().toISOString().split('T')[0];
             const response = await api.get('/flights/search', {
                 params: {
-                    from,
-                    to,
+                    from: originCode,
+                    to: destinationCode,
                     departureDate: today,
+
                     adults: '1',
                     travelClass: 'ECONOMY'
                 }
@@ -64,18 +78,18 @@ export default function FlightPricingPage() {
         }
     };
 
-    const handleSaveOverride = async (airlineCode: string, price: number) => {
-        setIsSaving(airlineCode);
+    const handleSaveOverride = async (origin: string, destination: string, airlineCode: string, price: number) => {
+        const key = `${origin}-${destination}-${airlineCode}`;
+        setIsSaving(key);
         try {
             await api.post('/agent/flight-overrides', {
-                origin: from.toUpperCase(),
-                destination: to.toUpperCase(),
+                origin: origin.toUpperCase(),
+                destination: destination.toUpperCase(),
                 airline_code: airlineCode.toUpperCase(),
                 override_price: price,
                 is_active: true
             });
             await fetchOverrides();
-            alert('Price override saved successfully!');
         } catch (error) {
             console.error('Save override error:', error);
             alert('Failed to save override.');
@@ -83,6 +97,7 @@ export default function FlightPricingPage() {
             setIsSaving(null);
         }
     };
+
 
     const handleDeleteOverride = async (id: string) => {
         if (!confirm('Are you sure you want to remove this override?')) return;
@@ -132,34 +147,29 @@ export default function FlightPricingPage() {
             {activeTab === 'search' ? (
                 <div className="space-y-8">
                     {/* Search Controls */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-zinc-100 shadow-sm flex flex-col md:flex-row items-end gap-6">
-                        <div className="flex-1 space-y-3">
-                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">Origin IATA</label>
-                            <div className="relative">
-                                <Plane size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" />
-                                <input
-                                    value={from}
-                                    onChange={(e) => setFrom(e.target.value.toUpperCase())}
-                                    placeholder="e.g. LOS"
-                                    className="w-full bg-zinc-50 border-none rounded-2xl py-4 pl-12 pr-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/20 outline-none"
-                                />
-                            </div>
+                    <div className="bg-white rounded-[2.5rem] p-8 border border-zinc-100 shadow-sm flex flex-col md:flex-row items-stretch md:items-end gap-6">
+                        <div className="flex-1">
+                            <LocationPicker
+                                label="Origin"
+                                icon={<PlaneTakeoff size={18} strokeWidth={2.5} />}
+                                value={from}
+                                onChange={setFrom}
+                                className="w-full"
+                            />
                         </div>
                         <div className="flex items-center justify-center pb-4 text-zinc-300">
                             <ArrowRight size={20} />
                         </div>
-                        <div className="flex-1 space-y-3">
-                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">Destination IATA</label>
-                            <div className="relative">
-                                <Plane size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300 -rotate-90" />
-                                <input
-                                    value={to}
-                                    onChange={(e) => setTo(e.target.value.toUpperCase())}
-                                    placeholder="e.g. ABV"
-                                    className="w-full bg-zinc-50 border-none rounded-2xl py-4 pl-12 pr-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/20 outline-none"
-                                />
-                            </div>
+                        <div className="flex-1">
+                            <LocationPicker
+                                label="Destination"
+                                icon={<PlaneLanding size={18} strokeWidth={2.5} />}
+                                value={to}
+                                onChange={setTo}
+                                className="w-full"
+                            />
                         </div>
+
                         <button
                             onClick={handleSearch}
                             disabled={isLoading}
@@ -194,9 +204,11 @@ export default function FlightPricingPage() {
                                     </tr>
                                 ) : flights.length > 0 ? (
                                     flights.map((flight) => {
+                                        const originCode = extractIATA(from);
+                                        const destinationCode = extractIATA(to);
                                         const existingOverride = overrides.find(o =>
-                                            o.origin === from.toUpperCase() &&
-                                            o.destination === to.toUpperCase() &&
+                                            o.origin === originCode &&
+                                            o.destination === destinationCode &&
                                             o.airline_code === flight.airlineCode
                                         );
 
@@ -205,11 +217,13 @@ export default function FlightPricingPage() {
                                                 key={flight.id}
                                                 flight={flight}
                                                 existingOverride={existingOverride}
-                                                isSaving={isSaving === flight.airlineCode}
-                                                onSave={(price) => handleSaveOverride(flight.airlineCode, price)}
+                                                isSaving={isSaving === `${originCode}-${destinationCode}-${flight.airlineCode}`}
+                                                onSave={(price) => handleSaveOverride(originCode, destinationCode, flight.airlineCode, price)}
                                             />
                                         );
+
                                     })
+
                                 ) : (
                                     <tr>
                                         <td colSpan={5} className="py-20 text-center text-zinc-300 font-medium uppercase tracking-widest text-xs italic">
@@ -236,34 +250,15 @@ export default function FlightPricingPage() {
                         </thead>
                         <tbody className="divide-y divide-zinc-50">
                             {overrides.length > 0 ? overrides.map((o) => (
-                                <tr key={o.id} className="hover:bg-zinc-50/50 transition-colors group">
-                                    <td className="px-10 py-6">
-                                        <div className="flex items-center gap-3 font-black text-zinc-900">
-                                            {o.origin} <ArrowRight size={14} className="text-amber" /> {o.destination}
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-[10px] font-black text-zinc-400 border border-zinc-200">
-                                                {o.airline_code}
-                                            </div>
-                                            <span className="text-sm font-bold text-zinc-600">{o.airline_code}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-6 font-black text-emerald-600">{formatNGN(o.override_price)}</td>
-                                    <td className="px-10 py-6">
-                                        <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest">Active</span>
-                                    </td>
-                                    <td className="px-10 py-6 text-right">
-                                        <button
-                                            onClick={() => handleDeleteOverride(o.id)}
-                                            className="p-2 rounded-lg text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-all"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </td>
-                                </tr>
+                                <ActiveOverrideRow
+                                    key={o.id}
+                                    override={o}
+                                    isSaving={isSaving === `${o.origin}-${o.destination}-${o.airline_code}`}
+                                    onSave={(price) => handleSaveOverride(o.origin, o.destination, o.airline_code, price)}
+                                    onDelete={() => handleDeleteOverride(o.id)}
+                                />
                             )) : (
+
                                 <tr>
                                     <td colSpan={5} className="py-20 text-center text-zinc-300 font-medium uppercase tracking-widest text-xs">No active price overrides.</td>
                                 </tr>
@@ -276,7 +271,85 @@ export default function FlightPricingPage() {
     );
 }
 
+function ActiveOverrideRow({ override, onSave, onDelete, isSaving }: {
+    override: any,
+    onSave: (price: number) => void,
+    onDelete: () => void,
+    isSaving: boolean
+}) {
+    const [price, setPrice] = useState(override.override_price);
+
+    useEffect(() => {
+        setPrice(override.override_price);
+    }, [override]);
+
+    const formatNGN = (value: number) =>
+        new Intl.NumberFormat('en-NG', {
+            style: 'currency',
+            currency: 'NGN',
+            maximumFractionDigits: 0
+        }).format(value);
+
+    const isDifferent = price !== Number(override.override_price);
+
+    return (
+        <tr className="hover:bg-zinc-50/50 transition-colors group">
+            <td className="px-10 py-6">
+                <div className="flex items-center gap-3 font-black text-zinc-900">
+                    {override.origin} <ArrowRight size={14} className="text-amber" /> {override.destination}
+                </div>
+            </td>
+            <td className="px-10 py-6">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-[10px] font-black text-zinc-400 border border-zinc-200">
+                        {override.airline_code}
+                    </div>
+                    <span className="text-sm font-bold text-zinc-600">{override.airline_code}</span>
+                </div>
+            </td>
+            <td className="px-10 py-6">
+                <div className="relative w-48">
+                    <DollarSign size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300" />
+                    <input
+                        type="number"
+                        value={price}
+                        onChange={(e) => setPrice(Number(e.target.value))}
+                        className={`w-full bg-zinc-50 border-2 rounded-xl py-2 pl-10 pr-4 text-sm font-black transition-all ${isDifferent ? 'border-amber ring-2 ring-amber/10' : 'border-transparent'}`}
+                    />
+                </div>
+            </td>
+            <td className="px-10 py-6">
+                <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest">Active</span>
+            </td>
+            <td className="px-10 py-6 text-right">
+                <div className="flex items-center justify-end gap-2">
+                    {!isDifferent && (
+                        <div className="flex items-center gap-1 text-[10px] font-black text-emerald-500 uppercase tracking-widest mr-2">
+                            <CheckCircle2 size={12} /> Live
+                        </div>
+                    )}
+                    <button
+                        onClick={() => onSave(price)}
+                        disabled={isSaving || !isDifferent}
+                        className={`p-2.5 rounded-xl transition-all shadow-sm ${isDifferent ? 'bg-zinc-900 text-amber hover:scale-105 active:scale-95' : 'bg-zinc-50 text-zinc-300 grayscale opacity-50'}`}
+                    >
+                        {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                    </button>
+
+                    <button
+                        onClick={onDelete}
+                        className="p-2.5 rounded-xl text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-all"
+                    >
+                        <Trash2 size={18} />
+                    </button>
+                </div>
+            </td>
+        </tr>
+    );
+}
+
 function FlightRow({ flight, existingOverride, onSave, isSaving }: {
+
     flight: any,
     existingOverride: any,
     onSave: (price: number) => void,
