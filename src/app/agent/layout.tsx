@@ -10,7 +10,8 @@ import {
     LogOut,
     Bell,
     Search,
-    Palmtree
+    Palmtree,
+    Calendar
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -23,6 +24,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
         { icon: <LayoutDashboard size={20} />, label: "Overview", href: "/agent/dashboard" },
         { icon: <Plane size={20} />, label: "Flight Requests", href: "/agent/requests" },
         { icon: <Palmtree size={20} />, label: "Tour Experiences", href: "/agent/tours" },
+        { icon: <Calendar size={20} />, label: "Tour Bookings", href: "/agent/tours/bookings" },
         { icon: <Users size={20} />, label: "Elite Members", href: "/agent/members" },
         { icon: <MessageSquare size={20} />, label: "Concierge Chat", href: "/agent/chat" },
         { icon: <Settings size={20} />, label: "Settings", href: "/agent/settings" },

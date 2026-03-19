@@ -15,6 +15,8 @@ router.get('/bookings/:id', authenticate, tourController.getTourBookingById);
 
 // Agent/Admin Endpoints
 router.get('/my/listings', authenticate, authorize(['AGENT', 'ADMIN']), tourController.getAgentTours);
+router.get('/agent/bookings', authenticate, authorize(['AGENT', 'ADMIN']), tourController.getAgentTourBookings);
+router.get('/agent/bookings/:id', authenticate, authorize(['AGENT', 'ADMIN']), tourController.getAgentTourBookingById);
 router.post('/', authenticate, authorize(['AGENT', 'ADMIN']), tourController.createTour);
 router.patch('/:id', authenticate, authorize(['AGENT', 'ADMIN']), tourController.updateTour);
 

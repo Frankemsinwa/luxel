@@ -58,6 +58,68 @@ export const getTourBySlug = async (req: Request, res: Response) => {
 
 /**
  * @swagger
+ * /api/tours/agent/bookings:
+ *   get:
+ *     summary: Get all bookings for tours managed by the authenticated agent
+ *     tags: [Agent]
+ */
+export const getAgentTourBookings = async (req: any, res: Response) => {
+    try {
+        const agentId = req.user.id;
+
+        const { data, error } = await supabaseAdmin
+            .from('tour_bookings')
+            .select(`
+                *,
+                tour:tours!inner(*)
+            `)
+            .eq('tour.agent_id', agentId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return res.json(data);
+    } catch (error) {
+        console.error('Fetch agent tour bookings error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+/**
+ * @swagger
+ * /api/tours/agent/bookings/{id}:
+ *   get:
+ *     summary: Get a specific tour booking detail (Agent only)
+ *     tags: [Agent]
+ */
+export const getAgentTourBookingById = async (req: any, res: Response) => {
+    try {
+        const { id } = req.params;
+        const agentId = req.user.id;
+
+        const { data, error } = await supabaseAdmin
+            .from('tour_bookings')
+            .select(`
+                *,
+                tour:tours!inner(*),
+                user:profiles(*)
+            `)
+            .eq('id', id)
+            .eq('tour.agent_id', agentId)
+            .single();
+
+        if (error || !data) {
+            return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        return res.json(data);
+    } catch (error) {
+        console.error('Fetch agent tour booking by ID error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+/**
+ * @swagger
  * /api/tours/id/{id}:
  *   get:
  *     summary: Get tour details by id
