@@ -335,7 +335,7 @@ function FlightRow({ flight, existingOverride, onSave, isSaving }: {
             </td>
             <td className="px-10 py-6 text-right">
                 <div className="flex items-center justify-end gap-2">
-                    {existingOverride && !isDifferent && (
+                    {existingOverride && !isDifferent ? (
                         <div className="flex items-center gap-1 text-[10px] font-black text-emerald-500 uppercase tracking-widest mr-2">
                             <CheckCircle2 size={12} /> Live Override
                         </div>
