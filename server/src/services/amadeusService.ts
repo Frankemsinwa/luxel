@@ -1,5 +1,6 @@
 import Amadeus from 'amadeus';
 import dotenv from 'dotenv';
+import { supabaseAdmin } from '../config/supabase.js';
 
 dotenv.config();
 
@@ -203,6 +204,14 @@ export const searchFlights = async (searchParams: {
 
         const carriers = response.result.dictionaries?.carriers || {};
 
+        // Fetch price overrides for this route
+        const { data: overrides } = await supabaseAdmin
+            .from('flight_price_overrides')
+            .select('*')
+            .eq('origin', originCode)
+            .eq('destination', destinationCode)
+            .eq('is_active', true);
+
         const mappedFlights = response.data.map((offer: any) => {
             const rawPrice = parseFloat(offer.price.total);
             const numPassengers = offer.travelerPricings ? offer.travelerPricings.length : parseInt(query.adults || '1');
@@ -227,6 +236,13 @@ export const searchFlights = async (searchParams: {
 
             const baggageInfo = offer.travelerPricings?.[0]?.fareDetailsBySegment?.[0]?.includedCheckedBags;
 
+            // Apply override if exists
+            let finalPrice = convertedPrice;
+            const override = overrides?.find(o => o.airline_code === airlineCode);
+            if (override) {
+                finalPrice = Number(override.override_price);
+            }
+
             return {
                 id: offer.id,
                 airlineCode: airlineCode,
@@ -240,7 +256,7 @@ export const searchFlights = async (searchParams: {
                 arrivalCity: destinationCode,
                 duration: offer.itineraries[0].duration.replace('PT', '').toLowerCase(),
                 stops: offer.itineraries[0].segments.length > 1 ? `${offer.itineraries[0].segments.length - 1} STOP(S)` : 'NON-STOP',
-                price: convertedPrice,
+                price: finalPrice,
                 currency: 'NGN',
                 originalPrice: unitRawPrice,
                 originalCurrency: offer.price.currency,
