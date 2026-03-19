@@ -17,10 +17,10 @@ import {
     XCircle
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 
-export default function TourBookingsPage() {
+function TourBookingsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const tourIdFilter = searchParams.get('tourId');
@@ -199,5 +199,17 @@ export default function TourBookingsPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function TourBookingsPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[400px]">
+                <RefreshCw size={32} className="animate-spin text-amber/20" />
+            </div>
+        }>
+            <TourBookingsContent />
+        </Suspense>
     );
 }
