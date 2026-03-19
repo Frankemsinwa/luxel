@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { supabaseAdmin } from '../config/supabase.js';
 import * as tourService from '../services/tourService.js';
 import * as bookingService from '../services/bookingService.js';
+import * as ticketService from '../services/ticketService.js';
 
 /**
  * @swagger
@@ -53,6 +54,51 @@ export const getTourBySlug = async (req: Request, res: Response) => {
             hint: error.hint
         });
         return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+/**
+ * @swagger
+ * /api/tours/bookings/{id}/download:
+ *   get:
+ *     summary: Download tour ticket PDF
+ *     tags: [Tours]
+ */
+export const downloadTourTicket = async (req: any, res: Response) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user?.id || null;
+
+        const { data: booking, error } = await supabaseAdmin
+            .from('tour_bookings')
+            .select(`
+                *,
+                tour:tours(*)
+            `)
+            .eq('id', id)
+            .single();
+
+        if (error || !booking) {
+            return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        // Authorization: If booking has user_id, must match req.user.id (or be an AGENT/ADMIN)
+        const userRole = req.user?.user_metadata?.role;
+        const isAuthorized = userRole === 'AGENT' || userRole === 'ADMIN' || (booking.user_id === userId);
+
+        if (booking.user_id && !isAuthorized) {
+            return res.status(403).json({ message: 'Unauthorized to download this ticket' });
+        }
+
+        const pdfBuffer = await ticketService.generateTourTicketPdf(booking);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=Luxel_Experience_Pass_${id.substring(0, 8).toUpperCase()}.pdf`);
+        return res.send(pdfBuffer);
+
+    } catch (error: any) {
+        console.error('Download tour ticket error:', error);
+        return res.status(500).json({ message: 'Internal server error while generating ticket' });
     }
 };
 
@@ -236,7 +282,7 @@ export const bookTour = async (req: any, res: Response) => {
     try {
         const { id } = req.params;
         const { guestCount, contactInfo, preferences, paymentReference } = req.body;
-        const userId = req.user.id;
+        const userId = req.user?.id || null;
 
         const booking = await bookingService.processTourBooking(
             id as string,

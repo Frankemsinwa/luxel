@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxel Experience Ticket</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #1a1a1a;
+            width: 210mm;
+            min-height: 297mm;
+        }
+
+        .ticket-container {
+            position: relative;
+            padding: 60px;
+            box-sizing: border-box;
+            background: #ffffff;
+            min-height: 297mm;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .brand-logo {
+            height: 50px;
+            width: auto;
+        }
+
+        .ticket-type {
+            text-align: right;
+        }
+
+        .ticket-type h1 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0;
+            color: #dbb35e;
+            font-weight: 800;
+        }
+
+        .hero-section {
+            position: relative;
+            height: 400px;
+            border-radius: 40px;
+            overflow: hidden;
+            margin-bottom: 60px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 100%;
+            object-cover: cover;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            padding: 40px;
+            color: #ffffff;
+        }
+
+        .hero-overlay h2 {
+            font-size: 42px;
+            font-weight: 900;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .hero-overlay p {
+            font-size: 18px;
+            font-weight: 400;
+            margin: 10px 0 0 0;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 60px;
+        }
+
+        .details-panel {
+            space-y: 40px;
+        }
+
+        .info-group {
+            margin-bottom: 40px;
+        }
+
+        .info-label {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .info-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111;
+        }
+
+        .info-value.highlight {
+            color: #dbb35e;
+        }
+
+        .sidebar {
+            background: #fafafa;
+            border-radius: 30px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .qr-code {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #eee;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #ccc;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .booking-id {
+            text-align: center;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #111;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 60px;
+            left: 60px;
+            right: 60px;
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .terms {
+            font-size: 10px;
+            line-height: 1.6;
+            color: #999;
+            max-width: 450px;
+        }
+
+        .status-badge {
+            background: #dbb35e;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ticket-container">
+        <div class="header">
+            <img src="<%- logoPath %>" alt="LUXEL" class="brand-logo">
+            <div class="ticket-type">
+                <h1>Experience Pass</h1>
+            </div>
+        </div>
+
+        <div class="hero-section">
+            <img src="<%= tourImage %>" alt="" class="hero-image">
+            <div class="hero-overlay">
+                <p><%= location %></p>
+                <h2><%= tourTitle %></h2>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="details-panel">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div class="info-group">
+                        <div class="info-label">Guest Name</div>
+                        <div class="info-value"><%= guestName %></div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">Booking Reference</div>
+                        <div class="info-value highlight">#<%= bookingRef %></div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">Date of Experience</div>
+                        <div class="info-value"><%= date %></div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">Guest Count</div>
+                        <div class="info-value"><%= guestCount %> Person(s)</div>
+                    </div>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label">Meeting Point</div>
+                    <div class="info-value" style="font-size: 16px; line-height: 1.5;"><%= meetingPoint %></div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div>
+                    <div class="qr-code">
+                        <div style="text-align: center;">
+                            <div style="font-size: 40px; margin-bottom: 10px;">▣</div>
+                            Secure Verification
+                        </div>
+                    </div>
+                    <div class="booking-id">LX-TR-<%= bookingRef %></div>
+                </div>
+
+                <div style="margin-top: 40px; text-align: center;">
+                    <div class="status-badge">Confirmed</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="terms">
+                This pass is non-transferable and must be presented alongside a valid government-issued ID. Please arrive at the meeting point 15 minutes before the scheduled time. For immediate assistance, contact your dedicated concierge designer.
+            </div>
+            <div style="text-align: right; font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 2px;">
+                Issued on <%= dateIssued %>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

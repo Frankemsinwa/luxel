@@ -263,11 +263,11 @@ function ConfirmationContent() {
 
                                 <div className="space-y-4 no-print">
                                     <button
-                                        onClick={() => window.print()}
+                                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || 'https://luxel-8o9h.vercel.app/api'}/tours/bookings/${bookingId}/download`, '_blank')}
                                         className="w-full bg-amber hover:bg-amber-dark text-black py-5 rounded-2xl text-body-sm font-medium tracking-widest uppercase flex items-center justify-center gap-3 transition-all shadow-xl shadow-amber/10"
                                     >
                                         <Download size={18} />
-                                        Download Itinerary
+                                        Download Experience Pass
                                     </button>
                                 </div>
                             </div>
