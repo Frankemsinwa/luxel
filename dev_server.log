@@ -1,0 +1,24 @@
+
+> luxel@0.1.0 dev /app
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+
+✓ Starting...
+✓ Ready in 1213ms
+○ Compiling / ...
+⨯ Error: supabaseUrl is required.
+    at module evaluation (src/lib/supabase.ts:6:37)
+    at module evaluation (src/components/Navbar.tsx:8:1)
+    at module evaluation (src/app/page.tsx:6:1)
+  4 | const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  5 |
+> 6 | export const supabase = createClient(supabaseUrl, supabaseKey);
+    |                                     ^
+  7 | {
+  digest: '987123088'
+}
+ GET / 500 in 10.5s (compile: 8.3s, render: 2.2s)
+ ELIFECYCLE  Command failed.
