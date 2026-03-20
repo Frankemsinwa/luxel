@@ -9,6 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { getSiteUrl } from '@/lib/utils';
 
 function AuthContent() {
     const router = useRouter();
@@ -39,7 +40,7 @@ function AuthContent() {
         try {
             if (mode === 'forgot-password') {
                 const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: `${window.location.origin}/auth/reset-password`,
+                    redirectTo: `${getSiteUrl()}/auth/reset-password`,
                 });
                 if (resetError) throw resetError;
                 setError("Reset link sent! Please check your inbox.");
