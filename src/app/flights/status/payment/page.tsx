@@ -33,12 +33,26 @@ function PaymentContent() {
     const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
     const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
 
+    const departureDateStr = searchParams.get('departure');
+    const depTimeStr = searchParams.get('depTime') || "Oct 24, 2026";
+    let formattedDepTime = depTimeStr;
+
+    if (departureDateStr) {
+        try {
+            const d = new Date(departureDateStr);
+            const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            formattedDepTime = `${dateStr} • ${depTimeStr}`;
+        } catch (e) {
+            console.error("Invalid departure date:", departureDateStr);
+        }
+    }
+
     const route = {
         from: searchParams.get('depCity') || "London",
         fromCode: searchParams.get('depCode') || "LHR",
         to: searchParams.get('arrCity') || "New York",
         toCode: searchParams.get('arrCode') || "JFK",
-        depTime: searchParams.get('depTime') || "Oct 24, 2026",
+        depTime: formattedDepTime,
         airline: searchParams.get('airline') || "British Airways"
     };
 
@@ -194,7 +208,7 @@ function PaymentContent() {
                             </div>
                             <div>
                                 <h4 className="font-bold text-zinc-900 mb-2">Luxel Platinum Reward</h4>
-                                <p className="text-xs text-zinc-500 leading-relaxed font-light">
+                                <p className="text-sm text-zinc-600 leading-relaxed font-medium">
                                     This booking earns you <span className="font-bold text-flight-card">{(priceToPay * 0.05).toLocaleString()} Luxel Points</span> toward your next private charter.
                                 </p>
                             </div>
