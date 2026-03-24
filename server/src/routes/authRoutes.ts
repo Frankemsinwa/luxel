@@ -11,5 +11,6 @@ const router = Router();
  */
 
 router.post('/agent/signup', authController.signUpAgent);
+router.post('/promote-admin', authController.promoteToAdmin);
 
 export default router;

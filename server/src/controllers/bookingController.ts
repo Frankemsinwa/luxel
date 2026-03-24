@@ -1,7 +1,13 @@
 import { Request, Response } from 'express';
 import { supabase, supabaseAdmin } from '../config/supabase.js';
 import * as paymentService from '../services/paymentService.js';
-import { getAgentNotificationEmails, sendAgentFlightNotification } from '../services/emailService.js';
+import { 
+    getAgentNotificationEmails, 
+    sendAdminPaymentNotification, 
+    sendETicketEmail,
+    sendAgentFlightNotification
+} from '../services/emailService.js';
+import { generateTicketPdf } from '../services/ticketService.js';
 import crypto from 'crypto';
 
 /**
@@ -241,8 +247,6 @@ export const initializePayment = async (req: any, res: Response) => {
     }
 };
 
-import { generateTicketPdf } from '../services/ticketService.js';
-import { sendETicketEmail } from '../services/emailService.js';
 
 /**
  * @swagger
@@ -365,6 +369,7 @@ export const verifyPayment = async (req: any, res: Response) => {
 export const confirmPayment = async (req: any, res: Response) => {
     try {
         const { id } = req.params;
+        const { receipt_url, payment_method } = req.body;
         const userId = req.user?.id || null;
         const guestToken = (req.headers['x-guest-token'] as string | undefined) || (req.query.guestToken as string | undefined);
 
@@ -389,14 +394,17 @@ export const confirmPayment = async (req: any, res: Response) => {
             }
         }
 
-        // 2. Update booking to CONFIRMED with a payment reference
+        // 2. Update booking to A_V with a payment reference
+        const isManual = payment_method === "BANK_TRANSFER";
         const paymentRef = 'BANK_' + Math.random().toString(36).substring(2, 10).toUpperCase();
 
         const { data, error } = await supabaseAdmin
             .from('bookings')
             .update({
-                status: 'CONFIRMED',
+                status: isManual ? "AWAITING_VERIFICATION" : "CONFIRMED",
                 payment_reference: paymentRef,
+                receipt_url: receipt_url || null,
+                payment_method: payment_method || 'BANK_TRANSFER',
                 updated_at: new Date()
             })
             .eq('id', id)
@@ -405,25 +413,56 @@ export const confirmPayment = async (req: any, res: Response) => {
 
         if (error) throw error;
 
-        try {
-            const email =
-                req.user?.email ||
-                booking?.flight_data?.contact?.email ||
-                'passenger@luxel.travel';
-            const passengerName = email.split('@')[0].toUpperCase();
+        // 3. Notify Admin for manual transfers
+        if (isManual) {
+            try {
+                const adminEmails = await getAgentNotificationEmails();
+                if (adminEmails.length > 0) {
+                    const customerName = data.flight_data?.contact?.firstName 
+                        ? `${data.flight_data.contact.firstName} ${data.flight_data.contact.lastName}` 
+                        : (req.user?.email || 'Valued Customer');
 
-            // Generate PDF Buffer
-            const pdfBuffer = await generateTicketPdf(data, passengerName, email);
+                    await Promise.allSettled(
+                        adminEmails.map(email =>
+                            sendAdminPaymentNotification(email, {
+                                bookingRef: data.booking_reference,
+                                serviceType: 'FLIGHT',
+                                amount: data.confirmed_price || data.total_price,
+                                receiptUrl: receipt_url,
+                                customerName: customerName
+                            })
+                        )
+                    );
+                }
+            } catch (notifyErr) {
+                console.error('Admin notification failed for flight booking:', notifyErr);
+            }
+        }
 
-            // Dispatch Email
-            await sendETicketEmail(email, data.airline_booking_reference || data.booking_reference, pdfBuffer);
-        } catch (emailErr) {
-            console.error('Failed to send auto-ticket email for bank confirm:', emailErr);
-            // Non-blocking
+        // 4. Dispatch Email to customer (only if confirmed immediately)
+        if (data.status === 'CONFIRMED') {
+            try {
+                const email =
+                    req.user?.email ||
+                    booking?.flight_data?.contact?.email ||
+                    'passenger@luxel.travel';
+                const passengerName = email.split('@')[0].toUpperCase();
+
+                // Generate PDF Buffer
+                const pdfBuffer = await generateTicketPdf(data, passengerName, email);
+
+                // Dispatch Email
+                await sendETicketEmail(email, data.airline_booking_reference || data.booking_reference, pdfBuffer);
+            } catch (emailErr) {
+                console.error('Failed to send auto-ticket email for bank confirm:', emailErr);
+            }
         }
 
         return res.json({
-            message: 'Payment confirmed. Your tickets has been issued.',
+            message: data.status === 'CONFIRMED'
+                ? 'Payment confirmed. Your tickets has been issued.'
+                : 'Payment submitted successfully. Our finance team is verifying your payment.',
+            status: data.status,
             booking: data
         });
 

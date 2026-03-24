@@ -21,40 +21,31 @@ function VerifyingContent() {
     useEffect(() => {
         const bookingId = searchParams.get('id');
 
-        const confirmAndFinalize = async () => {
+        const checkStatus = async () => {
             try {
-                if (!bookingId) {
-                    setError('Missing booking reference.');
-                    return;
-                }
+                if (!bookingId) return;
 
-                // Call the backend to confirm payment — using our centralized api client
-                const response = await api.patch(`/bookings/${bookingId}/confirm-payment`);
-
-                if (response.status === 200 || response.status === 204) {
+                const response = await api.get(`/bookings/${bookingId}/status`);
+                if (response.data.status === 'CONFIRMED') {
                     router.push(`/flights/status/finalized?${searchParams.toString()}`);
-                } else {
-                    setError(response.data?.message || 'Payment confirmation failed.');
                 }
-            } catch (err: any) {
-                console.error('Confirm payment error:', err);
-                setError(err.response?.data?.message || 'A connection error occurred during verification.');
+            } catch (err) {
+                console.error('Error checking verification status:', err);
             }
         };
 
-        // Progress bar animation — calls API at 100%
+        // Progress bar for aesthetics
         const timer = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(timer);
-                    confirmAndFinalize();
-                    return 100;
-                }
-                return prev + 1;
-            });
+            setProgress(prev => (prev >= 100 ? 100 : prev + 1));
         }, 100);
 
-        return () => clearInterval(timer);
+        // Polling for admin approval
+        const pollInterval = setInterval(checkStatus, 5000);
+
+        return () => {
+            clearInterval(timer);
+            clearInterval(pollInterval);
+        };
     }, [router, searchParams]);
 
     return (

@@ -14,6 +14,7 @@ import {
     AlertCircle,
     ArrowRight,
     TrendingUp,
+    CheckCircle2,
     ShieldCheck
 } from "lucide-react";
 import { Suspense, useState, useEffect } from 'react';
@@ -27,8 +28,12 @@ function PaymentContent() {
 
     const [booking, setBooking] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [isInitializing, setIsInitializing] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [userEmail, setUserEmail] = useState<string>('client@luxel.com');
+    const [receiptFile, setReceiptFile] = useState<File | null>(null);
+    const [receiptUrl, setReceiptUrl] = useState<string>('');
+    const [uploading, setUploading] = useState(false);
+    const [isConfirmed, setIsConfirmed] = useState(false);
 
     const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
     const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
@@ -77,6 +82,8 @@ function PaymentContent() {
     }, [bookingId, router]);
 
     // 2. Load Paystack Script
+    // We have shifted to manual payment for now.
+    /*
     useEffect(() => {
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
@@ -87,35 +94,76 @@ function PaymentContent() {
             document.body.removeChild(script); // Cleanup
         };
     }, []);
+    */
 
     // Price to pay: Prefer confirmed_price, fallback to total_price, then search Param.
     const priceToPay = booking?.confirmed_price || booking?.total_price || Number(searchParams.get('price')) || 945000;
 
-    const handlePaystackPayment = async () => {
-        setIsInitializing(true);
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
         try {
-            // @ts-ignore
-            const handler = window.PaystackPop.setup({
-                key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '', // Use proper key
-                email: userEmail, // Use the dynamically retrieved email
-                amount: priceToPay * 100, // Paystack amount is in kobo
-                currency: 'NGN',
-                ref: `LUX_${Math.floor((Math.random() * 1000000000) + 1)}`, // Generate a reference
-                callback: function (response: any) {
-                    // On payment success, we redirect to verifying which confirms payment
-                    setIsInitializing(false);
-                    router.push(`/flights/status/verifying?${searchParams.toString()}&reference=${response.reference}`);
-                },
-                onClose: function () {
-                    setIsInitializing(false);
-                    console.log('Payment window closed');
-                }
+            // 1. Get secure signature from Luxel backend
+            const sigRes = await api.get('/uploads/signature');
+            const { signature, timestamp, cloud_name, api_key, folder } = sigRes.data;
+
+            // 2. Upload file directly to Cloudinary using the signature
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('api_key', api_key);
+            formData.append('timestamp', timestamp.toString());
+            formData.append('signature', signature);
+            formData.append('folder', folder);
+
+            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
+                method: 'POST',
+                body: formData,
             });
-            handler.openIframe();
-        } catch (error) {
-            console.error('Failed to initialize Paystack:', error);
-            setIsInitializing(false);
+
+            if (!uploadRes.ok) throw new Error('Failed to upload receipt');
+
+            const data = await uploadRes.json();
+
+            // 3. Update the UI with the secure Cloudinary URL
+            setReceiptUrl(data.secure_url);
+            setReceiptFile(file);
+        } catch (error: any) {
+            console.error('Upload error:', error);
+            alert('Failed to upload receipt to Cloudinary.');
+        } finally {
+            setUploading(false);
         }
+    };
+
+    const handleConfirmPayment = async () => {
+        if (!receiptUrl) {
+            alert('Please upload your payment receipt before confirming.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await api.patch(`/bookings/${bookingId}/confirm-payment`, {
+                receipt_url: receiptUrl,
+                payment_method: 'BANK_TRANSFER'
+            });
+            setIsConfirmed(true);
+            setTimeout(() => {
+                router.push(`/flights/status/verifying?${searchParams.toString()}`);
+            }, 2000);
+        } catch (error: any) {
+            console.error('Failed to confirm payment:', error);
+            alert('Failed to submit payment proof. Please contact support.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        alert('Copied to clipboard');
     };
 
     return (
@@ -209,44 +257,108 @@ function PaymentContent() {
                                 <h2 className="text-caption font-medium text-zinc-900 uppercase tracking-widest">Secure Checkout</h2>
                             </div>
 
-                            <div className="p-6 md:p-10 flex flex-col justify-center items-center text-center space-y-6 md:space-y-8 min-h-[300px] md:min-h-[400px]">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Paystack_Logo.png/1200px-Paystack_Logo.png" alt="Paystack" className="h-10 object-contain mx-auto" />
-
-                                <div>
-                                    <h3 className="text-heading-lg text-zinc-900 tracking-tight mb-2">Finalize Your Private Charter</h3>
+                            <div className="p-6 md:p-10 flex flex-col space-y-6">
+                                <div className="text-center">
+                                    <h3 className="text-heading-lg text-zinc-900 tracking-tight mb-2">Manual Bank Transfer</h3>
                                     <p className="text-body text-zinc-500 max-w-sm mx-auto">
-                                        You will be redirected to Paystack to securely enter your payment details and finalize your booking.
+                                        Please complete your payment by transferring the exact amount to the account details below.
                                     </p>
                                 </div>
 
-                                <div className="w-full max-w-md bg-zinc-50 border border-zinc-100 rounded-3xl p-6 mb-4">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <span className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Amount Due</span>
-                                        <span className="text-lg font-black text-zinc-900">₦{priceToPay.toLocaleString()}</span>
+                                <div className="bg-zinc-50 border border-zinc-100 rounded-3xl p-6 space-y-4">
+                                    <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+                                        <div className="text-left">
+                                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Bank Name</p>
+                                            <p className="text-sm font-bold text-zinc-900">Moniepoint MFB</p>
+                                        </div>
+                                        <Building2 size={16} className="text-zinc-300" />
                                     </div>
-                                    <div className="w-full h-px bg-zinc-200 mb-4" />
-                                    <div className="flex items-center gap-3 text-body-sm font-medium text-emerald-600 justify-center">
-                                        <Check size={14} /> Price verified by agent
+                                    <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+                                        <div className="text-left">
+                                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Account Number</p>
+                                            <p className="text-lg font-black text-black">4000323443</p>
+                                        </div>
+                                        <button onClick={() => copyToClipboard('4000323443')} className="p-2 hover:bg-zinc-200 rounded-lg transition-colors">
+                                            <Copy size={16} className="text-zinc-400" />
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-left">
+                                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Account Name</p>
+                                            <p className="text-sm font-bold text-zinc-900 uppercase">Eljey Enterprise - Eljey Enterprise 2</p>
+                                        </div>
+                                        <CheckCircle2 size={16} className="text-emerald-500" />
                                     </div>
                                 </div>
 
+                                <div className="bg-amber/10 border border-amber/20 rounded-2xl p-4 flex items-start gap-3">
+                                    <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                                    <p className="text-xs text-amber-900 leading-relaxed font-medium">
+                                        <strong>IMPORTANT:</strong> Ensure you include your Booking Reference <span className="font-bold underline">{booking?.booking_reference || bookingId}</span> in the transfer description/message.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <label className="block">
+                                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 block">Upload Payment Receipt</span>
+                                        <div className="relative group cursor-pointer">
+                                            <input
+                                                type="file"
+                                                accept="image/*,.pdf"
+                                                onChange={handleFileUpload}
+                                                className="hidden"
+                                                id="receipt-upload"
+                                            />
+                                            <label
+                                                htmlFor="receipt-upload"
+                                                className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-3xl py-10 px-6 gap-3 group-hover:border-amber transition-colors bg-white cursor-pointer"
+                                            >
+                                                {uploading ? (
+                                                    <div className="w-8 h-8 border-4 border-amber border-t-transparent rounded-full animate-spin" />
+                                                ) : receiptFile ? (
+                                                    <>
+                                                        <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
+                                                            <Check size={24} />
+                                                        </div>
+                                                        <p className="text-sm font-bold text-zinc-900">{receiptFile.name}</p>
+                                                        <p className="text-[10px] font-medium text-zinc-400">Click to replace receipt</p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="w-12 h-12 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-amber/10 group-hover:text-amber">
+                                                            <UploadCloud size={24} />
+                                                        </div>
+                                                        <p className="text-sm font-bold text-zinc-900">Drop receipt or click to upload</p>
+                                                        <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest">PNG, JPG or PDF up to 5MB</p>
+                                                    </>
+                                                )}
+                                            </label>
+                                        </div>
+                                    </label>
+                                </div>
+
                                 <button
-                                    onClick={handlePaystackPayment}
-                                    disabled={loading || isInitializing}
-                                    className="w-full max-w-md bg-black text-flight-card py-6 rounded-3xl text-body-sm font-medium flex items-center justify-center gap-4 shadow-2xl shadow-black/20 hover:scale-[1.02] transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                                    onClick={handleConfirmPayment}
+                                    disabled={loading || isSubmitting || !receiptUrl || isConfirmed}
+                                    className="w-full bg-black text-white/90 py-6 rounded-3xl text-body-sm font-medium flex items-center justify-center gap-4 shadow-2xl shadow-black/20 hover:scale-[1.02] transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none uppercase tracking-widest"
                                 >
-                                    {isInitializing ? (
-                                        "INITIALIZING PAYMENT..."
+                                    {isSubmitting ? (
+                                        "PROCESSING..."
+                                    ) : isConfirmed ? (
+                                        <>
+                                            <Check size={20} strokeWidth={3} className="text-emerald-400" />
+                                            PAYMENT SUBMITTED SUCCESSFULLY
+                                        </>
                                     ) : (
                                         <>
-                                            <Check size={20} strokeWidth={3} />
-                                            PAY SECURELY WITH PAYSTACK
+                                            <ShieldCheck size={18} className={receiptUrl ? "text-amber" : "text-zinc-500"} />
+                                            I HAVE MADE PAYMENT
                                         </>
                                     )}
                                 </button>
 
                                 <p className="text-caption font-medium text-zinc-400 tracking-widest flex items-center justify-center gap-2">
-                                    <ShieldCheck size={14} /> Securely processed via PCI-DSS compliant infrastructure
+                                    <ShieldCheck size={14} /> Highly encrypted & secure transmission
                                 </p>
                             </div>
                         </div>

@@ -6,6 +6,7 @@ import authRoutes from './authRoutes.js';
 import tourRoutes from './tourRoutes.js';
 import uploadRoutes from './uploadRoutes.js';
 import chatRoutes from './chatRoutes.js';
+import adminRoutes from './adminRoutes.js';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use('/auth', authRoutes);
 router.use('/tours', tourRoutes);
 router.use('/uploads', uploadRoutes);
 router.use('/chat', chatRoutes);
+router.use('/admin', adminRoutes);
 
 export default router;
