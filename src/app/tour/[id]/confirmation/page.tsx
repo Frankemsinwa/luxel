@@ -16,7 +16,8 @@ import {
     Navigation,
     ExternalLink,
     ShieldCheck,
-    CreditCard
+    CreditCard,
+    Clock
 } from 'lucide-react';
 import { Suspense, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
