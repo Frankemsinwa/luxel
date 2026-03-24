@@ -18,7 +18,10 @@ import {
     CheckCircle2,
     Headset,
     Lock,
-    Loader2
+    Loader2,
+    Building2,
+    Copy,
+    UploadCloud
 } from 'lucide-react';
 
 function TourBookingContent() {
@@ -28,6 +31,9 @@ function TourBookingContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [tour, setTour] = useState<any>(null);
+    const [receiptFile, setReceiptFile] = useState<File | null>(null);
+    const [receiptUrl, setReceiptUrl] = useState<string>('');
+    const [uploading, setUploading] = useState(false);
 
     const guestsCount = Number(searchParams.get('guests')) || 2;
     const travelDate = searchParams.get('date') || 'Select a date';
@@ -62,7 +68,8 @@ function TourBookingContent() {
         };
         fetchTour();
 
-        // Load Paystack Script
+        // Manual Payment Transition
+        /*
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
         script.async = true;
@@ -73,9 +80,22 @@ function TourBookingContent() {
                 document.body.removeChild(script);
             }
         };
+        */
     }, [params.id]);
 
-    const handleCompleteBooking = async (reference: string) => {
+    const handleCompleteBooking = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (!formData.firstName || !formData.lastName || !formData.email) {
+            alert('Please provide your full name and email address.');
+            return;
+        }
+
+        if (!receiptUrl) {
+            alert('Please upload your payment receipt before confirming.');
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const response = await api.post(`/tours/${tour.id}/book`, {
@@ -87,9 +107,11 @@ function TourBookingContent() {
                 },
                 preferences: {
                     dietary: formData.dietary,
-                    requests: formData.requests
+                    requests: formData.requests,
+                    receipt_url: receiptUrl,
+                    payment_method: 'BANK_TRANSFER'
                 },
-                paymentReference: reference
+                paymentReference: `MANUAL_${Math.floor((Math.random() * 1000000) + 1)}`
             });
 
             if (response.status === 200 || response.status === 201) {
@@ -106,38 +128,49 @@ function TourBookingContent() {
         }
     };
 
-    const handlePaystackPayment = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-        if (!formData.firstName || !formData.lastName || !formData.email) {
-            alert('Please provide your full name and email address.');
-            return;
-        }
-
-        setIsSubmitting(true);
-
+        setUploading(true);
         try {
-            // @ts-ignore
-            const handler = window.PaystackPop.setup({
-                key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_a65759ce432d67a14f5e0896001221147558666c', // Luxel Test Key
-                email: formData.email,
-                amount: Math.round(total * 100), // kobo
-                currency: 'NGN',
-                ref: `TR_${Math.floor((Math.random() * 1000000000) + 1)}`,
-                callback: function (response: any) {
-                    handleCompleteBooking(response.reference);
-                },
-                onClose: function () {
-                    setIsSubmitting(false);
-                }
+            // 1. Get secure signature from Luxel backend
+            const sigRes = await api.get('/uploads/signature');
+            const { signature, timestamp, cloud_name, api_key, folder } = sigRes.data;
+
+            // 2. Upload file directly to Cloudinary using the signature
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('api_key', api_key);
+            formData.append('timestamp', timestamp.toString());
+            formData.append('signature', signature);
+            formData.append('folder', folder);
+
+            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
+                method: 'POST',
+                body: formData,
             });
-            handler.openIframe();
-        } catch (error) {
-            console.error('Paystack initialization error:', error);
-            alert('Failed to initialize secure payment engine.');
-            setIsSubmitting(false);
+
+            if (!uploadRes.ok) throw new Error('Failed to upload receipt');
+
+            const data = await uploadRes.json();
+
+            // 3. Update the UI with the secure Cloudinary URL
+            setReceiptUrl(data.secure_url);
+            setReceiptFile(file);
+        } catch (error: any) {
+            console.error('Upload error:', error);
+            alert('Failed to upload receipt to Cloudinary.');
+        } finally {
+            setUploading(false);
         }
     };
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        alert('Copied to clipboard');
+    };
+
 
     if (isLoading) return <div className="min-h-screen bg-white flex items-center justify-center text-body font-medium text-zinc-300">Preparing your luxury reservation desk...</div>;
     if (!tour) return <div className="min-h-screen bg-white flex items-center justify-center text-body font-medium text-zinc-300">Experience unavailable.</div>;
@@ -152,7 +185,7 @@ function TourBookingContent() {
             <Navbar />
             <div className="pt-32 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
-                    <form onSubmit={handlePaystackPayment} className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                    <form onSubmit={handleCompleteBooking} className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
                         {/* Form Side (Left) */}
                         <div className="lg:col-span-8 space-y-8">
@@ -239,25 +272,89 @@ function TourBookingContent() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2 text-zinc-900">
                                         <Lock size={20} className="text-amber" />
-                                        <h3 className="text-heading-sm font-medium tracking-tight">Verified Payment Engine</h3>
+                                        <h3 className="text-heading-sm font-medium tracking-tight">Manual Bank Transfer</h3>
                                     </div>
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Paystack_Logo.png/1200px-Paystack_Logo.png" alt="Paystack" className="h-4 object-contain" />
+                                    <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                        Verified Business Account
+                                    </div>
                                 </div>
 
-                                <div className="bg-emerald-50 text-emerald-700 px-6 py-5 rounded-2xl flex items-start gap-4 text-body-sm font-medium border border-emerald-100">
-                                    <ShieldCheck size={20} className="shrink-0" />
-                                    <p className="leading-relaxed">
-                                        You will be securely redirected to the Paystack checkout to finalize your premium reservation. No card details are stored on Luxel servers.
-                                    </p>
-                                </div>
-
-                                <div className="p-8 border-2 border-dashed border-zinc-100 rounded-3xl flex flex-col items-center justify-center text-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-300">
-                                        <CreditCard size={24} />
+                                <div className="space-y-6">
+                                    <div className="bg-zinc-50 border border-zinc-100 rounded-3xl p-8 space-y-5">
+                                        <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
+                                            <div className="text-left">
+                                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Bank Name</p>
+                                                <p className="text-body font-bold text-zinc-900 leading-none">Moniepoint MFB</p>
+                                            </div>
+                                            <Building2 size={18} className="text-zinc-300" />
+                                        </div>
+                                        <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
+                                            <div className="text-left">
+                                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Account Number</p>
+                                                <p className="text-2xl font-black text-black leading-none">4000323443</p>
+                                            </div>
+                                            <button type="button" onClick={() => copyToClipboard('4000323443')} className="p-3 hover:bg-zinc-200 rounded-xl transition-colors">
+                                                <Copy size={20} className="text-zinc-400" />
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="text-left">
+                                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Account Name</p>
+                                                <p className="text-body font-bold text-zinc-900 uppercase leading-none">Eljey Enterprise - Eljey Enterprise 2</p>
+                                            </div>
+                                            <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white">
+                                                <CheckCircle2 size={14} />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-body font-medium text-zinc-900">One-Click Secure Checkout</p>
-                                        <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mt-1">Multi-Bank & International Card Support</p>
+
+                                    <div className="bg-amber/5 border border-amber/10 rounded-2xl p-6 flex items-start gap-4">
+                                        <Info size={20} className="text-amber shrink-0 mt-0.5" />
+                                        <p className="text-body-sm text-zinc-600 leading-relaxed font-medium">
+                                            <strong>Important:</strong> Please include your full name in the transfer narration. Your reservation will be confirmed once the receipt is verified by our finance team.
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <label className="block">
+                                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 block">Upload Payment Receipt</span>
+                                            <div className="relative group cursor-pointer">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*,.pdf"
+                                                    onChange={handleFileUpload}
+                                                    className="hidden"
+                                                    id="receipt-upload"
+                                                />
+                                                <label
+                                                    htmlFor="receipt-upload"
+                                                    className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-3xl py-12 px-6 gap-4 group-hover:border-amber transition-colors bg-zinc-50/50 cursor-pointer"
+                                                >
+                                                    {uploading ? (
+                                                        <div className="w-10 h-10 border-4 border-amber border-t-transparent rounded-full animate-spin" />
+                                                    ) : receiptFile ? (
+                                                        <>
+                                                            <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500">
+                                                                <CheckCircle2 size={32} />
+                                                            </div>
+                                                            <p className="text-body font-bold text-zinc-900">{receiptFile.name}</p>
+                                                            <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Click to change file</p>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-zinc-300 shadow-sm group-hover:bg-amber/10 group-hover:text-amber transition-all">
+                                                                <UploadCloud size={32} />
+                                                            </div>
+                                                            <div className="text-center">
+                                                                <p className="text-body font-bold text-zinc-900">Upload Transaction Receipt</p>
+                                                                <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mt-1">PNG, JPG or PDF (Max 5MB)</p>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </label>
+                                            </div>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -316,8 +413,8 @@ function TourBookingContent() {
                                         disabled={isSubmitting}
                                         className="w-full bg-amber hover:bg-amber-dark text-black py-5 rounded-2xl text-body-sm font-medium tracking-widest uppercase flex items-center justify-center gap-3 shadow-xl shadow-amber/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
-                                        {isSubmitting ? 'Initializing Secure Engine...' : 'Pay Securely with Paystack'}
+                                        {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : (receiptUrl ? <CheckCircle2 size={18} /> : <ShieldCheck size={18} />)}
+                                        {isSubmitting ? 'Finalizing Reservation...' : 'Complete Luxury Booking'}
                                     </button>
 
                                     <p className="text-caption font-medium text-center text-zinc-400 leading-relaxed">

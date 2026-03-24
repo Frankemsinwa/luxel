@@ -115,12 +115,18 @@ function ConfirmationContent() {
                         <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-white mx-auto shadow-xl shadow-emerald-500/20 mb-8"
+                            className={`w-20 h-20 ${booking.status === 'AWAITING_VERIFICATION' ? 'bg-amber' : 'bg-emerald-500'} rounded-full flex items-center justify-center text-white mx-auto shadow-xl ${booking.status === 'AWAITING_VERIFICATION' ? 'shadow-amber/20' : 'shadow-emerald-500/20'} mb-8`}
                         >
-                            <CheckCircle2 size={40} />
+                            {booking.status === 'AWAITING_VERIFICATION' ? <Clock size={40} /> : <CheckCircle2 size={40} />}
                         </motion.div>
-                        <h1 className="text-heading-xl font-medium text-zinc-900 tracking-tight">Your journey begins soon</h1>
-                        <p className="text-body-lg font-medium text-zinc-500">A confirmation email has been sent to your inbox.</p>
+                        <h1 className="text-heading-xl font-medium text-zinc-900 tracking-tight">
+                            {booking.status === 'AWAITING_VERIFICATION' ? 'Payment Proof Received' : 'Your journey begins soon'}
+                        </h1>
+                        <p className="text-body-lg font-medium text-zinc-500">
+                            {booking.status === 'AWAITING_VERIFICATION' 
+                                ? 'Our finance team is verifying your transfer. You will receive an email once confirmed.' 
+                                : 'A confirmation email with your experience pass has been sent to your inbox.'}
+                        </p>
                         <div className="inline-block bg-zinc-100 px-6 py-2.5 rounded-full border border-zinc-200 mt-6">
                             <span className="text-caption font-medium text-zinc-400 uppercase tracking-widest mr-2">Booking ID:</span>
                             <span className="text-caption font-medium text-amber uppercase tracking-widest">{bookingRef}</span>
@@ -249,26 +255,43 @@ function ConfirmationContent() {
 
                                 <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100 space-y-4">
                                     <div className="text-caption font-medium text-zinc-400 uppercase tracking-widest flex items-center justify-between">
-                                        Secure Payment Engine
+                                        {booking.payment_method === 'BANK_TRANSFER' ? 'Secure Bank Transfer' : 'Secure Payment Engine'}
                                         <ShieldCheck size={14} className="text-emerald-500" />
                                     </div>
                                     <div className="flex items-center gap-4">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Paystack_Logo.png/1200px-Paystack_Logo.png" alt="Paystack" className="h-4 object-contain opacity-50" />
+                                        {booking.payment_method === 'BANK_TRANSFER' ? (
+                                            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-zinc-400 border border-zinc-100">
+                                                <CreditCard size={16} />
+                                            </div>
+                                        ) : (
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Paystack_Logo.png/1200px-Paystack_Logo.png" alt="Paystack" className="h-4 object-contain opacity-50" />
+                                        )}
                                         <span className="text-caption font-medium text-zinc-400 uppercase tracking-widest">Verified Reference</span>
                                     </div>
                                     <div className="text-caption font-medium text-zinc-900 truncate">
-                                        {booking.preferences?.payment_reference || 'REF-CONFIRMED'}
+                                        {booking.payment_reference || booking.preferences?.payment_reference || `LX-${bookingRef}-PAID`}
                                     </div>
                                 </div>
 
                                 <div className="space-y-4 no-print">
-                                    <button
-                                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || 'https://luxel-8o9h.vercel.app/api'}/tours/bookings/${bookingId}/download`, '_blank')}
-                                        className="w-full bg-amber hover:bg-amber-dark text-black py-5 rounded-2xl text-body-sm font-medium tracking-widest uppercase flex items-center justify-center gap-3 transition-all shadow-xl shadow-amber/10"
-                                    >
-                                        <Download size={18} />
-                                        Download Experience Pass
-                                    </button>
+                                    {booking.status === 'CONFIRMED' ? (
+                                        <button
+                                            onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || 'https://luxel-8o9h.vercel.app/api'}/tours/bookings/${bookingId}/download`, '_blank')}
+                                            className="w-full bg-amber hover:bg-amber-dark text-black py-5 rounded-2xl text-body-sm font-medium tracking-widest uppercase flex items-center justify-center gap-3 transition-all shadow-xl shadow-amber/10"
+                                        >
+                                            <Download size={18} />
+                                            Download Experience Pass
+                                        </button>
+                                    ) : (
+                                        <div className="p-6 bg-zinc-50 border border-zinc-100 rounded-2xl flex flex-col items-center gap-4 text-center">
+                                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-amber animate-pulse border border-amber/10">
+                                                <Clock size={20} />
+                                            </div>
+                                            <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest leading-relaxed">
+                                                Experience pass will be available <br /> once payment is verified.
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

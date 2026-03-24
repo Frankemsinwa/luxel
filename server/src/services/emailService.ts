@@ -294,3 +294,53 @@ export const sendAgentFlightNotification = async (
         console.error('Agent flight notification error:', error);
     }
 };
+/**
+ * Intense alert for admin when a payment is submitted for verification
+ */
+export const sendAdminPaymentNotification = async (
+    adminEmail: string,
+    payload: {
+        bookingRef: string;
+        serviceType: 'FLIGHT' | 'TOUR';
+        amount: number;
+        receiptUrl: string;
+        customerName: string;
+    }
+) => {
+    try {
+        const mailOptions = {
+            from: process.env.SMTP_FROM || '"Luxel Finance" <finance@luxel.travel>',
+            to: adminEmail,
+            subject: `🚨 ACTION REQUIRED: New Payment Proof (#${payload.bookingRef})`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 2px solid #dbb35e; border-radius: 16px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <span style="background: #dbb35e; color: #000; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; letter-spacing: 1px;">HIGH PRIORITY</span>
+                    </div>
+                    <h2 style="color: #111; margin-top: 0;">New Payment Submission</h2>
+                    <p>A customer has just uploaded proof of payment via bank transfer for a <strong>${payload.serviceType}</strong> booking.</p>
+                    
+                    <div style="background: #fdfaf3; border: 1px solid #f0e6cc; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                        <p style="margin: 0 0 10px 0;"><strong>Reference:</strong> ${payload.bookingRef}</p>
+                        <p style="margin: 0 0 10px 0;"><strong>Customer:</strong> ${payload.customerName}</p>
+                        <p style="margin: 0 0 10px 0;"><strong>Amount:</strong> NGN ${Number(payload.amount).toLocaleString()}</p>
+                        <p style="margin: 0;"><strong>Status:</strong> Awaiting Verification</p>
+                    </div>
+
+                    <div style="margin-top: 25px; text-align: center;">
+                        <a href="${payload.receiptUrl}" target="_blank" style="display: inline-block; background: #111; color: #dbb35e; text-decoration: none; padding: 14px 24px; border-radius: 12px; font-weight: bold;">
+                            VIEW PAYMENT RECEIPT
+                        </a>
+                    </div>
+
+                    <p style="margin-top: 25px; font-size: 12px; color: #666; font-style: italic;">
+                        Please verify this transaction in the bank portal and confirm the booking in the admin dashboard once settled.
+                    </p>
+                </div>
+            `
+        };
+        return await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Admin payment notification error:', error);
+    }
+};

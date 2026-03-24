@@ -26,6 +26,9 @@ export const processTourBooking = async (
     const totalPrice = tour.price * guestCount;
 
     // 2. Create Booking
+    const isManual = preferences?.payment_method === 'BANK_TRANSFER';
+    const finalStatus = isManual ? 'AWAITING_VERIFICATION' : 'CONFIRMED';
+
     const { data: booking, error: bookingError } = await supabaseAdmin
         .from('tour_bookings')
         .insert([{
@@ -34,15 +37,18 @@ export const processTourBooking = async (
             guest_count: guestCount,
             total_price: totalPrice,
             contact_info: contactInfo,
-            preferences: { ...preferences, payment_reference: paymentReference },
-            status: 'CONFIRMED' // Since payment is verified by frontend callback
+            preferences: preferences || {},
+            receipt_url: preferences?.receipt_url || null,
+            payment_method: preferences?.payment_method || 'PAYSTACK',
+            status: finalStatus
         }])
         .select()
         .single();
 
     if (bookingError) throw bookingError;
 
-    // 3. Update Inventory
+    // 3. Update Inventory (only if confirmed, or maybe pre-reserve?)
+    // For now we still decrement inventory on submission to avoid overbooking.
     await supabaseAdmin
         .from('tours')
         .update({ available_slots: tour.available_slots - guestCount })
@@ -57,16 +63,43 @@ export const processTourBooking = async (
         tour: tour
     };
 
-    // Generate Ticket PDF
-    let pdfBuffer: Buffer | undefined;
-    try {
-        pdfBuffer = await ticketService.generateTourTicketPdf(fullBooking);
-    } catch (err) {
-        console.error('Failed to generate tour ticket PDF:', err);
+    // Notify Admin (High Priority for manual pay)
+    if (isManual) {
+        try {
+            const adminEmails = await emailService.getAgentNotificationEmails();
+            if (adminEmails.length > 0) {
+                await Promise.allSettled(
+                    adminEmails.map(email =>
+                        emailService.sendAdminPaymentNotification(email, {
+                            bookingRef: booking.id, // Or reference if added
+                            serviceType: 'TOUR',
+                            amount: totalPrice,
+                            receiptUrl: preferences.receipt_url,
+                            customerName: guestName
+                        })
+                    )
+                );
+            }
+        } catch (adminErr) {
+            console.error('Admin notification failed for tour booking:', adminErr);
+        }
     }
 
-    // Notify Guest
-    emailService.sendTourConfirmationEmail(contactInfo.email, tour.title, booking.id, pdfBuffer);
+    // 5. Generate Ticket PDF & Notify Guest (ONLY if CONFIRMED)
+    if (finalStatus === 'CONFIRMED') {
+        let pdfBuffer: Buffer | undefined;
+        try {
+            pdfBuffer = await ticketService.generateTourTicketPdf(fullBooking);
+        } catch (err) {
+            console.error('Failed to generate tour ticket PDF:', err);
+        }
+
+        // Notify Guest
+        emailService.sendTourConfirmationEmail(contactInfo.email, tour.title, booking.id, pdfBuffer);
+    } else {
+        // Send a "Payment Received / Verification Pending" email to guest?
+        // (Optional: for now just let it be, but user said "intense notice alert email to admin")
+    }
 
     // Notify Agent (if assigned)
     if (tour.agent_id) {
