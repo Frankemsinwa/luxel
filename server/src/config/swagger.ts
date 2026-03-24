@@ -28,7 +28,14 @@ const options: swaggerJsdoc.Options = {
             }
         }
     },
-    apis: ['./src/routes/*.js', './src/routes/*.ts', './src/controllers/*.js', './src/controllers/*.ts'] // Paths to files with annotations
+    apis: [
+        './src/routes/*.ts', 
+        './src/controllers/*.ts',
+        './dist/routes/*.js',
+        './dist/controllers/*.js',
+        './routes/*.js',
+        './controllers/*.js'
+    ]
 };
 
 export const specs = swaggerJsdoc(options);
