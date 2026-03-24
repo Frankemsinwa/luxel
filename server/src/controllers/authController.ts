@@ -68,7 +68,7 @@ export const signUpAgent = async (req: Request, res: Response) => {
  * @swagger
  * /api/auth/promote-admin:
  *   post:
- *     summary: Elevate a user to ADMIN role (Requires secret key)
+ *     summary: Elevate a user to ADMIN and set their password (Requires secret key)
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
@@ -79,14 +79,17 @@ export const signUpAgent = async (req: Request, res: Response) => {
  *             required:
  *               - email
  *               - secret
+ *               - password
  *             properties:
  *               email:
  *                 type: string
  *               secret:
  *                 type: string
+ *               password:
+ *                 type: string
  *     responses:
  *       200:
- *         description: User elevated to ADMIN successfully
+ *         description: User elevated to ADMIN and password updated successfully
  *       403:
  *         description: Forbidden - Invalid secret
  *       404:
@@ -94,10 +97,10 @@ export const signUpAgent = async (req: Request, res: Response) => {
  */
 export const promoteToAdmin = async (req: Request, res: Response) => {
     try {
-        const { email, secret } = req.body;
+        const { email, secret, password } = req.body;
 
-        if (!email || !secret) {
-            return res.status(400).json({ message: 'Missing email or secret' });
+        if (!email || !secret || !password) {
+            return res.status(400).json({ message: 'Missing email, secret, or new password' });
         }
 
         const adminSecret = process.env.ADMIN_CREATION_SECRET || 'luxel-admin-supervision-2024';
@@ -118,9 +121,11 @@ export const promoteToAdmin = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'User not found in system' });
         }
 
+        // Update role AND password
         const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
             user.id,
             { 
+                password,
                 user_metadata: { 
                     ...user.user_metadata,
                     role: 'ADMIN' 
@@ -133,7 +138,7 @@ export const promoteToAdmin = async (req: Request, res: Response) => {
         }
 
         return res.json({
-            message: `User ${email} has been elevated to ADMIN role.`,
+            message: `User ${email} has been elevated to ADMIN role and password has been reset.`,
             user: data.user
         });
 
@@ -142,3 +147,4 @@ export const promoteToAdmin = async (req: Request, res: Response) => {
         return res.status(500).json({ message: error.message || 'Internal server error' });
     }
 };
+
