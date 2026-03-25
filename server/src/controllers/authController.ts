@@ -148,3 +148,78 @@ export const promoteToAdmin = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * @swagger
+ * /api/auth/admin/register:
+ *   post:
+ *     summary: Register a new ADMIN account (requires ADMIN_CREATION_SECRET)
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - fullName
+ *               - secret
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               fullName:
+ *                 type: string
+ *               secret:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Admin account created successfully
+ *       403:
+ *         description: Forbidden - Invalid secret
+ */
+export const registerAdmin = async (req: Request, res: Response) => {
+    try {
+        const { email, password, fullName, secret } = req.body;
+
+        if (!email || !password || !fullName || !secret) {
+            return res.status(400).json({ message: 'Missing required fields: email, password, fullName, secret' });
+        }
+
+        const adminSecret = process.env.ADMIN_CREATION_SECRET || 'luxel-admin-supervision-2024';
+        if (secret !== adminSecret) {
+            return res.status(403).json({ message: 'Forbidden: Invalid admin creation secret' });
+        }
+
+        // Create admin user via Supabase Admin API
+        const { data, error } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: {
+                full_name: fullName,
+                role: 'ADMIN',
+                two_fa_enabled: false,
+            },
+        });
+
+        if (error) {
+            console.error('Admin Register Error:', error);
+            // Provide friendly duplicate-email message
+            if (error.message?.toLowerCase().includes('already')) {
+                return res.status(409).json({ message: 'An account with this email already exists.' });
+            }
+            return res.status(400).json({ message: error.message });
+        }
+
+        return res.status(201).json({
+            message: 'Admin account created successfully. Please log in and enable 2FA.',
+            user: data.user,
+        });
+    } catch (error: any) {
+        console.error('Admin Register Error:', error);
+        return res.status(500).json({ message: 'Internal server error during admin registration' });
+    }
+};
