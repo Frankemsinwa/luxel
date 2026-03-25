@@ -47,21 +47,16 @@ export default function ConciergeChatFab() {
 
   return (
     <>
-      <button
+      <motion.button
+        drag
+        dragMomentum={false}
+        whileDrag={{ scale: 1.1 }}
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 left-6 z-[110] rounded-3xl bg-white text-black border border-black/10 shadow-[0_20px_60px_rgba(0,0,0,0.12)] px-4 py-3 flex items-center gap-3 hover:bg-black/5 transition-colors max-w-[92vw]"
+        className="fixed bottom-6 left-6 z-[110] w-14 h-14 rounded-full bg-white text-black border border-black/10 shadow-[0_20px_60px_rgba(0,0,0,0.12)] flex items-center justify-center hover:bg-black/5 transition-colors touch-none"
         aria-label="Open concierge chat"
       >
-        <div className="w-10 h-10 rounded-2xl bg-black/5 flex items-center justify-center">
-          <MessageSquare size={18} />
-        </div>
-        <div className="text-left min-w-0">
-          <div className="text-body-sm font-medium leading-tight truncate">Concierge Chat</div>
-          <div className="text-caption text-black/60 truncate">
-            {hasBooking ? 'Ask about your booking' : 'General help'}
-          </div>
-        </div>
-      </button>
+        <MessageSquare size={24} />
+      </motion.button>
 
       <AnimatePresence>
         {open && (

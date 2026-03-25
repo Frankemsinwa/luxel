@@ -27,7 +27,19 @@ function ConfirmationContent() {
     const arrCity = searchParams.get('arrCity') || 'New York';
     const depCode = searchParams.get('depCode') || 'LHR';
     const arrCode = searchParams.get('arrCode') || 'JFK';
-    const date = searchParams.get('depTime') || 'October 24, 2026';
+
+    // Formatting the date from 'departure' (ISO string) and fallback to depTime if needed
+    const departureDateStr = searchParams.get('departure');
+    let displayDate = searchParams.get('depTime') || 'October 24, 2026';
+
+    if (departureDateStr) {
+        try {
+            const d = new Date(departureDateStr);
+            displayDate = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        } catch (e) {
+            console.error("Invalid departure date:", departureDateStr);
+        }
+    }
 
     const handleTrackReservation = () => {
         router.push(`/flights/status/agent-confirming?${searchParams.toString()}`);
@@ -95,7 +107,7 @@ function ConfirmationContent() {
                             <div className="w-8 h-px md:w-px md:h-8 bg-zinc-100 hidden md:block" />
                             <div>
                                 <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Date</p>
-                                <p className="text-body text-zinc-900 underline decoration-amber decoration-2 underline-offset-4">{date}</p>
+                                <p className="text-body text-zinc-900 underline decoration-amber decoration-2 underline-offset-4">{displayDate}</p>
                             </div>
                         </div>
                     </div>
