@@ -290,16 +290,16 @@ function PaymentContent() {
                                     <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                                         <div className="text-left">
                                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Account Number</p>
-                                            <p className="text-lg font-black text-black">4000323443</p>
+                                            <p className="text-lg font-black text-black">4000323553</p>
                                         </div>
-                                        <button onClick={() => copyToClipboard('4000323443')} className="p-2 hover:bg-zinc-200 rounded-lg transition-colors">
+                                        <button onClick={() => copyToClipboard('4000323553')} className="p-2 hover:bg-zinc-200 rounded-lg transition-colors">
                                             <Copy size={16} className="text-zinc-400" />
                                         </button>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <div className="text-left">
                                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Account Name</p>
-                                            <p className="text-sm font-bold text-zinc-900 uppercase">Eljey Enterprise - Eljey Enterprise 2</p>
+                                            <p className="text-sm font-bold text-zinc-900 uppercase">Eljey Enterprise - Luxelbookings</p>
                                         </div>
                                         <CheckCircle2 size={16} className="text-emerald-500" />
                                     </div>

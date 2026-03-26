@@ -292,16 +292,16 @@ function TourBookingContent() {
                                         <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
                                             <div className="text-left">
                                                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Account Number</p>
-                                                <p className="text-2xl font-black text-black leading-none">4000323443</p>
+                                                <p className="text-2xl font-black text-black leading-none">4000323553</p>
                                             </div>
-                                            <button type="button" onClick={() => copyToClipboard('4000323443')} className="p-3 hover:bg-zinc-200 rounded-xl transition-colors">
+                                            <button type="button" onClick={() => copyToClipboard('4000323553')} className="p-3 hover:bg-zinc-200 rounded-xl transition-colors">
                                                 <Copy size={20} className="text-zinc-400" />
                                             </button>
                                         </div>
                                         <div className="flex items-center justify-between">
                                             <div className="text-left">
                                                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Account Name</p>
-                                                <p className="text-body font-bold text-zinc-900 uppercase leading-none">Eljey Enterprise - Eljey Enterprise 2</p>
+                                                <p className="text-body font-bold text-zinc-900 uppercase leading-none">Eljey Enterprise - Luxelbookings</p>
                                             </div>
                                             <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white">
                                                 <CheckCircle2 size={14} />
