@@ -112,15 +112,22 @@ export const downloadTourTicket = async (req: any, res: Response) => {
 export const getAgentTourBookings = async (req: any, res: Response) => {
     try {
         const agentId = req.user.id;
+        const userRole = req.user.user_metadata?.role;
 
-        const { data, error } = await supabaseAdmin
+        let query = supabaseAdmin
             .from('tour_bookings')
             .select(`
                 *,
                 tour:tours!inner(*)
             `)
-            .eq('tour.agent_id', agentId)
             .order('created_at', { ascending: false });
+
+        // If not ADMIN, filter by agent_owned tours
+        if (userRole !== 'ADMIN') {
+            query = query.eq('tour.agent_id', agentId);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         return res.json(data);
@@ -141,17 +148,23 @@ export const getAgentTourBookingById = async (req: any, res: Response) => {
     try {
         const { id } = req.params;
         const agentId = req.user.id;
+        const userRole = req.user.user_metadata?.role;
 
-        const { data, error } = await supabaseAdmin
+        let query = supabaseAdmin
             .from('tour_bookings')
             .select(`
                 *,
                 tour:tours!inner(*),
                 user:profiles(*)
             `)
-            .eq('id', id)
-            .eq('tour.agent_id', agentId)
-            .single();
+            .eq('id', id);
+
+        // If not ADMIN, filter by agent ownership
+        if (userRole !== 'ADMIN') {
+            query = query.eq('tour.agent_id', agentId);
+        }
+
+        const { data, error } = await query.single();
 
         if (error || !data) {
             return res.status(404).json({ message: 'Booking not found' });
@@ -248,6 +261,40 @@ export const updateTour = async (req: any, res: Response) => {
 
 /**
  * @swagger
+ * /api/tours/{id}:
+ *   delete:
+ *     summary: Delete a tour (Admin/Owner only)
+ *     tags: [Tours]
+ */
+export const deleteTour = async (req: any, res: Response) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+        const userRole = req.user.user_metadata?.role;
+
+        // Verify ownership unless admin
+        if (userRole !== 'ADMIN') {
+            const tour = await tourService.getTourById(id);
+            if (!tour || tour.agent_id !== userId) {
+                return res.status(403).json({ message: 'You do not have permission to delete this tour' });
+            }
+        }
+
+        const { error } = await supabaseAdmin
+            .from('tours')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+        return res.status(204).send();
+    } catch (error) {
+        console.error('Delete tour error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+/**
+ * @swagger
  * /api/agent/tours:
  *   get:
  *     summary: Get tours managed by agent
@@ -256,12 +303,19 @@ export const updateTour = async (req: any, res: Response) => {
 export const getAgentTours = async (req: any, res: Response) => {
     try {
         const agentId = req.user.id;
+        const userRole = req.user.user_metadata?.role;
 
-        const { data, error } = await supabaseAdmin
+        let query = supabaseAdmin
             .from('tours')
             .select('*')
-            .eq('agent_id', agentId)
             .order('created_at', { ascending: false });
+
+        // If not ADMIN, filter to only the agent's owned listings
+        if (userRole !== 'ADMIN') {
+            query = query.eq('agent_id', agentId);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         return res.json(data);

@@ -11,13 +11,23 @@ import * as amadeusService from '../services/amadeusService.js';
  */
 export const getAllRequests = async (req: any, res: Response) => {
     try {
-        const { data, error } = await supabaseAdmin
+        const userId = req.user.id;
+        const userRole = req.user.user_metadata?.role;
+
+        let query = supabaseAdmin
             .from('requests')
             .select(`
                 *,
                 profiles:user_id (full_name, role)
             `)
             .order('created_at', { ascending: false });
+
+        // If not ADMIN, filter: assigned to them OR not assigned to anyone yet (OPEN)
+        if (userRole !== 'ADMIN') {
+            query = query.or(`assigned_agent_id.eq.${userId},assigned_agent_id.is.null`);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         return res.json(data);
@@ -207,5 +217,43 @@ export const updateBookingStatus = async (req: any, res: Response) => {
         return res.json(data);
     } catch (error: any) {
         return res.status(500).json({ message: 'Error updating booking', error: error.message });
+    }
+};
+
+/**
+ * @swagger
+ * /api/agent/requests/{id}:
+ *   delete:
+ *     summary: Delete a request (Admin/Assigned Agent only)
+ *     tags: [Agent Dashboard]
+ */
+export const deleteRequest = async (req: any, res: Response) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+        const userRole = req.user.user_metadata?.role;
+
+        // Verify assignment unless admin
+        if (userRole !== 'ADMIN') {
+            const { data: request } = await supabaseAdmin
+                .from('requests')
+                .select('assigned_agent_id')
+                .eq('id', id)
+                .single();
+            
+            if (request && request.assigned_agent_id && request.assigned_agent_id !== userId) {
+                return res.status(403).json({ message: 'You do not have permission to delete this request (assigned to another agent)' });
+            }
+        }
+
+        const { error } = await supabaseAdmin
+            .from('requests')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+        return res.status(204).send();
+    } catch (error: any) {
+        return res.status(500).json({ message: 'Error deleting request', error: error.message });
     }
 };

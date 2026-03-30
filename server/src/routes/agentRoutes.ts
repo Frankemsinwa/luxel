@@ -12,6 +12,7 @@ router.use(authorize(['AGENT', 'ADMIN']));
 router.get('/requests', agentController.getAllRequests);
 router.get('/requests/:id', agentController.getRequestById);
 router.patch('/requests/:id', agentController.updateRequestStatus);
+router.delete('/requests/:id', agentController.deleteRequest);
 router.post('/verify-price', agentController.verifyFlightPrice);
 router.patch('/bookings/:id', agentController.updateBookingStatus);
 
