@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { supabase, supabaseAdmin } from '../config/supabase.js';
 import { sendETicketEmail, sendTourConfirmationEmail } from '../services/emailService.js';
 import { generateTicketPdf, generateTourTicketPdf } from '../services/ticketService.js';
+import { logAgentAction } from '../services/logService.js';
 
 /**
  * Get overall financial statistics across flights and tours
@@ -149,5 +150,115 @@ export const approvePayment = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error('Approve Payment Error:', error);
         res.status(500).json({ message: error.message || 'Internal server error during payment approval' });
+    }
+};
+
+/**
+ * List all agents
+ */
+export const getAllAgents = async (req: Request, res: Response) => {
+    try {
+        const { data: agents, error } = await supabaseAdmin
+            .from('profiles')
+            .select('*')
+            .eq('role', 'AGENT')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.json(agents);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Error fetching agents' });
+    }
+};
+
+/**
+ * Toggle agent ban status
+ */
+export const toggleAgentBan = async (req: any, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { isBanned } = req.body;
+        const adminId = req.user.id;
+
+        const { data: agent, error } = await supabaseAdmin
+            .from('profiles')
+            .update({ is_banned: isBanned })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        await logAgentAction(
+            adminId,
+            isBanned ? 'BAN_AGENT' : 'UNBAN_AGENT',
+            'PROFILE',
+            id,
+            { agent_name: agent.full_name }
+        );
+
+        res.json({ message: `Agent ${isBanned ? 'banned' : 'unbanned'} successfully`, agent });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Error toggling agent ban' });
+    }
+};
+
+/**
+ * Get agent activity logs
+ */
+export const getAgentLogs = async (req: Request, res: Response) => {
+    try {
+        const { data: logs, error } = await supabaseAdmin
+            .from('agent_logs')
+            .select(`
+                *,
+                actor:actor_id (full_name, avatar_url)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.json(logs);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Error fetching logs' });
+    }
+};
+
+/**
+ * Oversight: Get all tours (Admin only)
+ */
+export const getAllToursOversight = async (req: Request, res: Response) => {
+    try {
+        const { data: tours, error } = await supabaseAdmin
+            .from('tours')
+            .select(`
+                *,
+                agent:agent_id (full_name)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.json(tours);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Error fetching tours oversight' });
+    }
+};
+
+/**
+ * Oversight: Get all flight bookings (Admin only)
+ */
+export const getAllBookingsOversight = async (req: Request, res: Response) => {
+    try {
+        const { data: bookings, error } = await supabaseAdmin
+            .from('bookings')
+            .select(`
+                *,
+                user:user_id (full_name)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.json(bookings);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || 'Error fetching bookings oversight' });
     }
 };

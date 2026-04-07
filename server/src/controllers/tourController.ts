@@ -3,6 +3,7 @@ import { supabaseAdmin } from '../config/supabase.js';
 import * as tourService from '../services/tourService.js';
 import * as bookingService from '../services/bookingService.js';
 import * as ticketService from '../services/ticketService.js';
+import { logAgentAction } from '../services/logService.js';
 
 /**
  * @swagger
@@ -215,6 +216,7 @@ export const createTour = async (req: any, res: Response) => {
             .single();
 
         if (error) throw error;
+        await logAgentAction(agentId, 'UPDATE_TOUR', 'TOUR', data.id, { action: 'CREATE' });
         return res.status(201).json(data);
     } catch (error) {
         console.error('Create tour error:', error);
@@ -252,6 +254,15 @@ export const updateTour = async (req: any, res: Response) => {
             .single();
 
         if (error) throw error;
+
+        if (updates.status === 'PUBLISHED') {
+            await logAgentAction(userId, 'PUBLISH_TOUR', 'TOUR', id);
+        } else if (updates.status === 'ARCHIVED') {
+            await logAgentAction(userId, 'ARCHIVE_TOUR', 'TOUR', id);
+        } else {
+            await logAgentAction(userId, 'UPDATE_TOUR', 'TOUR', id, { updates });
+        }
+
         return res.json(data);
     } catch (error) {
         console.error('Update tour error:', error);

@@ -43,4 +43,15 @@ router.get('/flight-overrides', flightOverrideController.getOverrides);
 router.post('/flight-overrides', flightOverrideController.upsertOverride);
 router.delete('/flight-overrides/:id', flightOverrideController.deleteOverride);
 
+// Agent Management
+router.get('/agents', authenticate, authorize(['ADMIN']), adminController.getAllAgents);
+router.patch('/agents/:id/ban', authenticate, authorize(['ADMIN']), adminController.toggleAgentBan);
+
+// Activity Logs
+router.get('/logs', authenticate, authorize(['ADMIN']), adminController.getAgentLogs);
+
+// Oversight
+router.get('/tours', authenticate, authorize(['ADMIN']), adminController.getAllToursOversight);
+router.get('/bookings', authenticate, authorize(['ADMIN']), adminController.getAllBookingsOversight);
+
 export default router;
