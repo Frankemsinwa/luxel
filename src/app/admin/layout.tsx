@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, LayoutDashboard, CreditCard, LogOut, Loader2, Shield, AlertTriangle, Users, History, Palmtree, Plane } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, CreditCard, LogOut, Loader2, Shield, AlertTriangle, Users, History, Palmtree, Plane, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
