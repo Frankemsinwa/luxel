@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { supabaseAdmin } from '../config/supabase.js';
 import * as amadeusService from '../services/amadeusService.js';
+import { logAgentAction } from '../services/logService.js';
 
 /**
  * @swagger
@@ -114,8 +115,10 @@ export const updateRequestStatus = async (req: any, res: Response) => {
                 if (confirmedPrice) {
                     updateData.confirmed_price = confirmedPrice;
                 }
+                await logAgentAction(req.user.id, 'APPROVE_FLIGHT', 'BOOKING', bookingId, { confirmedPrice });
             } else if (status === 'CLOSED') {
                 updateData.status = 'CANCELLED';
+                await logAgentAction(req.user.id, 'UPDATE_BOOKING', 'BOOKING', bookingId, { status: 'CANCELLED' });
             }
 
             if (airlineBookingReference) {

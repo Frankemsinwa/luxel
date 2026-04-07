@@ -20,6 +20,17 @@ export const authenticate = async (req: any, res: Response, next: NextFunction) 
             return res.status(401).json({ message: 'Unauthorized: Invalid token' });
         }
 
+        // Check if user is banned
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_banned')
+            .eq('id', user.id)
+            .single();
+
+        if (profile?.is_banned) {
+            return res.status(403).json({ message: 'Forbidden: Your account has been suspended' });
+        }
+
         // Attach user to request
         req.user = user;
         next();
