@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Globe, ArrowRight, ChevronRight, PlaneLanding } from 'lucide-react';
+import { Globe, ChevronRight, PlaneLanding } from 'lucide-react';
+import PremiumGrid from './PremiumGrid';
 
 const destinationCards = [
   {
@@ -31,19 +32,6 @@ const destinationCards = [
     tag: "Adventure"
   }
 ];
-
-/* ───── Grid Background Component ───── */
-const PremiumGrid = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute inset-0" style={{
-      backgroundImage: `
-        linear-gradient(rgba(241,188,50,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(241,188,50,0.06) 1px, transparent 1px)
-      `,
-      backgroundSize: '80px 80px',
-    }} />
-  </div>
-);
 
 const DestinationsSection = () => {
   return (

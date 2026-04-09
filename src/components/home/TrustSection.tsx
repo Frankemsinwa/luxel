@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Shield, CreditCard, Clock, HeadphonesIcon } from 'lucide-react';
+import PremiumGrid from './PremiumGrid';
 
 const trustFeatures = [
   {
@@ -25,19 +26,6 @@ const trustFeatures = [
     desc: "Real humans, not bots. Our concierge team is available around the clock globally.",
   },
 ];
-
-/* ───── Grid Background Component ───── */
-const PremiumGrid = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute inset-0" style={{
-      backgroundImage: `
-        linear-gradient(rgba(241,188,50,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(241,188,50,0.06) 1px, transparent 1px)
-      `,
-      backgroundSize: '80px 80px',
-    }} />
-  </div>
-);
 
 const TrustSection = () => {
   return (

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import AnimatedCounter from './AnimatedCounter';
+import PremiumGrid from './PremiumGrid';
 
 const stats = [
   { value: 5000, suffix: "+", label: "Destinations" },
@@ -9,19 +10,6 @@ const stats = [
   { value: 98, suffix: "%", label: "Satisfaction" },
   { value: 24, suffix: "/7", label: "Support" },
 ];
-
-/* ───── Grid Background Component ───── */
-const PremiumGrid = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute inset-0" style={{
-      backgroundImage: `
-        linear-gradient(rgba(241,188,50,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(241,188,50,0.06) 1px, transparent 1px)
-      `,
-      backgroundSize: '80px 80px',
-    }} />
-  </div>
-);
 
 const HomeStats = () => {
   return (

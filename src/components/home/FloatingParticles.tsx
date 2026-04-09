@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 const FloatingParticles = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {[...Array(20)].map((_, i) => (
+    {[...Array(12)].map((_, i) => (
       <motion.div
         key={i}
         className="absolute w-1 h-1 rounded-full bg-amber/30"

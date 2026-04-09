@@ -5,33 +5,8 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Plane, Shield, CheckCircle2, Zap } from 'lucide-react';
+import PremiumGrid from './PremiumGrid';
 import FloatingParticles from './FloatingParticles';
-
-/* ───── Grid Background Component ───── */
-const PremiumGrid = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {/* Main grid */}
-    <div className="absolute inset-0" style={{
-      backgroundImage: `
-        linear-gradient(rgba(241,188,50,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(241,188,50,0.06) 1px, transparent 1px)
-      `,
-      backgroundSize: '80px 80px',
-    }} />
-    {/* Finer sub-grid */}
-    <div className="absolute inset-0" style={{
-      backgroundImage: `
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
-      `,
-      backgroundSize: '20px 20px',
-    }} />
-    {/* Radial fade overlay so grid fades at edges */}
-    <div className="absolute inset-0" style={{
-      background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.8) 100%)',
-    }} />
-  </div>
-);
 
 const HomeHero = () => {
   const heroRef = useRef(null);
@@ -69,7 +44,7 @@ const HomeHero = () => {
   };
 
   const titleVariants: any = {
-    hidden: { opacity: 0, y: 60, scale: 0.9 },
+    hidden: { opacity: 1, y: 0, scale: 1 }, // Fix for LCP: Default to visible
     visible: {
       opacity: 1,
       y: 0,
@@ -116,7 +91,7 @@ const HomeHero = () => {
         <motion.div
           className="flex-1 text-center lg:text-left"
           variants={containerVariants}
-          initial="hidden"
+          initial={false} // Fix LCP: Don't start hidden
           animate="visible"
           style={{ y: heroY, opacity: heroOpacity }}
         >
@@ -138,7 +113,7 @@ const HomeHero = () => {
               Billionaire
               <motion.span
                 className="absolute bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-amber/80 via-amber to-amber/80"
-                initial={{ scaleX: 0 }}
+                initial={{ scaleX: 1 }} // Fix LCP: Visible by default
                 animate={{ scaleX: 1 }}
                 transition={{ delay: 1.5, duration: 0.8 }}
               />
