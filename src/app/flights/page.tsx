@@ -573,7 +573,7 @@ function FlightsContent() {
                                     <motion.div
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="bg-flight-card rounded-[2.5rem] p-20 text-center border-2 border-dashed border-black/20"
+                                        className="bg-flight-card rounded-[2.5rem] p-10 lg:p-20 text-center border-2 border-dashed border-black/20"
                                     >
                                         <div className="w-20 h-20 rounded-full bg-black/10 flex items-center justify-center text-black/30 mx-auto mb-6">
                                             <Search size={32} />
@@ -620,17 +620,17 @@ function FlightsContent() {
                                                                     type="button"
                                                                     onClick={() => handleRequestAssistance()}
                                                                     disabled={isSubmittingAssistance}
-                                                                    className="w-full bg-black text-white py-5 rounded-[2rem] font-semibold text-sm shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+                                                                    className="w-full bg-black text-white py-3.5 sm:py-5 px-6 rounded-[1.5rem] sm:rounded-[2rem] font-semibold text-[13px] sm:text-sm shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3"
                                                                 >
                                                                     {isSubmittingAssistance ? (
                                                                         <>
-                                                                            <Loader2 className="animate-spin" size={20} />
-                                                                            <span>Sending Request...</span>
+                                                                            <Loader2 className="animate-spin" size={18} />
+                                                                            <span className="whitespace-nowrap">Sending Request...</span>
                                                                         </>
                                                                     ) : (
                                                                         <>
-                                                                            <Mail size={20} />
-                                                                            <span>Request Luxel Assistance</span>
+                                                                            <Mail size={18} className="flex-shrink-0" />
+                                                                            <span className="whitespace-nowrap sm:whitespace-normal">Request Luxel Assistance</span>
                                                                         </>
                                                                     )}
                                                                 </button>
