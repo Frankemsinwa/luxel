@@ -175,75 +175,73 @@ export default function RequestDetailsPage() {
 
     return (
         <>
-            <div className="max-w-6xl mx-auto space-y-10">
+            <div className="max-w-6xl mx-auto space-y-6 lg:space-y-10">
                 {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                        <button
-                            onClick={() => router.back()}
-                            className="w-12 h-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-all shadow-sm"
-                        >
-                            <ChevronLeft size={20} />
-                        </button>
-                        <div>
-                            <div className="flex items-center gap-3 mb-1">
-                                <h1 className="text-3xl font-black text-zinc-900 tracking-tight">{request.details?.itinerary || 'Flight Request'}</h1>
-                                <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${request.status === 'OPEN' ? 'bg-amber/10 text-amber animate-pulse' :
-                                    request.status === 'RESOLVED' ? 'bg-emerald-50 text-emerald-600' :
-                                        request.status === 'CLOSED' ? 'bg-red-50 text-red-600' :
-                                            'bg-zinc-100 text-zinc-500'
-                                    }`}>
-                                    {request.status}
-                                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6">
+                    <button
+                        onClick={() => router.back()}
+                        className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-white border border-zinc-100 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-all shadow-sm"
+                    >
+                        <ChevronLeft size={20} />
+                    </button>
+                    <div>
+                        <div className="flex flex-wrap items-center gap-3 mb-1">
+                            <h1 className="text-xl lg:text-3xl font-black text-zinc-900 tracking-tight">{request.details?.itinerary || 'Flight Request'}</h1>
+                            <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${request.status === 'OPEN' ? 'bg-amber/10 text-amber animate-pulse' :
+                                request.status === 'RESOLVED' ? 'bg-emerald-50 text-emerald-600' :
+                                    request.status === 'CLOSED' ? 'bg-red-50 text-red-600' :
+                                        'bg-zinc-100 text-zinc-500'
+                                }`}>
+                                {request.status}
                             </div>
-                            <p className="text-zinc-500 font-medium text-sm">Request ID: {request.id.substring(0, 8)}...</p>
                         </div>
+                        <p className="text-zinc-500 font-medium text-xs lg:text-sm">Request ID: {request.id.substring(0, 10)}...</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
 
                     {/* Left Column: Details */}
-                    <div className="lg:col-span-2 space-y-10">
+                    <div className="lg:col-span-2 space-y-6 lg:space-y-10">
 
                         {/* Itinerary Card */}
-                        <div className="bg-white rounded-[3rem] p-10 border border-zinc-100 shadow-sm relative overflow-hidden">
+                        <div className="bg-white rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 border border-zinc-100 shadow-sm relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-zinc-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50" />
 
-                            <div className="relative z-10 flex items-center justify-between mb-10 pb-10 border-b border-zinc-50">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-16 h-16 rounded-3xl bg-zinc-900 flex items-center justify-center text-amber">
-                                        <Plane size={32} />
+                            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-10 border-b border-zinc-50">
+                                <div className="flex items-center gap-4 lg:gap-6">
+                                    <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-zinc-900 flex items-center justify-center text-amber">
+                                        <Plane size={24} className="lg:w-8 lg:h-8" />
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-black text-zinc-400 uppercase tracking-widest mb-1">Route Overview</h3>
-                                        <p className="text-2xl font-black text-zinc-900 tracking-tight">{itinerary}</p>
+                                        <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Route Overview</h3>
+                                        <p className="text-lg lg:text-2xl font-black text-zinc-900 tracking-tight">{itinerary}</p>
                                     </div>
                                 </div>
-                                <div className="text-right">
+                                <div className="md:text-right">
                                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Quoted Price</p>
-                                    <p className="text-2xl font-black text-zinc-900">{formatNGN(bookingPrice || 0)}</p>
+                                    <p className="text-xl lg:text-2xl font-black text-zinc-900">{formatNGN(bookingPrice || 0)}</p>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-8 relative z-10">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8 relative z-10">
                                 <div>
                                     <h4 className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-2">Created</h4>
-                                    <div className="flex items-center gap-2 text-zinc-900 font-bold text-sm">
+                                    <div className="flex items-center gap-2 text-zinc-900 font-bold text-xs lg:text-sm">
                                         <Calendar size={16} className="text-zinc-400" />
                                         {new Date(request.created_at).toLocaleDateString()}
                                     </div>
                                 </div>
                                 <div>
                                     <h4 className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-2">Travelers</h4>
-                                    <div className="flex items-center gap-2 text-zinc-900 font-bold text-sm">
+                                    <div className="flex items-center gap-2 text-zinc-900 font-bold text-xs lg:text-sm">
                                         <User size={16} className="text-zinc-400" />
                                         {passengers.length || 1} Passenger(s)
                                     </div>
                                 </div>
                                 <div>
                                     <h4 className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-2">Flight ID</h4>
-                                    <div className="flex items-center gap-2 text-zinc-900 font-bold text-sm">
+                                    <div className="flex items-center gap-2 text-zinc-900 font-bold text-xs lg:text-sm">
                                         <ShieldCheck size={16} className="text-emerald-500" />
                                         {request.details?.flight_id || "Dynamic"}
                                     </div>
@@ -252,48 +250,48 @@ export default function RequestDetailsPage() {
                         </div>
 
                         {/* Trip Details */}
-                        <div className="bg-white rounded-[3rem] p-10 border border-zinc-100 shadow-sm">
+                        <div className="bg-white rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 border border-zinc-100 shadow-sm">
                             <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-8">Trip Details</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="grid grid-cols-2 lg:grid-cols-2 gap-6 lg:gap-8">
                                 <div className="space-y-2">
                                     <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Departure</p>
-                                    <p className="text-sm font-bold text-zinc-900">
+                                    <p className="text-xs lg:text-sm font-bold text-zinc-900">
                                         {tripDetails.departure ? new Date(tripDetails.departure).toLocaleDateString() : '-'}
                                     </p>
                                 </div>
                                 <div className="space-y-2">
                                     <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Return</p>
-                                    <p className="text-sm font-bold text-zinc-900">
+                                    <p className="text-xs lg:text-sm font-bold text-zinc-900">
                                         {tripDetails.return ? new Date(tripDetails.return).toLocaleDateString() : '-'}
                                     </p>
                                 </div>
                                 <div className="space-y-2">
                                     <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Cabin</p>
-                                    <p className="text-sm font-bold text-zinc-900">{tripDetails.travelClass || '-'}</p>
+                                    <p className="text-xs lg:text-sm font-bold text-zinc-900">{tripDetails.travelClass || '-'}</p>
                                 </div>
                                 <div className="space-y-2">
                                     <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Passengers</p>
-                                    <p className="text-sm font-bold text-zinc-900">
+                                    <p className="text-xs lg:text-sm font-bold text-zinc-900">
                                         {tripDetails.passengerCount || passengers.length || 1}
                                         {typeof tripDetails.adults !== 'undefined' || typeof tripDetails.children !== 'undefined'
-                                            ? ` (Adults: ${tripDetails.adults || 0}, Children: ${tripDetails.children || 0})`
+                                            ? ` (A: ${tripDetails.adults || 0}, C: ${tripDetails.children || 0})`
                                             : ''}
                                     </p>
                                 </div>
                             </div>
                             {pricing && (pricing.unitPrice || pricing.totalPrice) && (
-                                <div className="mt-10 pt-8 border-t border-zinc-50 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="mt-8 lg:mt-10 pt-6 lg:pt-8 border-t border-zinc-50 grid grid-cols-1 sm:grid-cols-3 gap-6">
                                     <div>
                                         <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Unit Price</p>
-                                        <p className="text-sm font-bold text-zinc-900">{formatNGN(pricing.unitPrice || 0)}</p>
+                                        <p className="text-xs lg:text-sm font-bold text-zinc-900">{formatNGN(pricing.unitPrice || 0)}</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Taxes</p>
-                                        <p className="text-sm font-bold text-zinc-900">{formatNGN(pricing.taxes || 0)}</p>
+                                        <p className="text-xs lg:text-sm font-bold text-zinc-900">{formatNGN(pricing.taxes || 0)}</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Total</p>
-                                        <p className="text-sm font-bold text-zinc-900">{formatNGN(pricing.totalPrice || 0)}</p>
+                                        <p className="text-xs lg:text-sm font-bold text-zinc-900">{formatNGN(pricing.totalPrice || 0)}</p>
                                     </div>
                                 </div>
                             )}
@@ -301,17 +299,17 @@ export default function RequestDetailsPage() {
 
                         {/* Passenger Details */}
                         {passengers.length > 0 && (
-                            <div className="bg-white rounded-[3rem] p-10 border border-zinc-100 shadow-sm">
+                            <div className="bg-white rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 border border-zinc-100 shadow-sm">
                                 <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-8">Passenger Manifesto</h3>
-                                <div className="space-y-6">
+                                <div className="space-y-4">
                                     {passengers.map((p: any, i: number) => (
-                                        <div key={i} className="bg-zinc-50 rounded-2xl p-6 flex items-center justify-between">
-                                            <div className="flex items-center gap-5">
-                                                <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center text-amber font-black text-sm">
+                                        <div key={i} className="bg-zinc-50 rounded-xl lg:rounded-2xl p-4 lg:p-6 flex items-center justify-between">
+                                            <div className="flex items-center gap-4 lg:gap-5">
+                                                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-zinc-900 flex items-center justify-center text-amber font-black text-xs lg:text-sm">
                                                     {i + 1}
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold text-zinc-900 text-sm">
+                                                <div className="min-w-0">
+                                                    <p className="font-bold text-zinc-900 text-xs lg:text-sm truncate">
                                                         {p.title} {p.firstName || '-'} {p.lastName || '-'}
                                                     </p>
                                                     <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
@@ -330,151 +328,148 @@ export default function RequestDetailsPage() {
 
                         {/* Action Panel - only show if OPEN */}
                         {request.status === 'OPEN' && (
-                            <div className="grid grid-cols-2 gap-8">
-                                <div
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8">
+                                <button
                                     onClick={openVerifyModal}
-                                    className={`bg-emerald-50/50 rounded-[2.5rem] p-8 border border-emerald-100 flex flex-col justify-between group hover:bg-emerald-50 transition-all cursor-pointer ${isActing ? 'opacity-50 pointer-events-none' : ''}`}
+                                    className={`bg-emerald-50/50 rounded-[2rem] p-6 lg:p-8 border border-emerald-100 flex flex-col justify-between group hover:bg-emerald-50 transition-all cursor-pointer text-left ${isActing ? 'opacity-50 pointer-events-none' : ''}`}
                                 >
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-100 flex items-center justify-center text-emerald-500 shadow-sm">
+                                    <div className="flex items-center justify-between mb-4 lg:mb-6">
+                                        <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-white border border-emerald-100 flex items-center justify-center text-emerald-500 shadow-sm">
                                             <CheckCircle2 size={24} />
                                         </div>
                                         <ArrowUpRight className="text-emerald-300 group-hover:text-emerald-500 transition-colors" />
                                     </div>
                                     <div>
-                                        <h4 className="text-lg font-black text-emerald-900 mb-1">Verify Seat & Rate</h4>
-                                        <p className="text-xs text-emerald-700/60 font-medium leading-relaxed">Verify live pricing via Amadeus and confirm the booking rate.</p>
+                                        <h4 className="text-base lg:text-lg font-black text-emerald-900 mb-1">Verify Seat & Rate</h4>
+                                        <p className="text-[10px] lg:text-xs text-emerald-700/60 font-medium leading-relaxed">Verify live pricing via Amadeus and confirm the booking rate.</p>
                                     </div>
-                                </div>
+                                </button>
 
-                                <div
+                                <button
                                     onClick={() => !isActing && handleReject()}
-                                    className={`bg-red-50/50 rounded-[2.5rem] p-8 border border-red-100 flex flex-col justify-between group hover:bg-red-50 transition-all cursor-pointer ${isActing ? 'opacity-50 pointer-events-none' : ''}`}
+                                    className={`bg-red-50/50 rounded-[2rem] p-6 lg:p-8 border border-red-100 flex flex-col justify-between group hover:bg-red-50 transition-all cursor-pointer text-left ${isActing ? 'opacity-50 pointer-events-none' : ''}`}
                                 >
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="w-12 h-12 rounded-2xl bg-white border border-red-100 flex items-center justify-center text-red-500 shadow-sm">
+                                    <div className="flex items-center justify-between mb-4 lg:mb-6">
+                                        <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-white border border-red-100 flex items-center justify-center text-red-500 shadow-sm">
                                             <XCircle size={24} />
                                         </div>
                                         <ArrowUpRight className="text-red-300 group-hover:text-red-500 transition-colors" />
                                     </div>
                                     <div>
-                                        <h4 className="text-lg font-black text-red-900 mb-1">Reject Inquiry</h4>
-                                        <p className="text-xs text-red-700/60 font-medium leading-relaxed">Reject if no availability or routing issues exist.</p>
+                                        <h4 className="text-base lg:text-lg font-black text-red-900 mb-1">Reject Inquiry</h4>
+                                        <p className="text-[10px] lg:text-xs text-red-700/60 font-medium leading-relaxed">Reject if no availability or routing issues exist.</p>
                                     </div>
-                                </div>
+                                </button>
                             </div>
                         )}
 
                         {/* Status badge for already resolved/closed */}
                         {request.status === 'RESOLVED' && (
-                            <div className="bg-emerald-50 border border-emerald-100 rounded-[2.5rem] p-8 flex items-center gap-6">
-                                <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-200">
-                                    <CheckCircle2 size={28} />
+                            <div className="bg-emerald-50 border border-emerald-100 rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-8 flex items-center gap-4 lg:gap-6">
+                                <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-200 flex-shrink-0">
+                                    <CheckCircle2 size={24} className="lg:w-7 lg:h-7" />
                                 </div>
                                 <div>
-                                    <h4 className="font-black text-emerald-900 text-lg mb-1">Confirmed & Resolved</h4>
-                                    <p className="text-xs text-emerald-700/60 font-medium">
+                                    <h4 className="font-black text-emerald-900 text-base lg:text-lg mb-1">Confirmed & Resolved</h4>
+                                    <p className="text-[10px] lg:text-xs text-emerald-700/60 font-medium">
                                         Confirmed at {formatNGN(request.booking?.confirmed_price || request.booking?.total_price || 0)}
                                     </p>
                                 </div>
                             </div>
                         )}
                         {request.status === 'CLOSED' && (
-                            <div className="bg-red-50 border border-red-100 rounded-[2.5rem] p-8 flex items-center gap-6">
-                                <div className="w-14 h-14 rounded-2xl bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-200">
-                                    <XCircle size={28} />
+                            <div className="bg-red-50 border border-red-100 rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-8 flex items-center gap-4 lg:gap-6">
+                                <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-200 flex-shrink-0">
+                                    <XCircle size={24} className="lg:w-7 lg:h-7" />
                                 </div>
                                 <div>
-                                    <h4 className="font-black text-red-900 text-lg mb-1">Request Rejected</h4>
-                                    <p className="text-xs text-red-700/60 font-medium">This inquiry has been closed by the concierge team.</p>
+                                    <h4 className="font-black text-red-900 text-base lg:text-lg mb-1">Request Rejected</h4>
+                                    <p className="text-[10px] lg:text-xs text-red-700/60 font-medium">This inquiry has been closed by the concierge team.</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {/* Right Column: Sidebar */}
-                    <div className="space-y-10">
+                    <div className="space-y-6 lg:space-y-10">
 
                         {/* Client Profile */}
-                        <div className="bg-white rounded-[3rem] p-10 border border-zinc-100 shadow-sm">
+                        <div className="bg-white rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 border border-zinc-100 shadow-sm">
                             <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-8">Client Profile</h3>
-                            <div className="flex items-center gap-6 mb-8">
-                                <div className="w-16 h-16 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center font-black text-xl text-zinc-300">
+                            <div className="flex items-center gap-4 lg:gap-6 mb-8 group">
+                                <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center font-black text-lg lg:text-xl text-zinc-300">
                                     {request.profiles?.full_name?.charAt(0) || "U"}
                                 </div>
                                 <div>
-                                    <p className="text-lg font-black text-zinc-900 mb-1">{request.profiles?.full_name || "Luxel Client"}</p>
+                                    <p className="text-base lg:text-lg font-black text-zinc-900 mb-1">{request.profiles?.full_name || "Luxel Client"}</p>
                                     <span className="text-[10px] font-bold text-amber px-2.5 py-1 rounded-md bg-amber/10 uppercase tracking-widest">{request.profiles?.role || "USER"}</span>
                                 </div>
                             </div>
-                            <div className="space-y-4 pt-8 border-t border-zinc-50">
+                            <div className="space-y-4 pt-6 lg:pt-8 border-t border-zinc-50">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-zinc-400 flex items-center gap-2"><Mail size={12} /> Email</span>
-                                    <button onClick={() => copyToClipboard(contact.email || '')} className="text-xs font-black text-zinc-900 flex items-center gap-2 hover:text-amber transition-colors">
+                                    <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-2"><Mail size={12} /> Email</span>
+                                    <button onClick={() => copyToClipboard(contact.email || '')} className="text-[10px] lg:text-xs font-black text-zinc-900 flex items-center gap-2 hover:text-amber transition-colors truncate max-w-[150px]">
                                         {contact.email || "-"}
                                         <Copy size={12} />
                                     </button>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-zinc-400 flex items-center gap-2"><Phone size={12} /> Phone</span>
-                                    <span className="text-xs font-black text-zinc-900">{contact.phone || request.profiles?.phone || "-"}</span>
+                                    <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-2"><Phone size={12} /> Phone</span>
+                                    <span className="text-[10px] lg:text-xs font-black text-zinc-900">{contact.phone || request.profiles?.phone || "-"}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-zinc-400 flex items-center gap-2"><Clock size={12} /> Request Time</span>
-                                    <span className="text-xs font-black text-zinc-900">{new Date(request.created_at).toLocaleString()}</span>
+                                    <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-2"><Clock size={12} /> Request Time</span>
+                                    <span className="text-[10px] lg:text-xs font-black text-zinc-900">{new Date(request.created_at).toLocaleDateString()}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Booking Info */}
                         {request.booking && (
-                            <div className="bg-white rounded-[3rem] p-10 border border-zinc-100 shadow-sm">
+                            <div className="bg-white rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 border border-zinc-100 shadow-sm">
                                 <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-8">Booking Details</h3>
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-zinc-400">Luxel Reference</span>
-                                        <span className="text-xs font-black text-zinc-900">{request.booking.booking_reference}</span>
+                                        <span className="text-[10px] font-bold text-zinc-400">Luxel Reference</span>
+                                        <span className="text-[10px] lg:text-xs font-black text-zinc-900">{request.booking.booking_reference}</span>
                                     </div>
                                     <div className="pt-4 mt-2 border-t border-zinc-50 space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs font-bold text-zinc-400">Airline Reference (PNR)</span>
-                                            <span className="text-xs font-black text-zinc-900">
+                                            <span className="text-[10px] font-bold text-zinc-400">PNR Reference</span>
+                                            <span className="text-[10px] lg:text-xs font-black text-zinc-900">
                                                 {request.booking.airline_booking_reference || request.details?.airline_booking_reference || '-'}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-2">
                                             <input
                                                 value={airlineBookingReference}
                                                 onChange={(e) => setAirlineBookingReference(e.target.value)}
-                                                placeholder="Enter airline PNR (e.g. ABC123)"
-                                                className="flex-1 bg-zinc-50 border border-zinc-100 rounded-xl px-4 py-3 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-amber/20 outline-none"
+                                                placeholder="Enter PNR"
+                                                className="flex-1 bg-zinc-50 border border-zinc-100 rounded-lg px-3 py-2.5 text-xs font-bold text-zinc-900 focus:ring-2 focus:ring-amber/20 outline-none"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={handleSaveAirlineReference}
                                                 disabled={isActing || !airlineBookingReference.trim()}
-                                                className="px-5 py-3 rounded-xl bg-zinc-900 text-amber text-xs font-black uppercase tracking-widest disabled:opacity-50"
+                                                className="px-4 py-2.5 rounded-lg bg-zinc-900 text-amber text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
                                             >
                                                 Save
                                             </button>
                                         </div>
-                                        <p className="text-[10px] text-zinc-400 font-medium">
-                                            This is the airline-provided booking reference. Add it after you book the traveler with the airline.
-                                        </p>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-zinc-400">Quoted Price</span>
-                                        <span className="text-xs font-black text-zinc-900">{formatNGN(request.booking.total_price)}</span>
+                                        <span className="text-[10px] font-bold text-zinc-400">Quoted Price</span>
+                                        <span className="text-[10px] lg:text-xs font-black text-zinc-900">{formatNGN(request.booking.total_price)}</span>
                                     </div>
                                     {request.booking.confirmed_price && (
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs font-bold text-emerald-600">Confirmed Price</span>
-                                            <span className="text-xs font-black text-emerald-600">{formatNGN(request.booking.confirmed_price)}</span>
+                                            <span className="text-[10px] lg:text-xs font-bold text-emerald-600">Confirmed Price</span>
+                                            <span className="text-[10px] lg:text-xs font-black text-emerald-600">{formatNGN(request.booking.confirmed_price)}</span>
                                         </div>
                                     )}
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-zinc-400">Status</span>
-                                        <span className={`text-xs font-black uppercase tracking-widest ${request.booking.status === 'CONFIRMED' ? 'text-emerald-600' : request.booking.status === 'CANCELLED' ? 'text-red-500' : 'text-amber'}`}>
+                                        <span className="text-[10px] font-bold text-zinc-400">Status</span>
+                                        <span className={`text-[10px] lg:text-xs font-black uppercase tracking-widest ${request.booking.status === 'CONFIRMED' ? 'text-emerald-600' : request.booking.status === 'CANCELLED' ? 'text-red-500' : 'text-amber'}`}>
                                             {request.booking.status}
                                         </span>
                                     </div>
@@ -492,21 +487,21 @@ export default function RequestDetailsPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6"
                         onClick={() => setShowVerifyModal(false)}
                     >
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            initial={{ opacity: 0, scale: 0.95, y: 100 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 100 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl"
+                            className="bg-white rounded-t-[2rem] sm:rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl"
                         >
                             {/* Modal Header */}
-                            <div className="sticky top-0 bg-white rounded-t-[2.5rem] px-10 py-8 border-b border-zinc-100 flex items-center justify-between z-10">
+                            <div className="sticky top-0 bg-white rounded-t-[2rem] sm:rounded-t-[2.5rem] px-6 lg:px-10 py-6 lg:py-8 border-b border-zinc-100 flex items-center justify-between z-10">
                                 <div>
-                                    <h2 className="text-xl font-black text-zinc-900 tracking-tight">Verify Flight & Price</h2>
-                                    <p className="text-xs text-zinc-500 font-medium mt-1">Live data from Amadeus GDS</p>
+                                    <h2 className="text-lg lg:text-xl font-black text-zinc-900 tracking-tight">Verify Flight & Price</h2>
+                                    <p className="text-[10px] lg:text-xs text-zinc-500 font-medium mt-1">Live data from Amadeus GDS</p>
                                 </div>
                                 <button
                                     onClick={() => setShowVerifyModal(false)}
@@ -517,73 +512,68 @@ export default function RequestDetailsPage() {
                             </div>
 
                             {/* Modal Body */}
-                            <div className="p-10 space-y-8">
+                            <div className="p-6 lg:p-10 space-y-6 lg:space-y-8">
                                 {/* Route Info */}
-                                <div className="bg-zinc-50 rounded-2xl p-6 flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
+                                <div className="bg-zinc-50 rounded-xl lg:rounded-2xl p-4 lg:p-6 flex items-center justify-between">
+                                    <div className="flex items-center gap-3 lg:gap-4">
                                         <Plane size={20} className="text-amber" />
-                                        <span className="font-bold text-zinc-900">{itinerary}</span>
+                                        <span className="font-bold text-zinc-900 text-sm">{itinerary}</span>
                                     </div>
-                                    <span className="text-xs font-bold text-zinc-400">{passengers.length} PAX</span>
+                                    <span className="text-[10px] font-bold text-zinc-400">{passengers.length} PAX</span>
                                 </div>
 
                                 {/* Loading State */}
                                 {verifyLoading && (
-                                    <div className="flex flex-col items-center py-12 gap-4">
+                                    <div className="flex flex-col items-center py-10 lg:py-12 gap-4">
                                         <Loader2 size={32} className="text-amber animate-spin" />
-                                        <p className="text-sm font-bold text-zinc-500">Querying Amadeus GDS for live pricing...</p>
+                                        <p className="text-xs lg:text-sm font-bold text-zinc-500">Querying Amadeus GDS...</p>
                                     </div>
                                 )}
 
                                 {/* Verified Flights */}
                                 {!verifyLoading && verifiedFlights.length > 0 && (
-                                    <div className="space-y-4">
-                                        <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Available Offers ({verifiedFlights.length})</h3>
-                                        <div className="space-y-3 max-h-60 overflow-y-auto">
+                                    <div className="space-y-3 lg:space-y-4">
+                                        <h3 className="text-[10px] lg:text-caption font-black text-zinc-400 uppercase tracking-widest">Available Offers ({verifiedFlights.length})</h3>
+                                        <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                                             {verifiedFlights.slice(0, 8).map((flight: any, i: number) => (
-                                                <div
+                                                <button
                                                     key={i}
                                                     onClick={() => {
                                                         setSelectedFlight(flight);
                                                         setConfirmedPrice(String(flight.price));
                                                     }}
-                                                    className={`p-5 rounded-2xl border cursor-pointer transition-all ${selectedFlight?.id === flight.id
+                                                    className={`w-full text-left p-4 lg:p-5 rounded-xl lg:rounded-2xl border transition-all ${selectedFlight?.id === flight.id
                                                         ? 'border-amber bg-amber/5 ring-2 ring-amber/20'
                                                         : 'border-zinc-100 hover:border-zinc-200'
                                                         }`}
                                                 >
                                                     <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-[10px] font-black text-zinc-500">
-                                                                {flight.airline || flight.logo}
+                                                        <div className="flex items-center gap-3 lg:gap-4">
+                                                            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-zinc-100 flex items-center justify-center text-[10px] font-black text-zinc-500 uppercase">
+                                                                {flight.airline?.substring(0, 2) || flight.logo?.substring(0, 2) || 'FL'}
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-bold text-zinc-900">
+                                                                <p className="text-xs lg:text-sm font-bold text-zinc-900">
                                                                     {flight.departureTime} {'->'} {flight.arrivalTime}
                                                                 </p>
                                                                 <p className="text-[10px] text-zinc-400 font-medium">
-                                                                    {flight.departureCode} {'->'} {flight.arrivalCode} - {flight.duration} - {flight.stops}
+                                                                    {flight.stops} stop(s) - {flight.duration}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                         <div className="text-right">
-                                                            <p className="font-black text-zinc-900">{formatNGN(flight.price)}</p>
-                                                            {flight.originalPrice && (
-                                                                <p className="text-[10px] text-zinc-400">
-                                                                    {flight.originalCurrency || 'EUR'} {flight.originalPrice}
-                                                                </p>
-                                                            )}
+                                                            <p className="font-black text-zinc-900 text-sm lg:text-base">{formatNGN(flight.price)}</p>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </button>
                                             ))}
                                         </div>
                                     </div>
                                 )}
 
                                 {!verifyLoading && verifiedFlights.length === 0 && (
-                                    <div className="text-center py-8 text-zinc-400">
-                                        <p className="font-bold">No live data available. Enter a manual price below.</p>
+                                    <div className="text-center py-6 text-zinc-400">
+                                        <p className="font-bold text-xs">No live data available. Enter a manual price below.</p>
                                     </div>
                                 )}
 
@@ -596,31 +586,30 @@ export default function RequestDetailsPage() {
                                             type="number"
                                             value={confirmedPrice}
                                             onChange={(e) => setConfirmedPrice(e.target.value)}
-                                            placeholder="Enter confirmed price in Naira"
-                                            className="w-full bg-zinc-50 border-none rounded-2xl py-5 pl-12 pr-6 text-lg font-black text-zinc-900 focus:ring-4 focus:ring-amber/20 outline-none"
+                                            placeholder="Enter confirmed price"
+                                            className="w-full bg-zinc-50 border-none rounded-xl lg:rounded-2xl py-4 lg:py-5 pl-12 pr-6 text-base lg:text-lg font-black text-zinc-900 focus:ring-4 focus:ring-amber/20 outline-none"
                                         />
                                     </div>
-                                    <p className="text-[10px] text-zinc-400 font-medium">This is the amount the customer will be required to pay.</p>
                                 </div>
                             </div>
 
                             {/* Modal Footer */}
-                            <div className="sticky bottom-0 bg-white rounded-b-[2.5rem] px-10 py-8 border-t border-zinc-100 flex items-center justify-between">
+                            <div className="sticky bottom-0 bg-white rounded-b-[2rem] sm:rounded-b-[2.5rem] px-6 lg:px-10 py-6 lg:py-8 border-t border-zinc-100 flex items-center justify-between gap-4">
                                 <button
                                     onClick={() => setShowVerifyModal(false)}
-                                    className="px-8 py-4 rounded-xl border border-zinc-100 text-zinc-500 font-bold text-xs hover:bg-zinc-50 transition-all"
+                                    className="flex-1 sm:flex-none px-6 lg:px-8 py-3.5 lg:py-4 rounded-xl border border-zinc-100 text-zinc-500 font-bold text-[10px] lg:text-xs hover:bg-zinc-50 transition-all uppercase tracking-widest"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleConfirm}
                                     disabled={!confirmedPrice || isActing}
-                                    className="px-10 py-4 rounded-xl bg-zinc-900 text-white font-bold text-xs shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center gap-3"
+                                    className="flex-1 sm:flex-none px-6 lg:px-10 py-3.5 lg:py-4 rounded-xl bg-zinc-900 text-white font-bold text-[10px] lg:text-xs shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 uppercase tracking-widest"
                                 >
                                     {isActing ? (
-                                        <><Loader2 size={16} className="animate-spin" /> Confirming...</>
+                                        <><Loader2 size={16} className="animate-spin" /> ...</>
                                     ) : (
-                                        <><CheckCircle2 size={16} /> Confirm at {formatNGN(confirmedPrice || 0)}</>
+                                        <><CheckCircle2 size={16} /> Confirm</>
                                     )}
                                 </button>
                             </div>
