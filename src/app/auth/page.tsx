@@ -65,7 +65,9 @@ function AuthContent() {
                 if (signInError) throw signInError;
 
                 const role = session?.user?.user_metadata?.role;
-                if (role === "AGENT") {
+                if (role === "ADMIN") {
+                    router.push("/admin/dashboard");
+                } else if (role === "AGENT") {
                     router.push("/agent/dashboard");
                 } else {
                     router.push("/");
