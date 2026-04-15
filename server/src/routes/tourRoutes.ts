@@ -11,7 +11,7 @@ router.get('/:slug', tourController.getTourBySlug);
 
 // Protected Booking Endpoints
 router.post('/:id/book', authenticateOptional, tourController.bookTour);
-router.get('/bookings/:id', authenticate, tourController.getTourBookingById);
+router.get('/bookings/:id', authenticateOptional, tourController.getTourBookingById);
 router.get('/bookings/:id/download', authenticateOptional, tourController.downloadTourTicket);
 
 // Agent/Admin Endpoints

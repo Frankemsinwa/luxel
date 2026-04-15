@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as amadeusService from '../services/amadeusService.js';
+import * as flightSearchService from '../services/flightSearchService.js';
 import { getAgentNotificationEmails } from '../services/emailService.js';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
@@ -99,7 +100,7 @@ export const searchFlights = async (req: Request, res: Response) => {
             });
         }
 
-        const result = await amadeusService.searchFlights({
+        const result = await flightSearchService.searchFlights({
             from: from as string,
             to: to as string,
             // Normalize date format for providers (Amadeus expects YYYY-MM-DD)

@@ -376,7 +376,7 @@ export const bookTour = async (req: any, res: Response) => {
 export const getTourBookingById = async (req: any, res: Response) => {
     try {
         const { id } = req.params;
-        const userId = req.user.id;
+        const userId = req.user?.id;
 
         const { data, error } = await supabaseAdmin
             .from('tour_bookings')
@@ -385,11 +385,14 @@ export const getTourBookingById = async (req: any, res: Response) => {
                 tour:tours(*)
             `)
             .eq('id', id)
-            .eq('user_id', userId)
             .single();
 
         if (error || !data) {
             return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        if (data.user_id && data.user_id !== userId) {
+            return res.status(403).json({ message: 'Unauthorized to view this booking' });
         }
 
         return res.json(data);

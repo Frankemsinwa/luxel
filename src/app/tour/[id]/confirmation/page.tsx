@@ -32,23 +32,35 @@ function ConfirmationContent() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchBooking = async () => {
-            if (!bookingId) {
-                setLoading(false);
-                return;
-            }
+        if (!bookingId) {
+            setLoading(false);
+            return;
+        }
 
+        const fetchBooking = async () => {
             try {
                 const response = await api.get(`/tours/bookings/${bookingId}`);
                 setBooking(response.data);
+                return response.data;
             } catch (err: any) {
                 console.error('Error fetching booking details:', err);
+                return null;
             } finally {
                 setLoading(false);
             }
         };
 
         fetchBooking();
+
+        // Setup polling mechanism for unverified bookings
+        const intervalId = setInterval(async () => {
+            const currentBooking = await fetchBooking();
+            if (currentBooking && currentBooking.status !== 'AWAITING_VERIFICATION') {
+                clearInterval(intervalId);
+            }
+        }, 5000); // Check every 5 seconds
+
+        return () => clearInterval(intervalId);
     }, [bookingId]);
 
     if (loading) return (

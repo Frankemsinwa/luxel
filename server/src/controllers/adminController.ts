@@ -10,10 +10,10 @@ import { logAgentAction } from '../services/logService.js';
 export const getFinanceOverview = async (req: Request, res: Response) => {
     try {
         const [{ data: flightStats, error: flightErr }, { data: tourStats, error: tourErr }] = await Promise.all([
-            supabase
+            supabaseAdmin
                 .from('bookings')
                 .select('total_price, confirmed_price, status, payment_method'),
-            supabase
+            supabaseAdmin
                 .from('tour_bookings')
                 .select('total_price, status, payment_method')
         ]);
@@ -57,13 +57,13 @@ export const getFinanceOverview = async (req: Request, res: Response) => {
  */
 export const getPendingPayments = async (req: Request, res: Response) => {
     try {
-        const { data: flights, error: fErr } = await supabase
+        const { data: flights, error: fErr } = await supabaseAdmin
             .from('bookings')
             .select('*, user_id')
             .eq('status', 'AWAITING_VERIFICATION')
             .order('created_at', { ascending: false });
 
-        const { data: tours, error: tErr } = await supabase
+        const { data: tours, error: tErr } = await supabaseAdmin
             .from('tour_bookings')
             .select('*, tour:tours(*)')
             .eq('status', 'AWAITING_VERIFICATION')
@@ -96,13 +96,15 @@ export const approvePayment = async (req: Request, res: Response) => {
 
         const table = serviceType === 'TOUR' ? 'tour_bookings' : 'bookings';
 
+        const updatePayload: any = { status: 'CONFIRMED' };
+        if (serviceType === 'FLIGHT') {
+            updatePayload.updated_at = new Date();
+        }
+
         // 1. Update status to CONFIRMED
         const { data: booking, error: updateErr } = await supabaseAdmin
             .from(table)
-            .update({ 
-                status: 'CONFIRMED', 
-                updated_at: new Date()
-            })
+            .update(updatePayload)
             .eq('id', bookingId)
             .select('*')
             .single();
@@ -230,14 +232,35 @@ export const getAllToursOversight = async (req: Request, res: Response) => {
     try {
         const { data: tours, error } = await supabaseAdmin
             .from('tours')
-            .select(`
-                *,
-                agent:agent_id (full_name)
-            `)
+            .select('*')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        res.json(tours);
+
+        // Since there is no strict FK relationship in DB cache, we map manually
+        const agentIds = Array.from(new Set(tours.map((t: any) => t.agent_id).filter(id => id)));
+        let profilesMap: Record<string, any> = {};
+
+        if (agentIds.length > 0) {
+            const { data: profiles } = await supabaseAdmin
+                .from('profiles')
+                .select('id, full_name')
+                .in('id', agentIds);
+            
+            if (profiles) {
+                profilesMap = profiles.reduce((acc: any, p: any) => {
+                    acc[p.id] = p;
+                    return acc;
+                }, {});
+            }
+        }
+
+        const toursWithAgents = tours.map((t: any) => ({
+            ...t,
+            agent: t.agent_id ? profilesMap[t.agent_id] : null
+        }));
+
+        res.json(toursWithAgents);
     } catch (error: any) {
         res.status(500).json({ message: error.message || 'Error fetching tours oversight' });
     }
