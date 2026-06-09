@@ -18,11 +18,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function AgentLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const menuItems = [
@@ -35,6 +37,15 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
         { icon: <MessageSquare size={20} />, label: "Concierge Chat", href: "/agent/chat" },
         { icon: <Settings size={20} />, label: "Settings", href: "/agent/settings" },
     ];
+
+    const handleSignOut = async () => {
+        try {
+            await supabase.auth.signOut();
+            router.push('/auth');
+        } catch (error) {
+            console.error('Error signing out:', error);
+        }
+    };
 
     // Close sidebar when route changes
     useEffect(() => {
@@ -108,7 +119,10 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
                     </nav>
 
                     <div className="pt-8 border-t border-zinc-50">
-                        <button className="flex items-center gap-4 px-4 py-3 rounded-2xl w-full text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all font-bold text-sm text-left">
+                        <button 
+                            onClick={handleSignOut}
+                            className="flex items-center gap-4 px-4 py-3 rounded-2xl w-full text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all font-bold text-sm text-left"
+                        >
                             <LogOut size={20} />
                             Sign Out
                         </button>

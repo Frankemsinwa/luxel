@@ -1,0 +1,177 @@
+{
+  "event_message": "POST | 500 | https://uwyiaxdwlpbzipaallft.supabase.co/auth/v1/signup | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+  "metadata": [
+    {
+      "load_balancer_experimental_routing": null,
+      "load_balancer_geo_aware_info": [],
+      "load_balancer_redirect_identifier": null,
+      "logflare_worker": [],
+      "request": [
+        {
+          "cf": [
+            {
+              "asOrganization": "MTN Nigeria",
+              "asn": null,
+              "botManagement": [
+                {
+                  "corporateProxy": null,
+                  "detectionIds": [],
+                  "ja3Hash": "1f024162deae15734544052b9d6d9986",
+                  "ja4": "t13d1516h2_8daaf6152771_d8a2da3f94cd",
+                  "ja4Signals": [],
+                  "jsDetection": [],
+                  "score": null,
+                  "staticResource": null,
+                  "verifiedBot": null
+                }
+              ],
+              "city": "Abuja",
+              "clientAcceptEncoding": null,
+              "clientTcpRtt": null,
+              "clientTrustScore": 10,
+              "colo": "LHR",
+              "continent": null,
+              "country": "NG",
+              "edgeRequestKeepAliveStatus": null,
+              "httpProtocol": "HTTP/2",
+              "isEUCountry": null,
+              "latitude": null,
+              "longitude": null,
+              "metroCode": null,
+              "postalCode": null,
+              "region": "FCT",
+              "regionCode": null,
+              "requestPriority": null,
+              "timezone": "Africa/Lagos",
+              "tlsCipher": null,
+              "tlsClientAuth": [],
+              "tlsClientCiphersSha1": null,
+              "tlsClientExtensionsSha1": null,
+              "tlsClientExtensionsSha1Le": null,
+              "tlsClientHelloLength": null,
+              "tlsClientRandom": null,
+              "tlsExportedAuthenticator": [],
+              "tlsVersion": null,
+              "verifiedBotCategory": null
+            }
+          ],
+          "headers": [
+            {
+              "accept": "*/*",
+              "cf_cache_status": null,
+              "cf_connecting_ip": "102.91.97.130",
+              "cf_ipcountry": "NG",
+              "cf_ray": "a02704fcaa53a387",
+              "content_length": "175",
+              "content_location": null,
+              "content_range": null,
+              "content_type": "application/json;charset=UTF-8",
+              "date": null,
+              "host": "uwyiaxdwlpbzipaallft.supabase.co",
+              "prefer": null,
+              "range": null,
+              "referer": "http://localhost:3000/",
+              "sb_forwarded_for": null,
+              "sb_gateway_mode": null,
+              "sb_gateway_version": null,
+              "traceparent": null,
+              "transfer_encoding": null,
+              "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+              "x_amz_content_sha256": null,
+              "x_amz_date": null,
+              "x_client_info": "supabase-js-web/2.98.0",
+              "x_forwarded_for": null,
+              "x_forwarded_host": null,
+              "x_forwarded_proto": "https",
+              "x_forwarded_user_agent": null,
+              "x_kong_proxy_latency": null,
+              "x_kong_upstream_latency": null,
+              "x_real_ip": "102.91.97.130"
+            }
+          ],
+          "host": "uwyiaxdwlpbzipaallft.supabase.co",
+          "method": "POST",
+          "path": "/auth/v1/signup",
+          "port": null,
+          "protocol": "https:",
+          "sb": [
+            {
+              "apikey": [],
+              "auth_user": null,
+              "aws_v4": [],
+              "jwt": [
+                {
+                  "apikey": [
+                    {
+                      "invalid": null,
+                      "payload": [
+                        {
+                          "algorithm": "HS256",
+                          "expires_at": 2088377623,
+                          "issued_at": 1772801623,
+                          "issuer": "supabase",
+                          "key_id": null,
+                          "role": "anon",
+                          "session_id": null,
+                          "signature_prefix": "AFBrx5",
+                          "subject": null
+                        }
+                      ]
+                    }
+                  ],
+                  "authorization": [
+                    {
+                      "invalid": null,
+                      "payload": [
+                        {
+                          "algorithm": "HS256",
+                          "expires_at": 2088377623,
+                          "issued_at": 1772801623,
+                          "issuer": "supabase",
+                          "key_id": null,
+                          "role": "anon",
+                          "session_id": null,
+                          "signature_prefix": "AFBrx5",
+                          "subject": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "search": null,
+          "url": "https://uwyiaxdwlpbzipaallft.supabase.co/auth/v1/signup"
+        }
+      ],
+      "response": [
+        {
+          "headers": [
+            {
+              "cf_cache_status": "DYNAMIC",
+              "cf_ray": "a02704fcbd93a387-LHR",
+              "content_length": "74",
+              "content_location": null,
+              "content_range": null,
+              "content_type": "application/json",
+              "date": "Wed, 27 May 2026 18:17:59 GMT",
+              "proxy_status": null,
+              "sb_gateway_mode": null,
+              "sb_gateway_version": "1",
+              "sb_request_id": null,
+              "server_timing": null,
+              "transfer_encoding": null,
+              "x_kong_proxy_latency": null,
+              "x_kong_upstream_latency": null,
+              "x_sb_error_code": "unexpected_failure"
+            }
+          ],
+          "origin_time": 622,
+          "status_code": 500
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-05-27T18:17:58.513000"
+}
