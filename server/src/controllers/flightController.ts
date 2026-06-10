@@ -163,7 +163,7 @@ export const searchFlights = async (req: Request, res: Response) => {
  */
 export const getFlightDetails = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
+        const id = req.params.id as string;
 
         if (id.startsWith('manual-')) {
             const uuid = id.replace('manual-', '');
