@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as amadeusService from '../services/amadeusService.js';
 import * as flightSearchService from '../services/flightSearchService.js';
 import { getAgentNotificationEmails } from '../services/emailService.js';
+import { supabaseAdmin } from '../config/supabase.js';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 
@@ -163,6 +164,41 @@ export const searchFlights = async (req: Request, res: Response) => {
 export const getFlightDetails = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
+
+        if (id.startsWith('manual-')) {
+            const uuid = id.replace('manual-', '');
+            const { data, error } = await supabaseAdmin
+                .from('manual_flights')
+                .select('*')
+                .eq('id', uuid)
+                .single();
+
+            if (error || !data) {
+                return res.status(404).json({ message: 'Manual flight not found' });
+            }
+
+            // Map to standard search result format for the frontend details page
+            return res.json({
+                id: `manual-${data.id}`,
+                airlineCode: data.airline_code,
+                airline: data.airline_name,
+                logo: `https://www.gstatic.com/flights/airline_logos/70px/${data.airline_code}.png`,
+                departureTime: data.departure_time,
+                departureCode: data.origin,
+                departureCity: data.origin,
+                arrivalTime: data.arrival_time,
+                arrivalCode: data.destination,
+                arrivalCity: data.destination,
+                duration: data.duration,
+                stops: data.stops,
+                price: Number(data.price),
+                currency: data.currency || 'NGN',
+                itineraries: data.itineraries, // Include structured itinerary
+                isManual: true,
+                baggage: { weight: 23, weightUnit: 'KG' }
+            });
+        }
+
         const flight = await amadeusService.getFlightById(id as string);
 
         if (!flight) {

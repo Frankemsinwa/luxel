@@ -32,7 +32,7 @@ export const getOverrides = async (req: any, res: Response) => {
  */
 export const upsertOverride = async (req: any, res: Response) => {
     try {
-        const { origin, destination, airline_code, override_price, is_active } = req.body;
+        const { origin, destination, airline_code, override_price, is_active, departure_date, valid_until } = req.body;
         const agentId = req.user.id;
 
         const { data, error } = await supabaseAdmin
@@ -42,11 +42,13 @@ export const upsertOverride = async (req: any, res: Response) => {
                 destination: destination.toUpperCase(),
                 airline_code: airline_code.toUpperCase(),
                 override_price,
+                departure_date: departure_date || null,
+                valid_until: valid_until || null,
                 is_active: is_active ?? true,
                 agent_id: agentId,
                 updated_at: new Date()
             }, {
-                onConflict: 'origin,destination,airline_code'
+                onConflict: 'origin,destination,airline_code,departure_date'
             })
             .select()
             .single();

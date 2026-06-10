@@ -140,7 +140,8 @@ function FlightsContent() {
     const availableAirlines = useMemo(() => {
         const uniques = new Set<string>();
         for (const f of results as any[]) {
-            const a = (f?.airline || '').toString().trim();
+            const carrierName = f?.itineraries?.[0]?.segments?.[0]?.carrierName || f?.airline || '';
+            const a = carrierName.toString().trim();
             if (a) uniques.add(a);
         }
         return Array.from(uniques).sort((a, b) => a.localeCompare(b));
@@ -149,7 +150,8 @@ function FlightsContent() {
     const airlineCounts = useMemo(() => {
         const map = new Map<string, number>();
         for (const f of results as any[]) {
-            const a = (f?.airline || '').toString().trim();
+            const carrierName = f?.itineraries?.[0]?.segments?.[0]?.carrierName || f?.airline || '';
+            const a = carrierName.toString().trim();
             if (!a) continue;
             map.set(a, (map.get(a) || 0) + 1);
         }
@@ -162,7 +164,8 @@ function FlightsContent() {
 
     const filteredResults = useMemo(() => {
         return (results as any[]).filter((f) => {
-            const airline = (f?.airline || '').toString().trim();
+            const carrierName = f?.itineraries?.[0]?.segments?.[0]?.carrierName || f?.airline || '';
+            const airline = carrierName.toString().trim();
             const inAirlines = selectedAirlines.length === 0
                 ? availableAirlines.length === 0
                 : selectedAirlines.includes(airline);
@@ -485,7 +488,9 @@ function FlightsContent() {
                             </motion.div>
                         ) : (
                             <AnimatePresence mode="popLayout">
-                                {filteredResults.length > 0 ? filteredResults.map((flight) => (
+                                {filteredResults.length > 0 ? filteredResults.map((flight) => {
+                                    const carrierName = flight?.itineraries?.[0]?.segments?.[0]?.carrierName || flight?.airline || '';
+                                    return (
                                     <motion.div
                                         key={flight.id}
                                         initial={{ opacity: 0, y: 20 }}
@@ -500,7 +505,7 @@ function FlightsContent() {
                                                 <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-2 border border-black/5 group-hover:shadow-md transition-all overflow-hidden relative">
                                                     <img
                                                         src={`https://www.gstatic.com/flights/airline_logos/70px/${flight.airlineCode}.png`}
-                                                        alt={flight.airline}
+                                                        alt={carrierName}
                                                         className="w-full h-full object-contain relative z-10"
                                                         onError={(e) => {
                                                             const target = e.target as HTMLImageElement;
@@ -508,13 +513,13 @@ function FlightsContent() {
                                                                 target.dataset.fallback = '1';
                                                                 target.src = `https://pics.avs.io/200/80/${flight.airlineCode}.png`;
                                                             } else {
-                                                                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(flight.airline)}&background=1a1a1a&color=dbb35e&bold=true&size=128`;
+                                                                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(carrierName)}&background=1a1a1a&color=dbb35e&bold=true&size=128`;
                                                             }
                                                         }}
                                                     />
                                                 </div>
                                                 <div>
-                                                    <div className="text-[10px] font-bold text-amber uppercase tracking-[0.2em] mb-1">{flight.airline}</div>
+                                                    <div className="text-[10px] font-bold text-amber uppercase tracking-[0.2em] mb-1">{carrierName}</div>
                                                     <div className="text-2xl font-semibold text-black">{flight.departureTime}</div>
                                                     <div className="text-sm font-medium text-black/60 tracking-widest">{flight.departureCode} • {flight.departureCity}</div>
                                                 </div>
@@ -549,7 +554,7 @@ function FlightsContent() {
                                                         ...Object.fromEntries(searchParams.entries()),
                                                         id: flight.id,
                                                         price: flight.price.toString(),
-                                                        airline: flight.airline,
+                                                        airline: carrierName,
                                                         airlineCode: flight.airlineCode || '',
                                                         logo: flight.logo || '',
                                                         depTime: flight.departureTime,
@@ -569,7 +574,7 @@ function FlightsContent() {
                                             </button>
                                         </div>
                                     </motion.div>
-                                )) : (
+                                )}) : (
                                     <motion.div
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}

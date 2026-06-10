@@ -330,7 +330,8 @@ function FlightDetailsContent() {
                                 onClick={() => {
                                     const params = new URLSearchParams(searchParams.toString());
                                     params.set('price', (fullFlight?.price || initialFlight.price).toString());
-                                    params.set('airline', fullFlight?.airline || initialFlight.airline);
+                                    const carrierName = fullFlight?.itineraries?.[0]?.segments?.[0]?.carrierName || fullFlight?.airline || initialFlight.airline;
+                                    params.set('airline', carrierName);
                                     params.set('airlineCode', fullFlight?.airlineCode || initialFlight.airlineCode);
                                     router.push(`/flights/booking?${params.toString()}`);
                                 }}
