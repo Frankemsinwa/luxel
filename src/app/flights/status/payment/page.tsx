@@ -1,6 +1,7 @@
 'use client'
 
 import api from '@/lib/api';
+import { FLIGHT_TAXES_BREAKDOWN, TOTAL_FLIGHT_TAXES } from '@/lib/constants';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
@@ -37,6 +38,9 @@ function PaymentContent() {
 
     const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
     const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
+
+    const taxesList = booking?.flight_data?.pricing?.taxesBreakdown || FLIGHT_TAXES_BREAKDOWN;
+    const totalTaxes = (booking?.flight_data?.pricing?.taxes || TOTAL_FLIGHT_TAXES) * passengerCount;
 
     const departureDateStr = searchParams.get('departure');
     const depTimeStr = searchParams.get('depTime') || "Oct 24, 2026";
@@ -230,7 +234,26 @@ function PaymentContent() {
                                 </div>
                             </div>
 
-                            <div className="pt-10 border-t border-white/10 flex items-center justify-between">
+                            {!loading && (
+                                <div className="mt-8 pt-8 border-t border-white/10 space-y-4 text-xs font-semibold text-white/60">
+                                    <div className="flex justify-between">
+                                        <span>Base Fare ({passengerCount} Passenger{passengerCount > 1 ? 's' : ''})</span>
+                                        <span className="text-white">₦{(priceToPay - totalTaxes).toLocaleString()}</span>
+                                    </div>
+                                    {taxesList.map((taxItem: any, index: number) => (
+                                        <div key={index} className="flex justify-between pl-2 text-[11px] text-white/40">
+                                            <span>{taxItem.name}</span>
+                                            <span>₦{(taxItem.amount * passengerCount).toLocaleString()}</span>
+                                        </div>
+                                    ))}
+                                    <div className="flex justify-between text-[11px] text-white/40 border-b border-dashed border-white/10 pb-2">
+                                        <span>Total Taxes & Fees</span>
+                                        <span>₦{totalTaxes.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="pt-6 flex items-center justify-between">
                                 <span className="text-sm font-medium text-white/50">Total Due (Confirmed)</span>
                                 <div className="text-right">
                                     {loading ? (

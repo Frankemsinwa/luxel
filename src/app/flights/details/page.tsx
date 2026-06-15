@@ -1,6 +1,7 @@
 'use client'
 
 import api from '@/lib/api';
+import { FLIGHT_TAXES_BREAKDOWN, TOTAL_FLIGHT_TAXES } from '@/lib/constants';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from "@/components/Navbar";
@@ -68,7 +69,7 @@ function FlightDetailsContent() {
 
     const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
     const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
-    const taxes = 45000;
+    const taxes = TOTAL_FLIGHT_TAXES;
     const baseFare = (fullFlight?.price || initialFlight.price) - taxes;
     const totalFare = (fullFlight?.price || initialFlight.price) * passengerCount;
 
@@ -312,10 +313,16 @@ function FlightDetailsContent() {
                                     <span className="text-black/60 font-semibold">Base Fare ({passengerCount} Traveler{passengerCount > 1 ? 's' : ''})</span>
                                     <span className="font-semibold text-black">₦{(baseFare * passengerCount).toLocaleString()}</span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-black/60 font-semibold">Taxes & Fees</span>
-                                    <span className="font-semibold text-black">₦{(taxes * passengerCount).toLocaleString()}</span>
-                                </div>
+                                 {FLIGHT_TAXES_BREAKDOWN.map((taxItem, index) => (
+                                     <div key={index} className="flex items-center justify-between text-xs pl-2">
+                                         <span className="text-black/50 font-medium">{taxItem.name}</span>
+                                         <span className="font-medium text-black/80">₦{(taxItem.amount * passengerCount).toLocaleString()}</span>
+                                     </div>
+                                 ))}
+                                 <div className="flex items-center justify-between pt-2 border-t border-dashed border-black/10">
+                                     <span className="text-black/60 font-semibold">Total Taxes & Fees</span>
+                                     <span className="font-semibold text-black">₦{(taxes * passengerCount).toLocaleString()}</span>
+                                 </div>
                             </div>
 
                             <div className="flex flex-col items-center mb-10">
