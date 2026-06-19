@@ -91,16 +91,12 @@ function VerifyingContent() {
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                         <div className="flex items-center gap-6">
                                             <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-flight-card">
-                                                <FileText size={32} />
+                                                <ShieldCheck size={32} />
                                             </div>
                                             <div>
-                                                <div className="text-body font-medium text-white mb-1">receipt_LX492781.pdf</div>
-                                                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Uploaded just now • 1.2 MB</div>
+                                                <div className="text-body font-medium text-white mb-1">Bank Transfer Details</div>
+                                                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-relaxed">Waiting for admin to verify the transaction in the bank account</div>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                            <span className="text-caption font-medium text-emerald-500 uppercase tracking-widest">Verified</span>
                                         </div>
                                     </div>
 
@@ -150,8 +146,8 @@ function VerifyingContent() {
                                     </div>
                                     <div>
                                         <div className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Just Now</div>
-                                        <h4 className="text-body font-medium text-zinc-700 mb-1">Proof of payment uploaded</h4>
-                                        <p className="text-caption text-zinc-400 leading-relaxed">Document successfully stored in system.</p>
+                                        <h4 className="text-body font-medium text-zinc-700 mb-1">Payment Confirmation Submitted</h4>
+                                        <p className="text-caption text-zinc-400 leading-relaxed">System alerted admin to check bank records.</p>
                                     </div>
                                 </div>
                             </div>
