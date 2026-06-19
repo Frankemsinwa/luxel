@@ -3,6 +3,7 @@ import * as adminController from '../controllers/adminController.js';
 import * as agentController from '../controllers/agentController.js';
 import * as tourController from '../controllers/tourController.js';
 import * as flightOverrideController from '../controllers/flightOverrideController.js';
+import * as taxController from '../controllers/taxController.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = Router();
@@ -43,15 +44,21 @@ router.get('/flight-overrides', flightOverrideController.getOverrides);
 router.post('/flight-overrides', flightOverrideController.upsertOverride);
 router.delete('/flight-overrides/:id', flightOverrideController.deleteOverride);
 
+// Flight Taxes
+router.get('/flight-taxes', taxController.getAllTaxes);
+router.post('/flight-taxes', taxController.createTax);
+router.patch('/flight-taxes/:id', taxController.updateTax);
+router.delete('/flight-taxes/:id', taxController.deleteTax);
+
 // Agent Management
-router.get('/agents', authenticate, authorize(['ADMIN']), adminController.getAllAgents);
-router.patch('/agents/:id/ban', authenticate, authorize(['ADMIN']), adminController.toggleAgentBan);
+router.get('/agents', adminController.getAllAgents);
+router.patch('/agents/:id/ban', adminController.toggleAgentBan);
 
 // Activity Logs
-router.get('/logs', authenticate, authorize(['ADMIN']), adminController.getAgentLogs);
+router.get('/logs', adminController.getAgentLogs);
 
 // Oversight
-router.get('/tours', authenticate, authorize(['ADMIN']), adminController.getAllToursOversight);
-router.get('/bookings', authenticate, authorize(['ADMIN']), adminController.getAllBookingsOversight);
+router.get('/tours', adminController.getAllToursOversight);
+router.get('/bookings', adminController.getAllBookingsOversight);
 
 export default router;

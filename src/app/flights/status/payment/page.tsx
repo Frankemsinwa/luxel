@@ -1,7 +1,6 @@
 'use client'
 
 import api from '@/lib/api';
-import { FLIGHT_TAXES_BREAKDOWN, TOTAL_FLIGHT_TAXES } from '@/lib/constants';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingStatusHeader from "@/components/BookingStatusHeader";
@@ -9,11 +8,8 @@ import { motion } from "framer-motion";
 import {
     Building2,
     Copy,
-    Globe,
-    UploadCloud,
     Check,
     AlertCircle,
-    ArrowRight,
     TrendingUp,
     CheckCircle2,
     ShieldCheck
@@ -31,16 +27,13 @@ function PaymentContent() {
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [userEmail, setUserEmail] = useState<string>('client@luxel.com');
-    const [receiptFile, setReceiptFile] = useState<File | null>(null);
-    const [receiptUrl, setReceiptUrl] = useState<string>('');
-    const [uploading, setUploading] = useState(false);
     const [isConfirmed, setIsConfirmed] = useState(false);
 
     const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
     const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
 
-    const taxesList = booking?.flight_data?.pricing?.taxesBreakdown || FLIGHT_TAXES_BREAKDOWN;
-    const totalTaxes = (booking?.flight_data?.pricing?.taxes || TOTAL_FLIGHT_TAXES) * passengerCount;
+    const taxesList = booking?.flight_data?.pricing?.taxesBreakdown || [];
+    const totalTaxes = (booking?.flight_data?.pricing?.taxes || 0) * passengerCount;
 
     const departureDateStr = searchParams.get('departure');
     const depTimeStr = searchParams.get('depTime') || "Oct 24, 2026";
@@ -117,54 +110,11 @@ function PaymentContent() {
     // Price to pay: Prefer confirmed_price, fallback to total_price, then search Param.
     const priceToPay = booking?.confirmed_price || booking?.total_price || Number(searchParams.get('price')) || 945000;
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setUploading(true);
-        try {
-            // 1. Get secure signature from Luxel backend
-            const sigRes = await api.get('/uploads/signature');
-            const { signature, timestamp, cloud_name, api_key, folder } = sigRes.data;
-
-            // 2. Upload file directly to Cloudinary using the signature
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('api_key', api_key);
-            formData.append('timestamp', timestamp.toString());
-            formData.append('signature', signature);
-            formData.append('folder', folder);
-
-            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!uploadRes.ok) throw new Error('Failed to upload receipt');
-
-            const data = await uploadRes.json();
-
-            // 3. Update the UI with the secure Cloudinary URL
-            setReceiptUrl(data.secure_url);
-            setReceiptFile(file);
-        } catch (error: any) {
-            console.error('Upload error:', error);
-            alert('Failed to upload receipt to Cloudinary.');
-        } finally {
-            setUploading(false);
-        }
-    };
-
     const handleConfirmPayment = async () => {
-        if (!receiptUrl) {
-            alert('Please upload your payment receipt before confirming.');
-            return;
-        }
-
         setIsSubmitting(true);
         try {
             await api.patch(`/bookings/${bookingId}/confirm-payment`, {
-                receipt_url: receiptUrl,
+                receipt_url: null,
                 payment_method: 'BANK_TRANSFER'
             });
             setIsConfirmed(true);
@@ -319,64 +269,49 @@ function PaymentContent() {
                                             <Copy size={16} className="text-zinc-400" />
                                         </button>
                                     </div>
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
                                         <div className="text-left">
                                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Account Name</p>
                                             <p className="text-sm font-bold text-zinc-900 uppercase">Eljey Enterprise - Luxelbookings</p>
                                         </div>
                                         <CheckCircle2 size={16} className="text-emerald-500" />
                                     </div>
-                                </div>
-
-                                <div className="bg-amber/10 border border-amber/20 rounded-2xl p-4 flex items-start gap-3">
-                                    <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
-                                    <p className="text-xs text-amber-900 leading-relaxed font-medium">
-                                        <strong>IMPORTANT:</strong> Ensure you include your Booking Reference <span className="font-bold underline">{booking?.booking_reference || bookingId}</span> in the transfer description/message.
-                                    </p>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <label className="block">
-                                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 block">Upload Payment Receipt</span>
-                                        <div className="relative group cursor-pointer">
-                                            <input
-                                                type="file"
-                                                accept="image/*,.pdf"
-                                                onChange={handleFileUpload}
-                                                className="hidden"
-                                                id="receipt-upload"
-                                            />
-                                            <label
-                                                htmlFor="receipt-upload"
-                                                className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-3xl py-10 px-6 gap-3 group-hover:border-amber transition-colors bg-white cursor-pointer"
-                                            >
-                                                {uploading ? (
-                                                    <div className="w-8 h-8 border-4 border-amber border-t-transparent rounded-full animate-spin" />
-                                                ) : receiptFile ? (
-                                                    <>
-                                                        <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
-                                                            <Check size={24} />
-                                                        </div>
-                                                        <p className="text-sm font-bold text-zinc-900">{receiptFile.name}</p>
-                                                        <p className="text-[10px] font-medium text-zinc-400">Click to replace receipt</p>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <div className="w-12 h-12 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-amber/10 group-hover:text-amber">
-                                                            <UploadCloud size={24} />
-                                                        </div>
-                                                        <p className="text-sm font-bold text-zinc-900">Drop receipt or click to upload</p>
-                                                        <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest">PNG, JPG or PDF up to 5MB</p>
-                                                    </>
-                                                )}
-                                            </label>
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-left">
+                                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Narration / Remarks</p>
+                                            <p className="text-sm font-bold text-amber">{booking?.booking_reference || bookingId}</p>
                                         </div>
-                                    </label>
+                                        <button onClick={() => copyToClipboard(booking?.booking_reference || bookingId)} className="p-2 hover:bg-zinc-200 rounded-lg transition-colors">
+                                            <Copy size={16} className="text-zinc-400" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="bg-amber/5 border border-amber/10 rounded-[2rem] p-8 space-y-6">
+                                    <h4 className="text-body font-bold text-zinc-900 tracking-tight">Please remember 👇</h4>
+                                    <div className="space-y-5">
+                                        <div className="flex gap-4 items-start">
+                                            <span className="text-amber font-bold text-lg leading-none mt-0.5">1</span>
+                                            <p className="text-body-sm text-zinc-600 leading-relaxed font-medium">You should use your Booking Reference <span className="font-bold underline">{booking?.booking_reference || bookingId}</span> as narration and remarks for your transaction.</p>
+                                        </div>
+                                        <div className="flex gap-4 items-start">
+                                            <span className="text-amber font-bold text-lg leading-none mt-0.5">2</span>
+                                            <p className="text-body-sm text-zinc-600 leading-relaxed font-medium">Only send money from an account with the same name as the one you used to signup on Luxel.</p>
+                                        </div>
+                                        <div className="flex gap-4 items-start">
+                                            <span className="text-amber font-bold text-lg leading-none mt-0.5">3</span>
+                                            <p className="text-body-sm text-zinc-600 leading-relaxed font-medium">Only tap the &quot;I HAVE MADE PAYMENT&quot; button after you have made payment to the details above.</p>
+                                        </div>
+                                        <div className="flex gap-4 items-start">
+                                            <span className="text-amber font-bold text-lg leading-none mt-0.5">4</span>
+                                            <p className="text-body-sm text-zinc-600 leading-relaxed font-medium">We do not refund in local currency. If you overpay or underpay, the processing time for funding may take 1-2 days.</p>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <button
                                     onClick={handleConfirmPayment}
-                                    disabled={loading || isSubmitting || !receiptUrl || isConfirmed}
+                                    disabled={loading || isSubmitting || isConfirmed}
                                     className="w-full bg-black text-white/90 py-6 rounded-3xl text-body-sm font-medium flex items-center justify-center gap-4 shadow-2xl shadow-black/20 hover:scale-[1.02] transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none uppercase tracking-widest"
                                 >
                                     {isSubmitting ? (
@@ -388,7 +323,7 @@ function PaymentContent() {
                                         </>
                                     ) : (
                                         <>
-                                            <ShieldCheck size={18} className={receiptUrl ? "text-amber" : "text-zinc-500"} />
+                                            <ShieldCheck size={18} className="text-amber" />
                                             I HAVE MADE PAYMENT
                                         </>
                                     )}

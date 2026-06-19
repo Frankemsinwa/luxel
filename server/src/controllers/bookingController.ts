@@ -498,7 +498,7 @@ export const getBookingStatus = async (req: any, res: Response) => {
 
         const { data, error } = await supabaseAdmin
             .from('bookings')
-            .select('id, status, booking_reference, airline_booking_reference, payment_reference, total_price, confirmed_price, updated_at, user_id, guest_access_token')
+            .select('id, status, booking_reference, airline_booking_reference, payment_reference, total_price, confirmed_price, updated_at, user_id, guest_access_token, flight_data')
             .eq('id', id)
             .single();
 
