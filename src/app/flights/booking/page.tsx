@@ -1,7 +1,6 @@
 'use client'
 
 import api from '@/lib/api';
-import { FLIGHT_TAXES_BREAKDOWN, TOTAL_FLIGHT_TAXES } from '@/lib/constants';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import Navbar from "@/components/Navbar";
@@ -136,6 +135,7 @@ function PassengerDetailsContent() {
     const flightId = searchParams.get('id');
 
     const [flightDetails, setFlightDetails] = useState<any>(null);
+    const [taxesList, setTaxesList] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [authChoice, setAuthChoice] = useState<'undecided' | 'guest' | 'login'>('undecided');
@@ -145,7 +145,7 @@ function PassengerDetailsContent() {
     const children = Number(searchParams.get('children') || 0);
     const passengerCountFromSplit = parseInt((searchParams.get('passengers') || '').split(' ')[0]) || 0;
     const passengerCount = (adults + children) || passengerCountFromSplit || 1;
-    const taxes = TOTAL_FLIGHT_TAXES;
+    const totalTaxesPerPerson = taxesList.reduce((sum, tax) => sum + Number(tax.amount), 0);
 
     const [passengerData, setPassengerData] = useState<any[]>([]);
     const [contactEmail, setContactEmail] = useState('');
@@ -167,22 +167,23 @@ function PassengerDetailsContent() {
     }, []);
 
     useEffect(() => {
-        const fetchDetails = async () => {
-            if (!flightId) {
-                setIsLoading(false);
-                return;
-            }
+        const fetchData = async () => {
+            setIsLoading(true);
             try {
-                const response = await api.get(`/flights/${flightId}`);
-                setFlightDetails(response.data);
+                const [flightRes, taxRes] = await Promise.all([
+                    flightId ? api.get(`/flights/${flightId}`) : Promise.resolve({ data: null }),
+                    api.get('/flights/taxes')
+                ]);
+                if (flightRes.data) setFlightDetails(flightRes.data);
+                setTaxesList(taxRes.data || []);
             } catch (error) {
-                console.error("Error fetching flight details for booking:", error);
+                console.error("Error fetching flight data for booking:", error);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchDetails();
+        fetchData();
     }, [flightId]);
 
     useEffect(() => {
@@ -202,7 +203,7 @@ function PassengerDetailsContent() {
     }, [passengerCount]);
 
     const totalPrice = flightDetails?.price || Number(searchParams.get('price')) || 0;
-    const baseFare = totalPrice - taxes;
+    const baseFare = totalPrice - totalTaxesPerPerson;
 
     const isFormValid = () => {
         const passengersValid = passengerData.every(p =>
@@ -275,11 +276,11 @@ function PassengerDetailsContent() {
                 },
                 pricing: {
                     unitPrice: totalPrice,
-                    taxes,
+                    taxes: totalTaxesPerPerson,
                     baseFare,
                     totalPassengers: passengerCount,
                     totalPrice: totalPrice * passengerCount,
-                    taxesBreakdown: FLIGHT_TAXES_BREAKDOWN
+                    taxesBreakdown: taxesList
                 }
             };
 
@@ -600,7 +601,7 @@ function PassengerDetailsContent() {
                                     <span className="text-black/60 font-medium">Base Fare ({passengerCount} Passengers)</span>
                                     <span className="font-bold text-black">₦{(baseFare * passengerCount).toLocaleString()}</span>
                                 </div>
-                                 {FLIGHT_TAXES_BREAKDOWN.map((taxItem, index) => (
+                                 {taxesList.map((taxItem, index) => (
                                      <div key={index} className="flex justify-between text-xs pl-2">
                                          <span className="text-black/50 font-medium">{taxItem.name}</span>
                                          <span className="font-medium text-black/80">₦{(taxItem.amount * passengerCount).toLocaleString()}</span>
@@ -608,7 +609,7 @@ function PassengerDetailsContent() {
                                  ))}
                                  <div className="flex justify-between pt-2 border-t border-dashed border-black/10">
                                      <span className="text-black/60 font-medium">Total Taxes & Fees</span>
-                                     <span className="font-bold text-black">₦{(taxes * passengerCount).toLocaleString()}</span>
+                                     <span className="font-bold text-black">₦{(totalTaxesPerPerson * passengerCount).toLocaleString()}</span>
                                  </div>
                             </div>
                             <div className="flex flex-col items-center gap-2 mb-8">

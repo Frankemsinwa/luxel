@@ -159,33 +159,20 @@ export default function AdminPendingPayments() {
                                             </p>
                                         </header>
 
-                                        {/* Proof Preview */}
-                                        <div className="relative h-[280px] w-full rounded-[2rem] overflow-hidden bg-zinc-50 border border-zinc-100 group/img shadow-inner ring-8 ring-zinc-50/50">
-                                            {selectedPayment.receipt_url ? (
-                                                <>
-                                                    {/* In a real app we would handle PDF vs Image. For now assume image from Cloudinary */}
-                                                    <Image 
-                                                        src={selectedPayment.receipt_url} 
-                                                        alt="Receipt proof" 
-                                                        fill 
-                                                        className="object-cover transition-transform duration-700 group-hover/img:scale-110" 
-                                                    />
-                                                    <a 
-                                                        href={selectedPayment.receipt_url} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer"
-                                                        className="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-3 text-white"
-                                                    >
-                                                        <ExternalLink size={20} />
-                                                        <span className="text-body-sm font-medium tracking-widest uppercase">Inspect High-Res</span>
-                                                    </a>
-                                                </>
-                                            ) : (
-                                                <div className="h-full flex flex-col items-center justify-center gap-4 text-zinc-300">
-                                                    <XCircle size={48} />
-                                                    <p className="text-caption font-bold uppercase tracking-widest">No Document Found</p>
-                                                </div>
-                                            )}
+                                        {/* Bank Check Instructions */}
+                                        <div className="relative w-full rounded-[2rem] overflow-hidden bg-zinc-50 border border-zinc-100 group/img shadow-inner ring-8 ring-zinc-50/50 p-8 flex flex-col items-center justify-center text-center gap-4">
+                                            <div className="w-16 h-16 rounded-full bg-amber/10 text-amber flex items-center justify-center mb-2">
+                                                <Compass size={32} />
+                                            </div>
+                                            <h4 className="text-body font-bold text-zinc-900">Check Bank App</h4>
+                                            <p className="text-caption font-medium text-zinc-500 leading-relaxed max-w-xs">
+                                                Please check the company bank account for a transfer with narration/remarks containing:
+                                            </p>
+                                            <div className="bg-white px-4 py-2 rounded-xl border border-zinc-200 mt-2 shadow-sm">
+                                                <span className="text-body-sm font-black text-amber tracking-wider">
+                                                    {selectedPayment.booking_reference || selectedPayment.id.split('-')[0]}
+                                                </span>
+                                            </div>
                                         </div>
 
                                         <div className="space-y-6">
@@ -197,7 +184,7 @@ export default function AdminPendingPayments() {
                                             <div className="space-y-4">
                                                 <button
                                                     onClick={() => handleVerify(selectedPayment)}
-                                                    disabled={verifyingId === selectedPayment.id || !selectedPayment.receipt_url}
+                                                    disabled={verifyingId === selectedPayment.id}
                                                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-5 rounded-2xl text-body-sm font-medium tracking-widest uppercase shadow-xl shadow-emerald-500/20 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
                                                 >
                                                     {verifyingId === selectedPayment.id ? (
