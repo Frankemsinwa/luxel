@@ -280,7 +280,7 @@ export const requestFlightAssistance = async (req: Request, res: Response) => {
         });
 
         const { from, to, departure, returnDate, tripType, adults, children, travelClass } = searchPayload;
-        const agentDashboardUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/agent/requests/${request.id}`;
+        const agentDashboardUrl = `${process.env.FRONTEND_URL || 'https://luxelbookings.com'}/agent/requests/${request.id}`;
 
         const mailHtml = `
             <div style="font-family: Arial, sans-serif; max-width: 680px; margin: auto; padding: 24px; border: 1px solid #e0e0e0; border-radius: 16px; background: #ffffff;">
