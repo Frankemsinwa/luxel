@@ -10,7 +10,10 @@ import {
     Calendar,
     ArrowUpRight,
     SearchX,
-    RefreshCw
+    RefreshCw,
+    Plane,
+    UserCheck,
+    Filter as FilterIcon
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -22,13 +25,18 @@ export default function FlightRequestsPage() {
     const [loading, setLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [activeFilter, setActiveFilter] = useState<'ALL' | 'LUXEL_ASSISTANCE' | 'STANDARD'>('ALL');
 
     const fetchRequests = useCallback(async (showFullLoading = true) => {
         if (showFullLoading) setLoading(true);
         else setIsRefreshing(true);
 
         try {
-            const response = await api.get('/agent/requests');
+            const params = new URLSearchParams();
+            if (activeFilter !== 'ALL') {
+                params.append('request_type', activeFilter);
+            }
+            const response = await api.get(`/agent/requests?${params.toString()}`);
             setRequests(response.data);
         } catch (error: any) {
             console.error('Error fetching agent requests:', error);
@@ -39,7 +47,7 @@ export default function FlightRequestsPage() {
             setLoading(false);
             setIsRefreshing(false);
         }
-    }, [router]);
+    }, [router, activeFilter]);
 
     useEffect(() => {
         fetchRequests();
@@ -50,6 +58,12 @@ export default function FlightRequestsPage() {
         req.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (req.details?.itinerary || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const filterTabs = [
+        { key: 'ALL' as const, label: 'All Requests', icon: null, count: requests.length },
+        { key: 'LUXEL_ASSISTANCE' as const, label: 'Flight Assistance', icon: Plane, count: requests.filter(r => r.request_type === 'LUXEL_ASSISTANCE').length },
+        { key: 'STANDARD' as const, label: 'Standard', icon: UserCheck, count: requests.filter(r => r.request_type === 'STANDARD' || !r.request_type).length },
+    ];
 
     return (
         <div className="space-y-6 lg:space-y-10">
@@ -83,9 +97,30 @@ export default function FlightRequestsPage() {
                         </motion.div>
                     </button>
                     <button className="w-12 h-12 lg:w-14 lg:h-14 bg-white rounded-xl lg:rounded-2xl flex items-center justify-center text-zinc-400 hover:text-zinc-900 shadow-sm transition-all flex-shrink-0">
-                        <Filter size={20} />
+                        <FilterIcon size={20} />
                     </button>
                 </div>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-2">
+                {filterTabs.map((tab) => (
+                    <button
+                        key={tab.key}
+                        onClick={() => setActiveFilter(tab.key)}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl lg:rounded-2xl text-sm lg:text-body font-medium whitespace-nowrap transition-all ${
+                            activeFilter === tab.key
+                                ? 'bg-zinc-900 text-white shadow-lg shadow-zinc-200'
+                                : 'bg-white text-zinc-600 hover:bg-zinc-50 border border-zinc-100'
+                        }`}
+                    >
+                        {tab.icon && <tab.icon size={14} className={activeFilter === tab.key ? 'text-white' : 'text-zinc-400'} />}
+                        <span>{tab.label}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${activeFilter === tab.key ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-500'}`}>
+                            {tab.count}
+                        </span>
+                    </button>
+                ))}
             </div>
 
             {/* List */}
@@ -100,6 +135,7 @@ export default function FlightRequestsPage() {
                                 <th className="px-6 lg:px-10 py-5 lg:py-6 text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest">Date</th>
                                 <th className="px-6 lg:px-10 py-5 lg:py-6 text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest">Status</th>
                                 <th className="px-6 lg:px-10 py-5 lg:py-6 text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest">Tier</th>
+                                <th className="px-6 lg:px-10 py-5 lg:py-6 text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest">Type</th>
                                 <th className="px-6 lg:px-10 py-5 lg:py-6 text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest"></th>
                             </tr>
                         </thead>
@@ -149,6 +185,19 @@ export default function FlightRequestsPage() {
                                                 {req.priority || 'REGULAR'}
                                             </span>
                                         </td>
+                                        <td className="px-6 lg:px-10 py-5 lg:py-6">
+                                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] lg:text-caption font-medium ${req.request_type === 'LUXEL_ASSISTANCE' ? 'bg-amber/10 text-amber border border-amber/20' : 'bg-zinc-100 text-zinc-600'
+                                                }`}>
+                                                {req.request_type === 'LUXEL_ASSISTANCE' ? (
+                                                    <>
+                                                        <Plane size={10} />
+                                                        Flight Assist
+                                                    </>
+                                                ) : (
+                                                    'Standard'
+                                                )}
+                                            </span>
+                                        </td>
                                         <td className="px-6 lg:px-10 py-5 lg:py-6 text-right">
                                             <button className="p-2 rounded-lg hover:bg-zinc-100 transition-colors text-zinc-400 group-hover:text-amber">
                                                 <ArrowUpRight size={20} />
@@ -158,7 +207,7 @@ export default function FlightRequestsPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={7} className="px-6 lg:px-10 py-20 text-center">
+                                    <td colSpan={8} className="px-6 lg:px-10 py-20 text-center">
                                         <div className="flex flex-col items-center gap-4">
                                             <div className="w-16 h-16 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-200">
                                                 <SearchX size={32} />
