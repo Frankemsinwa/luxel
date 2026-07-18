@@ -19,7 +19,13 @@ import {
     X,
     Search,
     Loader2,
-    DollarSign
+    DollarSign,
+    MessageSquare,
+    UserPlus,
+    Mail as MailIcon,
+    Phone as PhoneIcon,
+    MapPin,
+    UserCheck
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -187,6 +193,11 @@ export default function RequestDetailsPage() {
                     <div>
                         <div className="flex flex-wrap items-center gap-3 mb-1">
                             <h1 className="text-xl lg:text-3xl font-black text-zinc-900 tracking-tight">{request.details?.itinerary || 'Flight Request'}</h1>
+                            {request.request_type === 'LUXEL_ASSISTANCE' && (
+                                <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber/10 text-amber border border-amber/20">
+                                    <span className="flex items-center gap-1"><Plane size={12} /> Assistance</span>
+                                </div>
+                            )}
                             <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${request.status === 'OPEN' ? 'bg-amber/10 text-amber animate-pulse' :
                                 request.status === 'RESOLVED' ? 'bg-emerald-50 text-emerald-600' :
                                     request.status === 'CLOSED' ? 'bg-red-50 text-red-600' :
@@ -326,6 +337,175 @@ export default function RequestDetailsPage() {
                             </div>
                         )}
 
+                        {/* LUXEL_ASSISTANCE Specific Section */}
+                        {request.request_type === 'LUXEL_ASSISTANCE' && (
+                            <div className="bg-amber-50 border border-amber-100 rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600">
+                                        <UserCheck size={20} className="lg:w-5 lg:h-5" />
+                                    </div>
+                                    <h3 className="text-lg lg:text-xl font-black text-amber-900">Flight Assistance Request</h3>
+                                    <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-amber-200 text-amber-800 uppercase tracking-widest">Customer Needs Booking Help</span>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                                    {/* Customer Information */}
+                                    <div className="space-y-4">
+                                        <h4 className="text-[10px] font-black text-amber-700 uppercase tracking-widest border-b border-amber-200 pb-2">Customer Details</h4>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-600">
+                                                    <User size={16} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Name</p>
+                                                    <p className="font-medium text-zinc-900">{request.details?.customer_name || 'Not provided'}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-600">
+                                                    <MailIcon size={16} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Email</p>
+                                                    <a href={`mailto:${request.details?.customer_email}`} className="font-medium text-amber-700 hover:underline">
+                                                        {request.details?.customer_email}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            {(request.details?.customer_phone) && (
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-600">
+                                                        <PhoneIcon size={16} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Phone</p>
+                                                        <a href={`tel:${request.details.customer_phone}`} className="font-medium text-amber-700 hover:underline">
+                                                            {request.details.customer_phone}
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {(request.details?.special_requests) && (
+                                                <div className="flex items-start gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-600 mt-1">
+                                                        <MessageSquare size={16} />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Special Requests</p>
+                                                        <p className="font-medium text-zinc-900 whitespace-pre-wrap">{request.details.special_requests}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Flight Search Parameters */}
+                                    <div className="space-y-4">
+                                        <h4 className="text-[10px] font-black text-amber-700 uppercase tracking-widest border-b border-amber-200 pb-2">Flight Search Parameters</h4>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-600">
+                                                    <MapPin size={16} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Route</p>
+                                                    <p className="font-medium text-zinc-900">
+                                                        {request.details?.from || 'N/A'} → {request.details?.to || 'N/A'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-600">
+                                                    <Calendar size={16} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Departure</p>
+                                                    <p className="font-medium text-zinc-900">
+                                                        {request.details?.departure ? new Date(request.details.departure).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Flexible'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {(request.details?.return_date) && (
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-600">
+                                                        <Calendar size={16} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Return</p>
+                                                        <p className="font-medium text-zinc-900">
+                                                            {new Date(request.details.return_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-600">
+                                                    <UserPlus size={16} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Passengers</p>
+                                                    <p className="font-medium text-zinc-900">
+                                                        {request.details?.adults || 1} Adult{Number(request.details?.adults || 1) > 1 ? 's' : ''}
+                                                        {request.details?.children && Number(request.details.children) > 0 ? `, ${request.details.children} Child${Number(request.details.children) > 1 ? 'ren' : ''}` : ''}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-600">
+                                                    <Plane size={16} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Cabin Class</p>
+                                                    <p className="font-medium text-zinc-900 capitalize">
+                                                        {(request.details?.travel_class || 'ECONOMY').toLowerCase()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-600">
+                                                    <ShieldCheck size={16} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Trip Type</p>
+                                                    <p className="font-medium text-zinc-900 capitalize">
+                                                        {(request.details?.trip_type || 'ONE_WAY').toLowerCase().replace('_', ' ')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Quick Actions */}
+                                <div className="mt-6 pt-6 border-t border-amber-200 flex flex-wrap gap-3">
+                                    <a
+                                        href={`mailto:${request.details?.customer_email}`}
+                                        className="px-4 py-2 bg-white border border-amber-200 rounded-xl text-sm font-medium text-amber-700 hover:bg-amber-50 transition-colors flex items-center gap-2"
+                                    >
+                                        <MailIcon size={14} />
+                                        Email Customer
+                                    </a>
+                                    {(request.details?.customer_phone) && (
+                                        <a
+                                            href={`tel:${request.details.customer_phone}`}
+                                            className="px-4 py-2 bg-white border border-amber-200 rounded-xl text-sm font-medium text-amber-700 hover:bg-amber-50 transition-colors flex items-center gap-2"
+                                        >
+                                            <PhoneIcon size={14} />
+                                            Call Customer
+                                        </a>
+                                    )}
+                                    <button
+                                        onClick={openVerifyModal}
+                                        className="px-4 py-2 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-colors flex items-center gap-2"
+                                    >
+                                        <Search size={14} />
+                                        Search & Verify Flights
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Action Panel - only show if OPEN */}
                         {request.status === 'OPEN' && (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8">
@@ -398,28 +578,49 @@ export default function RequestDetailsPage() {
                             <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-8">Client Profile</h3>
                             <div className="flex items-center gap-4 lg:gap-6 mb-8 group">
                                 <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center font-black text-lg lg:text-xl text-zinc-300">
-                                    {request.profiles?.full_name?.charAt(0) || "U"}
+                                    {request.request_type === 'LUXEL_ASSISTANCE'
+                                        ? (request.details?.customer_name?.charAt(0) || "U")
+                                        : (request.profiles?.full_name?.charAt(0) || "U")
+                                    }
                                 </div>
                                 <div>
-                                    <p className="text-base lg:text-lg font-black text-zinc-900 mb-1">{request.profiles?.full_name || "Luxel Client"}</p>
-                                    <span className="text-[10px] font-bold text-amber px-2.5 py-1 rounded-md bg-amber/10 uppercase tracking-widest">{request.profiles?.role || "USER"}</span>
+                                    <p className="text-base lg:text-lg font-black text-zinc-900 mb-1">
+                                        {request.request_type === 'LUXEL_ASSISTANCE'
+                                            ? (request.details?.customer_name || "Flight Assistance Client")
+                                            : (request.profiles?.full_name || "Luxel Client")
+                                        }
+                                    </p>
+                                    <span className="text-[10px] font-bold text-amber px-2.5 py-1 rounded-md bg-amber/10 uppercase tracking-widest">
+                                        {request.request_type === 'LUXEL_ASSISTANCE' ? 'GUEST' : (request.profiles?.role || "USER")}
+                                    </span>
                                 </div>
                             </div>
                             <div className="space-y-4 pt-6 lg:pt-8 border-t border-zinc-50">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-2"><Mail size={12} /> Email</span>
-                                    <button onClick={() => copyToClipboard(contact.email || '')} className="text-[10px] lg:text-xs font-black text-zinc-900 flex items-center gap-2 hover:text-amber transition-colors truncate max-w-[150px]">
-                                        {contact.email || "-"}
+                                    <button onClick={() => copyToClipboard(request.details?.customer_email || contact.email || '')} className="text-[10px] lg:text-xs font-black text-zinc-900 flex items-center gap-2 hover:text-amber transition-colors truncate max-w-[150px]">
+                                        {request.request_type === 'LUXEL_ASSISTANCE' ? (request.details?.customer_email || "-") : (contact.email || "-")}
                                         <Copy size={12} />
                                     </button>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-2"><Phone size={12} /> Phone</span>
-                                    <span className="text-[10px] lg:text-xs font-black text-zinc-900">{contact.phone || request.profiles?.phone || "-"}</span>
+                                    <span className="text-[10px] lg:text-xs font-black text-zinc-900">
+                                        {request.request_type === 'LUXEL_ASSISTANCE'
+                                            ? (request.details?.customer_phone || "-")
+                                            : (contact.phone || request.profiles?.phone || "-")
+                                        }
+                                    </span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-2"><Clock size={12} /> Request Time</span>
                                     <span className="text-[10px] lg:text-xs font-black text-zinc-900">{new Date(request.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-2"><Plane size={12} /> Type</span>
+                                    <span className={`text-[10px] lg:text-xs font-black px-2 py-0.5 rounded ${request.request_type === 'LUXEL_ASSISTANCE' ? 'bg-amber/10 text-amber' : 'bg-zinc-100 text-zinc-600'}`}>
+                                        {request.request_type === 'LUXEL_ASSISTANCE' ? 'Flight Assistance' : 'Standard'}
+                                    </span>
                                 </div>
                             </div>
                         </div>

@@ -9,11 +9,19 @@ import { logAgentAction } from '../services/logService.js';
  *   get:
  *     summary: Fetch all open/active traveler requests (Agent Only)
  *     tags: [Agent Dashboard]
+ *     parameters:
+ *       - in: query
+ *         name: request_type
+ *         schema:
+ *           type: string
+ *           enum: [STANDARD, LUXEL_ASSISTANCE, VIP_CONCIERGE]
+ *         description: Filter by request type
  */
 export const getAllRequests = async (req: any, res: Response) => {
     try {
         const userId = req.user.id;
         const userRole = req.user.user_metadata?.role;
+        const { request_type } = req.query;
 
         let query = supabaseAdmin
             .from('requests')
@@ -26,6 +34,11 @@ export const getAllRequests = async (req: any, res: Response) => {
         // If not ADMIN, filter: assigned to them OR not assigned to anyone yet (OPEN)
         if (userRole !== 'ADMIN') {
             query = query.or(`assigned_agent_id.eq.${userId},assigned_agent_id.is.null`);
+        }
+
+        // Filter by request_type if provided
+        if (request_type) {
+            query = query.eq('request_type', request_type);
         }
 
         const { data, error } = await query;
