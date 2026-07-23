@@ -43,17 +43,24 @@ export default function TrackingClient() {
     if (!opts?.silent) setLoading(true);
     setError(null);
     try {
-      const [reqRes, bookingRes] = await Promise.all([
-        api.get(`/bookings/requests/${tracker.requestId}/status`, { headers }),
-        api.get(`/bookings/${tracker.bookingId}/status`, { headers }),
-      ]);
+      const reqRes = await api.get(`/bookings/requests/${tracker.requestId}/status`, { headers });
       setRequestStatus(reqRes.data);
-      setBookingStatus(bookingRes.data);
+
+      let bookingData = null;
+      if (tracker.bookingId) {
+        try {
+          const bookingRes = await api.get(`/bookings/${tracker.bookingId}/status`, { headers });
+          bookingData = bookingRes.data;
+          setBookingStatus(bookingData);
+        } catch {
+          // No booking yet (LUXEL_ASSISTANCE flow) — that's fine
+        }
+      }
 
       const next: BookingTrackerRecord = {
         ...tracker,
         lastKnownRequestStatus: reqRes.data?.status ?? tracker.lastKnownRequestStatus,
-        lastKnownBookingStatus: bookingRes.data?.status ?? tracker.lastKnownBookingStatus,
+        lastKnownBookingStatus: bookingData?.status ?? tracker.lastKnownBookingStatus,
         lastSyncedAt: Date.now(),
       };
       setTracker(next);
@@ -74,6 +81,8 @@ export default function TrackingClient() {
   }, [tracker?.bookingId, tracker?.requestId, tracker?.guestToken]);
 
   const mismatch = Boolean(requestIdParam && tracker?.requestId && requestIdParam !== tracker.requestId);
+  const isAssistance = !tracker?.bookingId;
+  const requestStatusStr = (requestStatus?.status ?? tracker?.lastKnownRequestStatus ?? '').toUpperCase();
 
   return (
     <div className="min-h-screen bg-[#faf7f2]">
@@ -92,9 +101,9 @@ export default function TrackingClient() {
           <div className="mt-6 rounded-[2.5rem] border border-black/10 bg-white shadow-[0_30px_90px_rgba(0,0,0,0.08)] p-7 md:p-10">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
               <div>
-                <div className="text-heading-lg font-medium text-black">Track your booking</div>
+                <div className="text-heading-lg font-medium text-black">{isAssistance ? 'Track your request' : 'Track your booking'}</div>
                 <div className="text-body text-black/60 mt-2">
-                  We save your booking progress on this device (if you accepted cookies), so you can come back anytime.
+                  We save your progress on this device (if you accepted cookies), so you can come back anytime.
                 </div>
               </div>
 
@@ -143,29 +152,53 @@ export default function TrackingClient() {
                       {prettyStatus(requestStatus?.status ?? tracker.lastKnownRequestStatus)}
                     </div>
                     <div className="text-body-sm text-black/60 mt-2">
-                      This is your request in the agent queue (open, in-progress, confirmed, etc).
+                      {isAssistance
+                        ? 'This is your flight assistance request with our team.'
+                        : 'This is your request in the agent queue (open, in-progress, confirmed, etc).'}
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-black/10 bg-white p-5">
-                    <div className="text-caption text-black/50 tracking-widest uppercase">Booking</div>
-                    <div className="text-heading-sm font-medium text-black mt-2">
-                      {prettyStatus(bookingStatus?.status ?? tracker.lastKnownBookingStatus)}
-                    </div>
-                    {bookingStatus?.airline_booking_reference && (
-                      <div className="text-body-sm text-black/60 mt-2">
-                        Airline PNR: <span className="font-medium text-black">{bookingStatus.airline_booking_reference}</span>
+                  {!isAssistance ? (
+                    <div className="rounded-2xl border border-black/10 bg-white p-5">
+                      <div className="text-caption text-black/50 tracking-widest uppercase">Booking</div>
+                      <div className="text-heading-sm font-medium text-black mt-2">
+                        {prettyStatus(bookingStatus?.status ?? tracker.lastKnownBookingStatus)}
                       </div>
-                    )}
-                    <div className="text-body-sm text-black/60 mt-2">
-                      This is the state of your booking record on Luxel.
+                      {bookingStatus?.airline_booking_reference && (
+                        <div className="text-body-sm text-black/60 mt-2">
+                          Airline PNR: <span className="font-medium text-black">{bookingStatus.airline_booking_reference}</span>
+                        </div>
+                      )}
+                      <div className="text-body-sm text-black/60 mt-2">
+                        This is the state of your booking record on Luxel.
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="rounded-2xl border border-black/10 bg-white p-5">
+                      <div className="text-caption text-black/50 tracking-widest uppercase">Payment</div>
+                      <div className="text-heading-sm font-medium text-black mt-2">
+                        {requestStatusStr === 'RESOLVED' ? 'Payment Received' : 'Awaiting Payment'}
+                      </div>
+                      <div className="text-body-sm text-black/60 mt-2">
+                        {requestStatusStr === 'RESOLVED'
+                          ? 'Our team will now proceed to book your flight. You will receive an email with your booking confirmation.'
+                          : 'Please complete your bank transfer to proceed with your flight assistance.'}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-8 rounded-2xl border border-black/10 bg-black/[0.03] p-5">
                   <div className="text-body-sm text-black/70">
-                    Your Luxel reference: <span className="font-medium text-black">{bookingStatus?.airline_booking_reference || tracker.bookingRef}</span>
+                    {isAssistance ? (
+                      <>
+                        Your reference: <span className="font-medium text-black">{tracker.requestId.substring(0, 8).toUpperCase()}</span>
+                      </>
+                    ) : (
+                      <>
+                        Your Luxel reference: <span className="font-medium text-black">{bookingStatus?.airline_booking_reference || tracker.bookingRef}</span>
+                      </>
+                    )}
                   </div>
                   <div className="text-caption text-black/50 mt-2">
                     Saved: {new Date(tracker.createdAt).toLocaleString()}

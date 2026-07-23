@@ -106,16 +106,36 @@ function FlightsContent() {
                 userId: user?.id || null
             });
 
-            if (response) {
-                setAssistanceSuccess(true);
-                setShowAssistanceModal(false);
-                // Reset form
-                setAssistanceForm({
-                    customerName: '',
-                    customerEmail: '',
-                    customerPhone: '',
-                    specialRequests: ''
+            if (response?.data?.requestId) {
+                const { requestId, guestToken } = response.data;
+                // Store tracker so agent-confirming page can use guest token for status polling
+                try {
+                    const { writeTracker } = await import('@/lib/bookingTracker');
+                    writeTracker({
+                        bookingId: null,
+                        requestId,
+                        bookingRef: null,
+                        guestToken: guestToken || null,
+                        createdAt: Date.now(),
+                        contextQuery: searchParams.toString(),
+                        lastKnownRequestStatus: 'OPEN',
+                        lastSyncedAt: Date.now()
+                    });
+                } catch { }
+                // Build status tracking URL
+                const params = new URLSearchParams({
+                    reqId: requestId,
+                    token: guestToken || '',
+                    from: searchData.from,
+                    to: searchData.to,
+                    departure: searchData.departure,
+                    return: searchData.return,
+                    tripType: searchData.tripType || (searchData.return ? 'ROUND_TRIP' : 'ONE_WAY'),
+                    adults: searchData.adults,
+                    children: searchData.children,
+                    travelClass: searchData.travelClass
                 });
+                router.push(`/flights/status/agent-confirming?${params.toString()}`);
             }
         } catch (error) {
             console.error('Assistance request error:', error);

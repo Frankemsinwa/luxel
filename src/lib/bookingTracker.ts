@@ -1,9 +1,9 @@
 export type CookieConsent = 'accepted' | 'rejected' | null;
 
 export type BookingTrackerRecord = {
-  bookingId: string;
+  bookingId: string | null;
   requestId: string;
-  bookingRef: string;
+  bookingRef: string | null;
   guestToken: string | null;
   createdAt: number; // epoch ms
   contextQuery?: string; // original query params from the booking flow (without ref/id/reqId)
@@ -53,7 +53,7 @@ export function readTracker(): BookingTrackerRecord | null {
     const raw = storage.getItem(TRACKER_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as BookingTrackerRecord;
-    if (!parsed?.bookingId || !parsed?.requestId || !parsed?.bookingRef) return null;
+    if (!parsed?.requestId) return null;
     return parsed;
   } catch {
     return null;

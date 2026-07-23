@@ -48,8 +48,10 @@ function ReservationSummaryContent() {
         returnDate: searchParams.get('return') ? new Date(searchParams.get('return')!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Oct 31, 2024',
     };
 
-    const displayPrice = booking?.confirmed_price || booking?.total_price || (Number(searchParams.get('price')) * passengerCount) || 945000;
+    const noBooking = !bookingId;
+    const displayPrice = noBooking ? 0 : (booking?.confirmed_price || booking?.total_price || (Number(searchParams.get('price')) * passengerCount) || 945000);
     const isConfirmed = !!booking?.confirmed_price;
+    const showBlurred = noBooking || (!isConfirmed && !booking?.total_price);
 
     return (
         <div className="bg-flight-card rounded-[3rem] shadow-xl shadow-black/5 border border-black/5 overflow-hidden">
@@ -111,6 +113,16 @@ function ReservationSummaryContent() {
             <div className="bg-black p-8 flex items-center justify-between">
                 {loading ? (
                     <div className="w-full text-center text-white/50 animate-pulse text-body">Validating Record...</div>
+                ) : showBlurred ? (
+                    <>
+                        <span className="text-body text-white/60">Total Due</span>
+                        <div className="text-right relative">
+                            <div className="text-heading-lg text-flight-card/30 blur-sm select-none">₦0</div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="bg-amber/20 text-amber text-caption font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full">Not Confirmed</span>
+                            </div>
+                        </div>
+                    </>
                 ) : (
                     <>
                         <span className="text-body text-white/60">Total Due</span>
