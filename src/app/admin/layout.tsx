@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, LayoutDashboard, CreditCard, LogOut, Loader2, Shield, AlertTriangle, Users, History, Palmtree, Plane } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, CreditCard, LogOut, Loader2, Shield, AlertTriangle, Users, History, Palmtree, Plane, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -38,6 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { label: 'All Tours', href: '/admin/tours', icon: Palmtree },
         { label: 'All Flights', href: '/admin/bookings', icon: Plane },
         { label: 'Security & 2FA', href: '/admin/security', icon: Shield },
+        { label: 'System Settings', href: '/admin/settings', icon: Settings },
     ];
 
     if (verifying) return (

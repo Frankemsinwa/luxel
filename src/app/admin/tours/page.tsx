@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { Loader2, Palmtree, MapPin, Archive, Send, ExternalLink } from 'lucide-react';
+import { Loader2, Palmtree, MapPin, Archive, Send, ExternalLink, Edit } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface Tour {
     id: string;
@@ -15,6 +16,7 @@ interface Tour {
 }
 
 export default function AdminToursPage() {
+    const router = useRouter();
     const [tours, setTours] = useState<Tour[]>([]);
     const [loading, setLoading] = useState(true);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -90,9 +92,18 @@ export default function AdminToursPage() {
                                 href={`/tours/${tour.slug}`}
                                 target="_blank"
                                 className="p-3 rounded-xl bg-zinc-50 text-zinc-600 hover:bg-black hover:text-white transition-all"
+                                title="Preview Experience"
                             >
                                 <ExternalLink size={18} />
                             </a>
+
+                            <button
+                                onClick={() => router.push(`/admin/tours/edit/${tour.id}`)}
+                                className="p-3 rounded-xl bg-zinc-50 text-zinc-600 hover:bg-amber hover:text-black transition-all"
+                                title="Edit Metadata"
+                            >
+                                <Edit size={18} />
+                            </button>
 
                             {tour.status !== 'PUBLISHED' && (
                                 <button

@@ -68,16 +68,16 @@ export default function ToursManagementPage() {
     );
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-6 lg:space-y-10">
             {/* Page Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-heading-lg font-medium text-zinc-900 tracking-tight mb-2">Tour Experiences</h1>
-                    <p className="text-zinc-500 font-medium">Manage and curate your elite travel portfolio.</p>
+                    <h1 className="text-2xl lg:text-heading-lg font-medium text-zinc-900 tracking-tight mb-2">Tour Experiences</h1>
+                    <p className="text-sm lg:text-body text-zinc-500 font-medium">Manage and curate your elite travel portfolio.</p>
                 </div>
                 <button
                     onClick={() => router.push('/agent/tours/create')}
-                    className="bg-zinc-900 text-white px-8 py-4 rounded-2xl font-medium text-body shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
+                    className="bg-zinc-900 text-white px-6 lg:px-8 py-3.5 lg:py-4 rounded-xl lg:rounded-2xl font-medium text-xs lg:text-body shadow-xl shadow-zinc-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                     <Plus size={20} />
                     Create New Tour
@@ -85,56 +85,56 @@ export default function ToursManagementPage() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm transition-all hover:shadow-md">
-                    <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Total Tours</p>
-                    <h3 className="text-heading-lg font-medium text-zinc-900 tracking-tight">{tours.length}</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
+                <div className="bg-white p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] border border-zinc-100 shadow-sm transition-all hover:shadow-md">
+                    <p className="text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Total Tours</p>
+                    <h3 className="text-xl lg:text-heading-lg font-medium text-zinc-900 tracking-tight">{tours.length}</h3>
                 </div>
-                <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm transition-all hover:shadow-md">
-                    <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Active Listings</p>
-                    <h3 className="text-heading-lg font-medium text-emerald-500 tracking-tight">{tours.filter(t => t.status === 'PUBLISHED').length}</h3>
+                <div className="bg-white p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] border border-zinc-100 shadow-sm transition-all hover:shadow-md">
+                    <p className="text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Active Listings</p>
+                    <h3 className="text-xl lg:text-heading-lg font-medium text-emerald-500 tracking-tight">{tours.filter(t => t.status === 'PUBLISHED').length}</h3>
                 </div>
-                <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm transition-all hover:shadow-md">
-                    <p className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Drafts / Archived</p>
-                    <h3 className="text-heading-lg font-medium text-amber tracking-tight">{tours.filter(t => t.status !== 'PUBLISHED').length}</h3>
+                <div className="bg-white p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] border border-zinc-100 shadow-sm transition-all hover:shadow-md">
+                    <p className="text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Drafts / Archived</p>
+                    <h3 className="text-xl lg:text-heading-lg font-medium text-amber tracking-tight">{tours.filter(t => t.status !== 'PUBLISHED').length}</h3>
                 </div>
             </div>
 
             {/* Main Area */}
-            <div className="bg-white rounded-[3rem] border border-zinc-100 shadow-sm overflow-hidden min-h-[400px]">
-                <div className="p-10 border-b border-zinc-50 bg-white/50 backdrop-blur-sm">
-                    <div className="relative w-96">
+            <div className="bg-white rounded-[2rem] lg:rounded-[3rem] border border-zinc-100 shadow-sm overflow-hidden min-h-[400px]">
+                <div className="p-6 lg:p-10 border-b border-zinc-50 bg-white/50 backdrop-blur-sm">
+                    <div className="relative w-full md:w-96">
                         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300" />
                         <input
                             type="text"
-                            placeholder="Filter by title or location..."
+                            placeholder="Filter experiences..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-zinc-50 border-none rounded-xl py-3 pl-12 pr-4 text-body-sm font-medium text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
+                            className="w-full bg-zinc-50 border-none rounded-xl py-3 pl-12 pr-4 text-xs lg:text-body-sm font-medium text-zinc-900 focus:ring-2 focus:ring-amber/10 transition-all"
                         />
                     </div>
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse min-w-[900px]">
                         <thead>
                             <tr className="bg-zinc-50/50">
-                                <th className="px-10 py-6 text-caption font-medium text-zinc-400 uppercase tracking-widest w-[400px]">Experience Details</th>
-                                <th className="px-10 py-6 text-caption font-medium text-zinc-400 uppercase tracking-widest">Base Price</th>
-                                <th className="px-10 py-6 text-caption font-medium text-zinc-400 uppercase tracking-widest">Status</th>
-                                <th className="px-10 py-6 text-caption font-medium text-zinc-400 uppercase tracking-widest text-right">Actions</th>
+                                <th className="px-6 lg:px-10 py-5 lg:py-6 text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest w-[400px]">Experience Details</th>
+                                <th className="px-6 lg:px-10 py-5 lg:py-6 text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest">Base Price</th>
+                                <th className="px-6 lg:px-10 py-5 lg:py-6 text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest">Status</th>
+                                <th className="px-6 lg:px-10 py-5 lg:py-6 text-[10px] lg:text-caption font-medium text-zinc-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-50">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={4} className="text-center py-20 text-zinc-300 font-medium uppercase tracking-widest text-body-sm">Accessing your luxury portfolio...</td>
+                                    <td colSpan={4} className="text-center py-20 text-zinc-300 font-medium uppercase tracking-widest text-[10px] lg:text-body-sm">Accessing your luxury portfolio...</td>
                                 </tr>
                             ) : filteredTours.length > 0 ? filteredTours.map((tour) => (
                                 <tr key={tour.id} className="hover:bg-zinc-50/50 transition-colors group">
-                                    <td className="px-10 py-6">
+                                    <td className="px-6 lg:px-10 py-5 lg:py-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-16 h-16 rounded-2xl bg-zinc-100 relative overflow-hidden flex-shrink-0 shadow-sm">
+                                            <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-xl lg:rounded-2xl bg-zinc-100 relative overflow-hidden flex-shrink-0 shadow-sm">
                                                 {tour.hero_image ? (
                                                     <Image src={tour.hero_image} alt={tour.title} fill className="object-cover" />
                                                 ) : (
@@ -143,28 +143,28 @@ export default function ToursManagementPage() {
                                                     </div>
                                                 )}
                                             </div>
-                                            <div>
-                                                <h4 className="text-body font-medium text-zinc-900 mb-1">{tour.title}</h4>
-                                                <div className="flex items-center gap-3 text-body-sm text-zinc-400 font-medium whitespace-nowrap">
+                                            <div className="min-w-0">
+                                                <h4 className="text-sm lg:text-body font-medium text-zinc-900 mb-1 truncate">{tour.title}</h4>
+                                                <div className="flex items-center gap-3 text-[10px] lg:text-body-sm text-zinc-400 font-medium whitespace-nowrap">
                                                     <div className="flex items-center gap-1"><MapPin size={12} className="text-amber" /> {tour.location}</div>
                                                     <div className="flex items-center gap-1"><Calendar size={12} className="text-amber" /> {tour.duration}</div>
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-10 py-6">
-                                        <span className="text-body font-medium text-zinc-900 tracking-tight">₦{Number(tour.price).toLocaleString()}</span>
-                                        <p className="text-caption font-medium text-zinc-400 tracking-widest uppercase">Per Guest</p>
+                                    <td className="px-6 lg:px-10 py-5 lg:py-6">
+                                        <span className="text-sm lg:text-body font-medium text-zinc-900 tracking-tight">₦{Number(tour.price).toLocaleString()}</span>
+                                        <p className="text-[10px] lg:text-caption font-medium text-zinc-400 tracking-widest uppercase">Per Guest</p>
                                     </td>
-                                    <td className="px-10 py-6">
-                                        <span className={`text-caption font-medium px-3 py-1 rounded-full uppercase tracking-widest ${tour.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-600' :
+                                    <td className="px-6 lg:px-10 py-5 lg:py-6">
+                                        <span className={`text-[10px] lg:text-caption font-medium px-3 py-1 rounded-full uppercase tracking-widest ${tour.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-600' :
                                             tour.status === 'ARCHIVED' ? 'bg-zinc-100 text-zinc-400' : 'bg-amber/5 text-amber'
                                             }`}>
                                             {tour.status}
                                         </span>
                                     </td>
-                                    <td className="px-10 py-6 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <td className="px-6 lg:px-10 py-5 lg:py-6 text-right">
+                                        <div className="flex items-center justify-end gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300">
                                             <button
                                                 onClick={() => window.open(`/tour/${tour.slug}`, '_blank')}
                                                 className="p-2 rounded-lg bg-white border border-zinc-100 text-zinc-400 hover:text-blue-500 shadow-sm hover:shadow-md active:scale-95 transition-all"
@@ -200,15 +200,15 @@ export default function ToursManagementPage() {
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan={4} className="text-center py-24">
+                                    <td colSpan={4} className="text-center py-24 px-6">
                                         <div className="flex flex-col items-center gap-4">
-                                            <div className="w-16 h-16 rounded-3xl bg-zinc-50 flex items-center justify-center text-zinc-200">
+                                            <div className="w-16 h-16 rounded-2xl lg:rounded-3xl bg-zinc-50 flex items-center justify-center text-zinc-200">
                                                 <Palmtree size={32} />
                                             </div>
-                                            <p className="text-zinc-400 font-medium">No exclusive experiences found.</p>
+                                            <p className="text-zinc-400 font-medium text-sm lg:text-body">No exclusive experiences found.</p>
                                             <button
                                                 onClick={() => router.push('/agent/tours/create')}
-                                                className="text-amber font-medium text-body-sm uppercase tracking-widest hover:underline"
+                                                className="text-amber font-medium text-[10px] lg:text-body-sm uppercase tracking-widest hover:underline"
                                             >
                                                 Start Curating Your First Tour
                                             </button>

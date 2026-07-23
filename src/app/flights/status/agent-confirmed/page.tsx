@@ -15,21 +15,35 @@ function AgentConfirmedContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const bookingId = searchParams.get('id');
+    const reqId = searchParams.get('reqId');
+    const guestToken = searchParams.get('token');
     const [confirmedPrice, setConfirmedPrice] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchBookingPrice = async () => {
-            if (!bookingId) {
-                setLoading(false);
-                return;
-            }
+        const fetchPrice = async () => {
+            setLoading(true);
 
             try {
-                const response = await api.get(`/bookings/${bookingId}/status`);
-                setConfirmedPrice(response.data.confirmed_price || response.data.total_price);
+                // If bookingId exists, fetch from booking
+                if (bookingId) {
+                    const response = await api.get(`/bookings/${bookingId}/status`);
+                    setConfirmedPrice(response.data.confirmed_price || response.data.total_price);
+                    return;
+                }
+
+                // If no bookingId but reqId exists (LUXEL_ASSISTANCE flow), fetch from request
+                if (reqId) {
+                    const headers: Record<string, string> = {};
+                    if (guestToken) {
+                        headers['x-guest-token'] = guestToken;
+                    }
+                    const response = await api.get(`/bookings/requests/${reqId}/status`, { headers });
+                    setConfirmedPrice(response.data.confirmed_price || null);
+                    return;
+                }
             } catch (err: any) {
-                console.error('Error fetching booking price:', err);
+                console.error('Error fetching price:', err);
                 if (err.response?.status === 401) {
                     router.push('/');
                 }
@@ -38,11 +52,12 @@ function AgentConfirmedContent() {
             }
         };
 
-        fetchBookingPrice();
-    }, [bookingId, router]);
+        fetchPrice();
+    }, [bookingId, reqId, guestToken, router]);
 
     // Fallback from search params while loading
     const displayPrice = confirmedPrice || Number(searchParams.get('price')) || 0;
+    const isPriceConfirmed = confirmedPrice !== null && confirmedPrice > 0;
 
     return (
         <div className="min-h-screen bg-amber/5 flex flex-col">
@@ -65,17 +80,22 @@ function AgentConfirmedContent() {
                                 <div>
                                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-caption font-medium uppercase tracking-widest mb-4">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                                        Availability Confirmed
+                                        {isPriceConfirmed ? 'Availability Confirmed' : 'Agent Reviewing'}
                                     </div>
-                                    <h1 className="text-heading-xl text-zinc-900 tracking-tight mb-2">Price & Routing Verified</h1>
-                                    <p className="text-body text-zinc-500">Your private rate has been locked. Please complete payment to issue your tickets.</p>
+                                    <h1 className="text-heading-xl text-zinc-900 tracking-tight mb-2">{isPriceConfirmed ? 'Price & Routing Verified' : 'Agent Reviewing Your Request'}</h1>
+                                    <p className="text-body text-zinc-500">{isPriceConfirmed ? 'Your private rate has been locked. Please complete payment to issue your tickets.' : 'An experienced agent is currently reviewing flight options for you. The confirmed price will appear here once finalized.'}</p>
                                 </div>
                                 <div className="text-right">
                                     <div className="text-caption font-medium text-zinc-400 uppercase tracking-widest mb-1">Total Confirmed Price</div>
                                     {loading ? (
                                         <Loader2 size={24} className="text-amber animate-spin ml-auto" />
-                                    ) : (
+                                    ) : isPriceConfirmed ? (
                                         <div className="text-5xl font-black text-zinc-900">₦{displayPrice.toLocaleString()}</div>
+                                    ) : (
+                                        <div className="flex flex-col items-end gap-1">
+                                            <div className="text-5xl font-black text-zinc-300 blur-sm select-none">₦0</div>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">Not Confirmed</span>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -88,16 +108,17 @@ function AgentConfirmedContent() {
                                         <Wallet size={24} className="relative z-10" />
                                     </div>
                                     <div>
-                                        <h3 className="text-heading-sm text-zinc-900">Payment Instructions</h3>
-                                        <p className="text-body-sm text-zinc-400">Secure private jet rates for next 2 hours</p>
+                                        <h3 className="text-heading-sm text-zinc-900">{isPriceConfirmed ? 'Payment Instructions' : 'Awaiting Price Confirmation'}</h3>
+                                        <p className="text-body-sm text-zinc-400">{isPriceConfirmed ? 'Secure private jet rates for next 2 hours' : 'An agent is reviewing and will confirm the price shortly'}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
                                     <button
-                                        onClick={() => router.push(`/flights/status/payment?${searchParams.toString()}`)}
-                                        className="flex-1 md:flex-none bg-amber text-white px-8 md:px-10 py-5 rounded-2xl text-body-sm font-medium shadow-xl shadow-amber/20 hover:bg-amber-dark transition-all active:scale-95 whitespace-nowrap"
+                                        onClick={() => isPriceConfirmed && router.push(`/flights/status/payment?${searchParams.toString()}`)}
+                                        disabled={!isPriceConfirmed}
+                                        className="flex-1 md:flex-none bg-amber text-white px-8 md:px-10 py-5 rounded-2xl text-body-sm font-medium shadow-xl shadow-amber/20 hover:bg-amber-dark transition-all active:scale-95 whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
                                     >
-                                        Proceed to Payment
+                                        {isPriceConfirmed ? 'Proceed to Payment' : 'Awaiting Confirmation'}
                                     </button>
                                     <button className="w-14 h-14 rounded-2xl border border-zinc-100 flex items-center justify-center text-zinc-400 hover:text-amber hover:border-amber/20 transition-all">
                                         <MessageSquare size={20} />
@@ -119,7 +140,7 @@ function AgentConfirmedContent() {
                                         <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-50">
                                             <CheckCircle2 size={16} />
                                         </div>
-                                        <p className="text-sm font-bold text-zinc-900">Price confirmed at ₦{displayPrice.toLocaleString()}</p>
+                                        <p className="text-sm font-bold text-zinc-900">{isPriceConfirmed ? `Price confirmed at ₦${displayPrice.toLocaleString()}` : 'Awaiting price confirmation from agent'}</p>
                                     </div>
                                     <span className="text-caption font-medium text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-md">NOW</span>
                                 </motion.div>

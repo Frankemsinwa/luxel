@@ -11,6 +11,18 @@ const __dirname = path.dirname(__filename);
 // Helper to determine if we're running on Vercel
 const isVercel = process.env.VERCEL || process.env.AWS_EXECUTION_ENV;
 
+const getLocalExecutablePath = () => {
+    if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+    switch (process.platform) {
+        case 'win32':
+            return 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+        case 'darwin':
+            return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+        default:
+            return '/usr/bin/google-chrome';
+    }
+};
+
 export const generateTicketPdf = async (booking: any, passengerName: string, email: string): Promise<Buffer> => {
     // Read logo and convert to base64 for reliable PDF rendering
     const logoFullSizePath = path.join(__dirname, '../../public/assets/logo.png');
@@ -55,7 +67,7 @@ export const generateTicketPdf = async (booking: any, passengerName: string, ema
         defaultViewport: (chromium as any).defaultViewport,
         executablePath: isVercel 
             ? await chromium.executablePath() 
-            : process.env.CHROME_PATH || '/usr/bin/google-chrome', // Fallback to common Linux path or env var
+            : getLocalExecutablePath(),
         headless: isVercel ? (chromium as any).headless : true,
     });
 
@@ -106,7 +118,7 @@ export const generateTourTicketPdf = async (booking: any): Promise<Buffer> => {
         defaultViewport: (chromium as any).defaultViewport,
         executablePath: isVercel
             ? await chromium.executablePath()
-            : process.env.CHROME_PATH || '/usr/bin/google-chrome',
+            : getLocalExecutablePath(),
         headless: isVercel ? (chromium as any).headless : true,
     });
 

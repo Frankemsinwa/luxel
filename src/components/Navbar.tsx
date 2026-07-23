@@ -149,6 +149,16 @@ export default function Navbar() {
                           <p className="text-body text-white truncate">{user.email}</p>
                         </div>
                         <div className="p-2 space-y-1">
+                          {user.user_metadata?.role === 'ADMIN' && (
+                            <Link
+                              href="/admin/dashboard"
+                              onClick={() => setShowUserMenu(false)}
+                              className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-red-500/10 text-red-500 hover:text-red-400 transition-all group"
+                            >
+                              <Settings size={16} />
+                              <span className="text-caption font-medium tracking-widest uppercase">Admin Dashboard</span>
+                            </Link>
+                          )}
                           {user.user_metadata?.role === 'AGENT' && (
                             <Link
                               href="/agent/dashboard"

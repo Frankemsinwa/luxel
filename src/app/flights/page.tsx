@@ -20,7 +20,11 @@ import {
     Check,
     Mail,
     Loader2,
-    CheckCircle2
+    CheckCircle2,
+    X,
+    Phone,
+    MessageSquare,
+    UserPlus
 } from "lucide-react";
 import { supabase } from '@/lib/supabase';
 
@@ -47,40 +51,48 @@ function FlightsContent() {
 
     const [user, setUser] = useState<any>(null);
     const [requestEmail, setRequestEmail] = useState('');
-    const [showEmailPrompt, setShowEmailPrompt] = useState(false);
+    const [showAssistanceModal, setShowAssistanceModal] = useState(false);
     const [isSubmittingAssistance, setIsSubmittingAssistance] = useState(false);
     const [assistanceSuccess, setAssistanceSuccess] = useState(false);
+    
+    // Assistance form state
+    const [assistanceForm, setAssistanceForm] = useState({
+        customerName: '',
+        customerEmail: '',
+        customerPhone: '',
+        specialRequests: ''
+    });
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
             setUser(session?.user ?? null);
-            if (session?.user?.email) {
-                setRequestEmail(session.user.email);
-            }
+            const email = session?.user?.email || '';
+            const name = session?.user?.user_metadata?.full_name || '';
+            const phone = session?.user?.phone || '';
+            setRequestEmail(email);
+            setAssistanceForm(prev => ({ ...prev, customerEmail: email, customerName: name, customerPhone: phone }));
         });
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
-            if (session?.user?.email) {
-                setRequestEmail(session.user.email);
-            }
+            const email = session?.user?.email || '';
+            const name = session?.user?.user_metadata?.full_name || '';
+            const phone = session?.user?.phone || '';
+            setRequestEmail(email);
+            setAssistanceForm(prev => ({ ...prev, customerEmail: email, customerName: name, customerPhone: phone }));
         });
 
         return () => subscription.unsubscribe();
     }, []);
 
-    const handleRequestAssistance = async (emailOverride?: string) => {
-        const finalEmail = emailOverride || requestEmail;
-        
-        if (!finalEmail || !finalEmail.includes('@')) {
-            setShowEmailPrompt(true);
-            return;
-        }
-
+    const handleRequestAssistance = async () => {
         setIsSubmittingAssistance(true);
         try {
             const response = await api.post('/flights/request-assistance', {
-                customerEmail: finalEmail,
+                customerEmail: assistanceForm.customerEmail,
+                customerName: assistanceForm.customerName,
+                customerPhone: assistanceForm.customerPhone,
+                specialRequests: assistanceForm.specialRequests,
                 searchPayload: {
                     from: searchData.from,
                     to: searchData.to,
@@ -90,12 +102,40 @@ function FlightsContent() {
                     adults: searchData.adults,
                     children: searchData.children,
                     travelClass: searchData.travelClass
-                }
+                },
+                userId: user?.id || null
             });
 
-            if (response) {
-                setAssistanceSuccess(true);
-                setShowEmailPrompt(false);
+            if (response?.data?.requestId) {
+                const { requestId, guestToken } = response.data;
+                // Store tracker so agent-confirming page can use guest token for status polling
+                try {
+                    const { writeTracker } = await import('@/lib/bookingTracker');
+                    writeTracker({
+                        bookingId: null,
+                        requestId,
+                        bookingRef: null,
+                        guestToken: guestToken || null,
+                        createdAt: Date.now(),
+                        contextQuery: searchParams.toString(),
+                        lastKnownRequestStatus: 'OPEN',
+                        lastSyncedAt: Date.now()
+                    });
+                } catch { }
+                // Build status tracking URL
+                const params = new URLSearchParams({
+                    reqId: requestId,
+                    token: guestToken || '',
+                    from: searchData.from,
+                    to: searchData.to,
+                    departure: searchData.departure,
+                    return: searchData.return,
+                    tripType: searchData.tripType || (searchData.return ? 'ROUND_TRIP' : 'ONE_WAY'),
+                    adults: searchData.adults,
+                    children: searchData.children,
+                    travelClass: searchData.travelClass
+                });
+                router.push(`/flights/status/agent-confirming?${params.toString()}`);
             }
         } catch (error) {
             console.error('Assistance request error:', error);
@@ -103,6 +143,15 @@ function FlightsContent() {
         } finally {
             setIsSubmittingAssistance(false);
         }
+    };
+
+    const openAssistanceModal = () => {
+        setShowAssistanceModal(true);
+    };
+
+    const closeAssistanceModal = () => {
+        setShowAssistanceModal(false);
+        setAssistanceSuccess(false);
     };
 
     // Update searchData when URL params change
@@ -140,7 +189,8 @@ function FlightsContent() {
     const availableAirlines = useMemo(() => {
         const uniques = new Set<string>();
         for (const f of results as any[]) {
-            const a = (f?.airline || '').toString().trim();
+            const carrierName = f?.itineraries?.[0]?.segments?.[0]?.carrierName || f?.airline || '';
+            const a = carrierName.toString().trim();
             if (a) uniques.add(a);
         }
         return Array.from(uniques).sort((a, b) => a.localeCompare(b));
@@ -149,7 +199,8 @@ function FlightsContent() {
     const airlineCounts = useMemo(() => {
         const map = new Map<string, number>();
         for (const f of results as any[]) {
-            const a = (f?.airline || '').toString().trim();
+            const carrierName = f?.itineraries?.[0]?.segments?.[0]?.carrierName || f?.airline || '';
+            const a = carrierName.toString().trim();
             if (!a) continue;
             map.set(a, (map.get(a) || 0) + 1);
         }
@@ -162,7 +213,8 @@ function FlightsContent() {
 
     const filteredResults = useMemo(() => {
         return (results as any[]).filter((f) => {
-            const airline = (f?.airline || '').toString().trim();
+            const carrierName = f?.itineraries?.[0]?.segments?.[0]?.carrierName || f?.airline || '';
+            const airline = carrierName.toString().trim();
             const inAirlines = selectedAirlines.length === 0
                 ? availableAirlines.length === 0
                 : selectedAirlines.includes(airline);
@@ -485,7 +537,9 @@ function FlightsContent() {
                             </motion.div>
                         ) : (
                             <AnimatePresence mode="popLayout">
-                                {filteredResults.length > 0 ? filteredResults.map((flight) => (
+                                {filteredResults.length > 0 ? filteredResults.map((flight) => {
+                                    const carrierName = flight?.itineraries?.[0]?.segments?.[0]?.carrierName || flight?.airline || '';
+                                    return (
                                     <motion.div
                                         key={flight.id}
                                         initial={{ opacity: 0, y: 20 }}
@@ -500,7 +554,7 @@ function FlightsContent() {
                                                 <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-2 border border-black/5 group-hover:shadow-md transition-all overflow-hidden relative">
                                                     <img
                                                         src={`https://www.gstatic.com/flights/airline_logos/70px/${flight.airlineCode}.png`}
-                                                        alt={flight.airline}
+                                                        alt={carrierName}
                                                         className="w-full h-full object-contain relative z-10"
                                                         onError={(e) => {
                                                             const target = e.target as HTMLImageElement;
@@ -508,13 +562,13 @@ function FlightsContent() {
                                                                 target.dataset.fallback = '1';
                                                                 target.src = `https://pics.avs.io/200/80/${flight.airlineCode}.png`;
                                                             } else {
-                                                                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(flight.airline)}&background=1a1a1a&color=dbb35e&bold=true&size=128`;
+                                                                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(carrierName)}&background=1a1a1a&color=dbb35e&bold=true&size=128`;
                                                             }
                                                         }}
                                                     />
                                                 </div>
                                                 <div>
-                                                    <div className="text-[10px] font-bold text-amber uppercase tracking-[0.2em] mb-1">{flight.airline}</div>
+                                                    <div className="text-[10px] font-bold text-amber uppercase tracking-[0.2em] mb-1">{carrierName}</div>
                                                     <div className="text-2xl font-semibold text-black">{flight.departureTime}</div>
                                                     <div className="text-sm font-medium text-black/60 tracking-widest">{flight.departureCode} • {flight.departureCity}</div>
                                                 </div>
@@ -549,7 +603,7 @@ function FlightsContent() {
                                                         ...Object.fromEntries(searchParams.entries()),
                                                         id: flight.id,
                                                         price: flight.price.toString(),
-                                                        airline: flight.airline,
+                                                        airline: carrierName,
                                                         airlineCode: flight.airlineCode || '',
                                                         logo: flight.logo || '',
                                                         depTime: flight.departureTime,
@@ -569,80 +623,60 @@ function FlightsContent() {
                                             </button>
                                         </div>
                                     </motion.div>
-                                )) : (
+                                )}) : (
                                     <motion.div
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="bg-flight-card rounded-[2.5rem] p-20 text-center border-2 border-dashed border-black/20"
+                                        className="bg-flight-card rounded-[2.5rem] p-10 lg:p-20 text-center border-2 border-dashed border-black/20"
                                     >
                                         <div className="w-20 h-20 rounded-full bg-black/10 flex items-center justify-center text-black/30 mx-auto mb-6">
                                             <Search size={32} />
                                         </div>
-                                        {results.length === 0 ? (
-                                            <>
-                                                <h3 className="text-heading-sm text-black mb-2">No flights found</h3>
-                                                <p className="text-body-sm font-medium text-black/50 mb-8 max-w-md mx-auto">
-                                                    We couldn't find any live offers for this route. Would you like the Luxel team to manually search for private charter or commercial options for you?
-                                                </p>
+{results.length === 0 ? (
+                                                <>
+                                                    <h3 className="text-heading-sm text-black mb-2">No flights found</h3>
+                                                    <p className="text-body-sm font-medium text-black/50 mb-8 max-w-md mx-auto">
+                                                        We couldn't find any live offers for this route. Would you like the Luxel team to manually search for private charter or commercial options for you?
+                                                    </p>
 
-                                                <div className="flex flex-col items-center gap-4">
-                                                    <AnimatePresence mode="wait">
-                                                        {assistanceSuccess ? (
-                                                            <motion.div
-                                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                                animate={{ opacity: 1, scale: 1 }}
-                                                                className="flex flex-col items-center gap-2 p-6 bg-green-50 rounded-[2rem] border border-green-100"
-                                                            >
-                                                                <CheckCircle2 className="text-green-600 mb-2" size={32} />
-                                                                <p className="text-body-sm font-semibold text-green-900">Request Sent!</p>
-                                                                <p className="text-caption text-green-700 uppercase tracking-widest text-[10px]">An agent will contact you shortly</p>
-                                                            </motion.div>
-                                                        ) : (
-                                                            <div className="w-full max-w-sm space-y-4">
-                                                                {showEmailPrompt && !user && (
-                                                                    <motion.div
-                                                                        initial={{ opacity: 0, y: 10 }}
-                                                                        animate={{ opacity: 1, y: 0 }}
-                                                                        className="space-y-3"
-                                                                    >
-                                                                        <label className="text-[10px] font-bold uppercase tracking-widest text-black/40 block text-left px-4">Contact Email</label>
-                                                                        <input
-                                                                            type="email"
-                                                                            placeholder="your@email.com"
-                                                                            value={requestEmail}
-                                                                            onChange={(e) => setRequestEmail(e.target.value)}
-                                                                            className="w-full bg-black/5 border border-black/10 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:ring-2 focus:ring-amber/30 transition-all font-medium"
-                                                                        />
-                                                                    </motion.div>
-                                                                )}
-
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleRequestAssistance()}
-                                                                    disabled={isSubmittingAssistance}
-                                                                    className="w-full bg-black text-white py-5 rounded-[2rem] font-semibold text-sm shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+                                                    <div className="flex flex-col items-center gap-4">
+                                                        <AnimatePresence mode="wait">
+                                                            {assistanceSuccess ? (
+                                                                <motion.div
+                                                                    initial={{ opacity: 0, scale: 0.9 }}
+                                                                    animate={{ opacity: 1, scale: 1 }}
+                                                                    className="flex flex-col items-center gap-2 p-6 bg-green-50 rounded-[2rem] border border-green-100"
                                                                 >
-                                                                    {isSubmittingAssistance ? (
-                                                                        <>
-                                                                            <Loader2 className="animate-spin" size={20} />
-                                                                            <span>Sending Request...</span>
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <Mail size={20} />
-                                                                            <span>Request Luxel Assistance</span>
-                                                                        </>
-                                                                    )}
-                                                                </button>
-                                                                {!showEmailPrompt && !user && (
-                                                                    <p className="text-[10px] text-black/40 uppercase tracking-tighter">Enter your email to receive a quote</p>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </div>
-                                            </>
-                                        ) : (
+                                                                    <CheckCircle2 className="text-green-600 mb-2" size={32} />
+                                                                    <p className="text-body-sm font-semibold text-green-900">Request Sent!</p>
+                                                                    <p className="text-caption text-green-700 uppercase tracking-widest text-[10px]">An agent will contact you shortly</p>
+                                                                </motion.div>
+                                                            ) : (
+                                                                <div className="w-full max-w-sm space-y-4">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={openAssistanceModal}
+                                                                        disabled={isSubmittingAssistance}
+                                                                        className="w-full bg-black text-white py-3.5 sm:py-5 px-6 rounded-[1.5rem] sm:rounded-[2rem] font-semibold text-[13px] sm:text-sm shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3"
+                                                                    >
+                                                                        {isSubmittingAssistance ? (
+                                                                            <>
+                                                                                <Loader2 className="animate-spin" size={18} />
+                                                                                <span className="whitespace-nowrap">Opening Form...</span>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <Mail size={18} className="flex-shrink-0" />
+                                                                                <span className="whitespace-nowrap sm:whitespace-normal">Request Luxel Assistance</span>
+                                                                            </>
+                                                                        )}
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                </>
+                                            ) : (
                                             <>
                                                 <h3 className="text-heading-sm text-black mb-2">No flights match your filters</h3>
                                                 <p className="text-body-sm font-medium text-black/50 mb-6">Try widening the price range or selecting more airlines.</p>
@@ -667,6 +701,169 @@ function FlightsContent() {
             </main>
 
             <Footer />
+
+            {/* Assistance Modal */}
+            <AnimatePresence>
+                {showAssistanceModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+                        onClick={closeAssistanceModal}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white rounded-[2rem] w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl"
+                        >
+                            {/* Modal Header */}
+                            <div className="sticky top-0 bg-white rounded-t-[2rem] px-6 py-4 border-b border-zinc-100 flex items-center justify-between z-10">
+                                <div>
+                                    <h2 className="text-lg font-bold text-zinc-900">Request Luxel Assistance</h2>
+                                    <p className="text-xs text-zinc-500 mt-0.5">Our team will manually search and book the best option for you</p>
+                                </div>
+                                <button
+                                    onClick={closeAssistanceModal}
+                                    className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-colors"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            {/* Modal Body */}
+                            <div className="p-6 space-y-6">
+                                {/* Route Summary */}
+                                <div className="bg-amber/5 border border-amber/20 rounded-xl p-4">
+                                    <p className="text-xs font-bold text-amber uppercase tracking-widest mb-2">Your Search</p>
+                                    <div className="flex items-center gap-2 text-sm font-medium text-zinc-900">
+                                        <span>{searchData.from}</span>
+                                        <Plane size={14} className="text-amber" />
+                                        <span>{searchData.to}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-zinc-500 mt-1">
+                                        <span>{searchData.departure ? new Date(searchData.departure).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Flexible'}</span>
+                                        {searchData.return && (
+                                            <>
+                                                <span>→</span>
+                                                <span>{new Date(searchData.return).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                            </>
+                                        )}
+                                        <span>• {searchData.passengers}</span>
+                                        <span>• {searchData.travelClass}</span>
+                                    </div>
+                                </div>
+
+                                {assistanceSuccess ? (
+                                    <div className="flex flex-col items-center gap-4 py-8 text-center">
+                                        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+                                            <CheckCircle2 className="text-green-600" size={32} />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-green-900">Request Sent!</h3>
+                                        <p className="text-zinc-600 text-center max-w-xs">
+                                            Our travel team has received your request and will contact you at <strong>{assistanceForm.customerEmail}</strong> shortly.
+                                        </p>
+                                        <button
+                                            onClick={closeAssistanceModal}
+                                            className="mt-4 px-6 py-3 bg-black text-white rounded-xl font-semibold text-sm hover:scale-[1.02] active:scale-95 transition-all"
+                                        >
+                                            Done
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <form onSubmit={(e) => { e.preventDefault(); handleRequestAssistance(); }} className="space-y-4">
+                                        {/* Full Name */}
+                                        <div>
+                                            <label htmlFor="customerName" className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                                                Full Name <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="customerName"
+                                                value={assistanceForm.customerName}
+                                                onChange={(e) => setAssistanceForm(prev => ({ ...prev, customerName: e.target.value }))}
+                                                placeholder="John Doe"
+                                                required
+                                                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3.5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-amber/30 focus:border-transparent transition-all font-medium"
+                                            />
+                                        </div>
+
+                                        {/* Email */}
+                                        <div>
+                                            <label htmlFor="customerEmail" className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                                                Email Address <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="email"
+                                                id="customerEmail"
+                                                value={assistanceForm.customerEmail}
+                                                onChange={(e) => setAssistanceForm(prev => ({ ...prev, customerEmail: e.target.value }))}
+                                                placeholder="john@example.com"
+                                                required
+                                                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3.5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-amber/30 focus:border-transparent transition-all font-medium"
+                                            />
+                                        </div>
+
+                                        {/* Phone */}
+                                        <div>
+                                            <label htmlFor="customerPhone" className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                                                Phone Number <span className="text-zinc-400 font-normal">(optional)</span>
+                                            </label>
+                                            <div className="relative">
+                                                <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                                                <input
+                                                    type="tel"
+                                                    id="customerPhone"
+                                                    value={assistanceForm.customerPhone}
+                                                    onChange={(e) => setAssistanceForm(prev => ({ ...prev, customerPhone: e.target.value }))}
+                                                    placeholder="+234 8XX XXX XXXX"
+                                                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3.5 px-4 pl-12 text-sm focus:outline-none focus:ring-2 focus:ring-amber/30 focus:border-transparent transition-all font-medium"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Special Requests */}
+                                        <div>
+                                            <label htmlFor="specialRequests" className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                                                Special Requests <span className="text-zinc-400 font-normal">(optional)</span>
+                                            </label>
+                                            <textarea
+                                                id="specialRequests"
+                                                value={assistanceForm.specialRequests}
+                                                onChange={(e) => setAssistanceForm(prev => ({ ...prev, specialRequests: e.target.value }))}
+                                                placeholder="e.g., Need wheelchair assistance, prefer morning flights, flexible dates ±3 days, specific airline preference..."
+                                                rows={3}
+                                                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3.5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-amber/30 focus:border-transparent transition-all font-medium resize-none"
+                                            />
+                                        </div>
+
+                                        {/* Submit Button */}
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmittingAssistance}
+                                            className="w-full bg-black text-white py-4 px-6 rounded-xl font-semibold text-sm shadow-xl shadow-black/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+                                        >
+                                            {isSubmittingAssistance ? (
+                                                <>
+                                                    <Loader2 className="animate-spin" size={18} />
+                                                    <span>Sending Request...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Mail size={18} className="flex-shrink-0" />
+                                                    <span>Submit Request</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </form>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

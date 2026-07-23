@@ -8,6 +8,7 @@ import ConciergeChatFab from "@/components/ConciergeChatFab";
 const newtonScient = localFont({
   src: "../../public/fonts/NewtonScient.ttf",
   variable: "--font-newton-scient",
+  display: 'swap',
 });
 
 const satoshi = localFont({
@@ -18,6 +19,7 @@ const satoshi = localFont({
     { path: "../../public/fonts/Satoshi-MediumItalic.otf", weight: "500", style: "italic" },
   ],
   variable: "--font-satoshi-font",
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
