@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import * as amadeusService from '../services/amadeusService.js';
 import * as flightSearchService from '../services/flightSearchService.js';
-import { getAgentNotificationEmails } from '../services/emailService.js';
+import { getAgentNotificationEmails, sendAdminPaymentNotification } from '../services/emailService.js';
 import { supabaseAdmin } from '../config/supabase.js';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
@@ -227,6 +227,9 @@ export const requestFlightAssistance = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Customer email and search details are required.' });
         }
 
+        // Generate guest tracking token
+        const guestToken = crypto.randomBytes(20).toString('hex');
+
         // Create request record in database
         const requestData = {
             user_id: userId || null,
@@ -239,6 +242,7 @@ export const requestFlightAssistance = async (req: Request, res: Response) => {
                 customer_name: customerName || '',
                 customer_phone: customerPhone || '',
                 special_requests: specialRequests || '',
+                guest_token: guestToken,
                 request_source: 'flight_search_no_results',
                 search_payload: searchPayload,
                 from: searchPayload.from,
@@ -266,7 +270,7 @@ export const requestFlightAssistance = async (req: Request, res: Response) => {
         const agentEmails = await getAgentNotificationEmails();
         if (agentEmails.length === 0) {
             console.warn('No agent emails found for flight assistance notification');
-            return res.status(200).json({ message: 'Request received. Our team will get back to you.', requestId: request.id });
+            return res.status(200).json({ message: 'Request received. Our team will get back to you.', requestId: request.id, guestToken });
         }
 
         const transporter = nodemailer.createTransport({
@@ -378,10 +382,97 @@ export const requestFlightAssistance = async (req: Request, res: Response) => {
         console.log(`Flight assistance request ${request.id} sent to ${agentEmails.length} agent(s)`);
         return res.status(200).json({ 
             message: 'Your request has been sent to our travel team. We will contact you shortly.', 
-            requestId: request.id 
+            requestId: request.id,
+            guestToken
         });
     } catch (error: any) {
         console.error('Flight assistance request error:', error);
         return res.status(500).json({ message: 'Error sending flight request', error: error.message });
+    }
+};
+
+export const confirmAssistancePayment = async (req: any, res: Response) => {
+    try {
+        const { id } = req.params;
+        const guestToken = (req.headers['x-guest-token'] as string | undefined);
+
+        if (!guestToken) {
+            return res.status(401).json({ message: 'Guest token required' });
+        }
+
+        const { data: request, error } = await supabaseAdmin
+            .from('requests')
+            .select('id, details, request_type')
+            .eq('id', id)
+            .single();
+
+        if (error || !request) {
+            return res.status(404).json({ message: 'Request not found' });
+        }
+
+        if (request.request_type !== 'LUXEL_ASSISTANCE') {
+            return res.status(400).json({ message: 'Invalid request type' });
+        }
+
+        const storedToken = request.details?.guest_token;
+        if (!storedToken || storedToken !== guestToken) {
+            return res.status(403).json({ message: 'Invalid guest token' });
+        }
+
+        const mergedDetails = {
+            ...request.details,
+            payment_marked: true,
+            payment_marked_at: new Date().toISOString(),
+        };
+
+        const { error: updateError } = await supabaseAdmin
+            .from('requests')
+            .update({ details: mergedDetails, updated_at: new Date() })
+            .eq('id', id);
+
+        if (updateError) throw updateError;
+
+        // Notify agents
+        try {
+            const agentEmails = await getAgentNotificationEmails();
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+                port: Number(process.env.SMTP_PORT) || 587,
+                secure: Number(process.env.SMTP_PORT) === 465,
+                auth: {
+                    user: process.env.SMTP_USER || 'test@ethereal.email',
+                    pass: process.env.SMTP_PASS || 'password',
+                },
+            });
+            const agentDashboardUrl = `${process.env.FRONTEND_URL || 'https://luxelbookings.com'}/agent/requests/${id}`;
+            await Promise.allSettled(
+                agentEmails.map((email: string) =>
+                    transporter.sendMail({
+                        from: process.env.SMTP_FROM || '"Luxel System" <system@luxel.travel>',
+                        to: email,
+                        subject: `💰 Payment Received: Flight Assistance #${id.substring(0, 8)}`,
+                        html: `
+                            <div style="font-family: Arial, sans-serif; max-width: 680px; margin: auto; padding: 24px;">
+                                <h2>Payment Confirmation Received</h2>
+                                <p>A customer has indicated they have made payment for their LUXEL ASSISTANCE request.</p>
+                                <div style="background: #f0f8f0; border: 1px solid #c8e6c9; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                                    <p style="margin: 0;"><strong>Request ID:</strong> ${id}</p>
+                                </div>
+                                <a href="${agentDashboardUrl}" style="display: inline-block; background: #1a1a1a; color: #f5e6a0; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                                    View & Verify Request
+                                </a>
+                            </div>
+                        `,
+                    })
+                )
+            );
+        } catch (emailErr) {
+            console.warn('Failed to send payment notification email:', emailErr);
+        }
+
+        return res.json({ message: 'Payment marked as received', success: true });
+    } catch (error: any) {
+        console.error('Confirm assistance payment error:', error);
+        return res.status(500).json({ message: 'Error confirming payment', error: error.message });
     }
 };

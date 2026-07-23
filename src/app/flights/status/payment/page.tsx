@@ -22,12 +22,14 @@ function PaymentContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const bookingId = searchParams.get('id');
+    const reqId = searchParams.get('reqId');
 
     const [booking, setBooking] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [userEmail, setUserEmail] = useState<string>('client@luxel.com');
     const [isConfirmed, setIsConfirmed] = useState(false);
+    const [requestPrice, setRequestPrice] = useState<number | null>(null);
 
     const passengerCountStr = searchParams.get('passengers') || '1 Passenger';
     const passengerCount = parseInt(passengerCountStr.split(' ')[0]) || 1;
@@ -58,7 +60,7 @@ function PaymentContent() {
         airline: searchParams.get('airline') || "British Airways"
     };
 
-    // 1. Fetch the REAL confirmed price from the booking
+    // 1a. Fetch the REAL confirmed price from the booking (standard flow)
     useEffect(() => {
         const fetchBooking = async () => {
             if (!bookingId) {
@@ -92,6 +94,32 @@ function PaymentContent() {
         fetchBooking();
     }, [bookingId, router]);
 
+    // 1b. Fetch confirmed price from request (LUXEL_ASSISTANCE flow, no booking)
+    useEffect(() => {
+        if (bookingId || !reqId) return;
+
+        const fetchRequestPrice = async () => {
+            try {
+                const { readTracker } = await import('@/lib/bookingTracker');
+                const tracker = readTracker();
+                const headers: Record<string, string> = {};
+                if (tracker?.guestToken) {
+                    headers['x-guest-token'] = tracker.guestToken;
+                }
+                const res = await api.get(`/bookings/requests/${reqId}/status`, { headers });
+                if (res.data?.confirmed_price) {
+                    setRequestPrice(res.data.confirmed_price);
+                }
+            } catch (err) {
+                console.error('Error fetching request price:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRequestPrice();
+    }, [bookingId, reqId]);
+
     // 2. Load Paystack Script
     // We have shifted to manual payment for now.
     /*
@@ -107,19 +135,34 @@ function PaymentContent() {
     }, []);
     */
 
-    // Price to pay: Prefer confirmed_price, fallback to total_price, then search Param.
-    const priceToPay = booking?.confirmed_price || booking?.total_price || Number(searchParams.get('price')) || 945000;
+    // Price to pay: Prefer booking confirmed_price, then request confirmed_price, then fallback.
+    const priceToPay = booking?.confirmed_price || booking?.total_price || requestPrice || Number(searchParams.get('price')) || 945000;
 
     const handleConfirmPayment = async () => {
         setIsSubmitting(true);
         try {
-            await api.patch(`/bookings/${bookingId}/confirm-payment`, {
-                receipt_url: null,
-                payment_method: 'BANK_TRANSFER'
-            });
+            const { readTracker } = await import('@/lib/bookingTracker');
+            const tracker = readTracker();
+            const headers: Record<string, string> = {};
+            if (tracker?.guestToken) {
+                headers['x-guest-token'] = tracker.guestToken;
+            }
+
+            if (bookingId) {
+                await api.patch(`/bookings/${bookingId}/confirm-payment`, {
+                    receipt_url: null,
+                    payment_method: 'BANK_TRANSFER'
+                }, { headers });
+            } else if (reqId) {
+                await api.post(`/flights/requests/${reqId}/confirm-payment`, {}, { headers });
+            }
+
             setIsConfirmed(true);
             setTimeout(() => {
-                router.push(`/flights/status/verifying?${searchParams.toString()}`);
+                const target = bookingId
+                    ? `/flights/status/verifying?${searchParams.toString()}`
+                    : `/flights/status/tracking?requestId=${reqId}`;
+                router.push(target);
             }, 2000);
         } catch (error: any) {
             console.error('Failed to confirm payment:', error);

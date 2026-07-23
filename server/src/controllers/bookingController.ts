@@ -544,7 +544,7 @@ export const getRequestStatus = async (req: any, res: Response) => {
 
         const { data: request, error } = await supabaseAdmin
             .from('requests')
-            .select('id, status, priority, updated_at, user_id, details')
+            .select('id, status, priority, updated_at, user_id, details, request_type')
             .eq('id', id)
             .single();
 
@@ -562,6 +562,21 @@ export const getRequestStatus = async (req: any, res: Response) => {
                 status: request.status,
                 priority: request.priority,
                 updated_at: request.updated_at
+            });
+        }
+
+        // LUXEL_ASSISTANCE: allow access via guest token
+        if (request.request_type === 'LUXEL_ASSISTANCE') {
+            const storedToken = request.details?.guest_token;
+            if (!storedToken || !guestToken || storedToken !== guestToken) {
+                return res.status(403).json({ message: 'Invalid or missing guest token' });
+            }
+            return res.json({
+                id: request.id,
+                status: request.status,
+                priority: request.priority,
+                updated_at: request.updated_at,
+                confirmed_price: request.details?.confirmed_price || null
             });
         }
 

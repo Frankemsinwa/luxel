@@ -109,14 +109,20 @@ export const updateRequestStatus = async (req: any, res: Response) => {
             .single();
         if (existingErr) throw existingErr;
 
-        const mergedDetails = airlineBookingReference
-            ? { ...(existingRequest?.details || {}), airline_booking_reference: airlineBookingReference }
-            : undefined;
+        const mergedDetails = { ...(existingRequest?.details || {}) };
+        if (airlineBookingReference) {
+            mergedDetails.airline_booking_reference = airlineBookingReference;
+        }
+        // If confirmedPrice is provided and no linked booking, store it in details
+        if (confirmedPrice && !existingRequest?.details?.booking_id) {
+            mergedDetails.confirmed_price = confirmedPrice;
+        }
+        const hasDetailsChange = Object.keys(mergedDetails).length > Object.keys(existingRequest?.details || {}).length;
 
         const updateFields: any = { updated_at: new Date() };
         if (typeof status !== 'undefined') updateFields.status = status;
         if (typeof priority !== 'undefined') updateFields.priority = priority;
-        if (mergedDetails) updateFields.details = mergedDetails;
+        if (hasDetailsChange) updateFields.details = mergedDetails;
 
         // 1. Update the request status
         const { data: request, error } = await supabaseAdmin

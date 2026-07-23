@@ -54,7 +54,7 @@ export default function BookingTrackerWidget() {
     try {
       const [reqRes, bookingRes] = await Promise.all([
         api.get(`/bookings/requests/${tracker.requestId}/status`, { headers }),
-        api.get(`/bookings/${tracker.bookingId}/status`, { headers }),
+        tracker.bookingId ? api.get(`/bookings/${tracker.bookingId}/status`, { headers }) : Promise.resolve({ data: null }),
       ]);
 
       const next: BookingTrackerRecord = {
@@ -120,8 +120,8 @@ export default function BookingTrackerWidget() {
 
   const buildStatusQuery = () => {
     const q = new URLSearchParams(tracker.contextQuery || '');
-    q.set('ref', tracker.bookingRef);
-    q.set('id', tracker.bookingId);
+    if (tracker.bookingRef) q.set('ref', tracker.bookingRef);
+    if (tracker.bookingId) q.set('id', tracker.bookingId);
     q.set('reqId', tracker.requestId);
     return q.toString();
   };
@@ -173,7 +173,7 @@ export default function BookingTrackerWidget() {
           <Plane size={18} />
         </div>
         <div className="text-left min-w-0">
-          <div className="text-body-sm font-medium leading-tight truncate">Booking {tracker.bookingRef}</div>
+          <div className="text-body-sm font-medium leading-tight truncate">{tracker.bookingRef ? `Booking ${tracker.bookingRef}` : 'Flight Assistance'}</div>
           <div className="text-caption text-white/70 truncate">{prettyStatus(status)}</div>
         </div>
         <div className="ml-1">
@@ -205,9 +205,11 @@ export default function BookingTrackerWidget() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <div className="text-heading-sm font-medium text-black">Your booking status</div>
-                    <div className="text-body-sm text-black/60 mt-1">
-                      Reference: <span className="font-medium text-black">{tracker.bookingRef}</span>
-                    </div>
+                    {tracker.bookingRef && (
+                      <div className="text-body-sm text-black/60 mt-1">
+                        Reference: <span className="font-medium text-black">{tracker.bookingRef}</span>
+                      </div>
+                    )}
                     {airlineBookingRef && (
                       <div className="text-body-sm text-black/60 mt-1">
                         Airline PNR: <span className="font-medium text-black">{airlineBookingRef}</span>
